@@ -1,0 +1,121 @@
+#include "impcom.inc"
+
+#ifndef __WIN32
+#include "ansver.inc"
+#endif
+
+#include "ansysdef.inc"
+#include "echprm.inc"
+#include "syspar.inc"
+#include "elempr.inc"
+
+c     external functions from ANSYS library
+      EXTERNAL  wrinqr, ndinqr, ndgxyz, ndnext, runcmd
+      INTEGER   wrinqr, ndinqr, ndgxyz, ndnext, runcmd
+      EXTERNAL  fAnsMemAlloc, fAnsMemFree
+      PTRFTN    fAnsMemAlloc
+
+      EXTERNAL  elnext, elmiqr, disiqr, ndgall, mpinqr, mpget, elmget
+      INTEGER   elnext, elmiqr, disiqr, ndgall, mpinqr, mpget, elmget
+      EXTERNAL  rlget, rlinqr, etyget, forget, foriqr
+      INTEGER   rlget, rlinqr, etyget, forget, foriqr
+
+#if   ANSVER < 70
+      EXTERNAL         parevl
+      DOUBLE PRECISION parevl
+#endif
+
+c     external procedures
+      EXTERNAL  HeapDealloc, anserr, rlsel
+
+c     variables to interface with ANSYS
+      INTEGER i, nodes(NNMAX), elmdat(EL_DIM), kerr
+      INTEGER ityp, ielc(IelCSZ)
+      DOUBLE PRECISION rtable(400), mptemp(100), mpval(100), subc(3)
+
+
+#if   ANSVER >= 70
+      CHARACTER(LEN=CMD_MAX_LENG) :: cmd
+#else
+      CHARACTER(LEN=SYS_LNG_CMDLN) :: cmd
+#endif
+
+      CHARACTER(LEN=PARMSIZE) para
+
+c     global information about ANSYS model
+      INTEGER n_nodes, n_nloads, n_elem, n_masses, n_mass_groups
+
+
+c     local functions from ans2bmf program
+C      EXTERNAL len_trim
+C      INTEGER  len_trim
+
+c     variables and parameters
+
+c     NZERO is used to compare double numbers
+c     NDIGITS is the number of significant digits
+      DOUBLE PRECISION NZERO, NDIGITS
+      PARAMETER (NZERO = 1E-30, NDIGITS=8)
+
+c     at this point, just one structure is admitted
+      INTEGER structure
+      PARAMETER (structure = 1)
+c     [jobname].ascii is the file name opened as outfile
+      CHARACTER(LEN=32) :: jobname
+      INTEGER outfile, sfiles
+
+c     this block holds the component information
+      INTEGER el_offset, el_length, el_count
+
+      INTEGER max_components
+      PARAMETER (max_components = 1024)
+      CHARACTER(LEN=16) :: l_comp_name (max_components)
+      INTEGER        l_comp_pos  (max_components)
+      INTEGER        l_comp_len  (max_components)
+#if   ANSVER >= 70
+      CHARACTER(LEN=PARMSIZE) :: l_comp_ansys(max_components)
+#else
+      CHARACTER(LEN=8) :: l_comp_ansys(max_components)
+#endif
+      INTEGER :: l_comp_csub(max_components)
+      INTEGER :: l_csub_gid(max_components)
+      INTEGER comp_num
+
+      INTEGER n_sfiles, max_loadcases
+
+      INTEGER bp_length, bp_num_i, bp_num_j
+      INTEGER bp_R, bp_A, bp_I, bp_e, bp_sc, bp_sf, bp_d, bp_rlen
+      PARAMETER (bp_R = 0, bp_A=1, bp_I=4, bp_e=7, bp_sc=13, bp_sf=15,
+     $     bp_d=17, bp_rlen=20)
+
+      INTEGER rl_length, rl_num
+
+      COMMON / ans2bmf_ans2bmf /
+     x   i, nodes, elmdat, subc, kerr, para, cmd,
+     x     ityp, ielc, n_nodes, n_nloads, n_sfiles, max_loadcases,
+     x   jobname, outfile, sfiles, n_elem, n_masses, n_mass_groups,
+     x   el_offset, el_length, el_count,
+     x     l_comp_name, l_comp_pos, l_comp_len, comp_num,
+     x     l_comp_ansys, l_comp_csub,
+     x   bp_length, bp_num_i, bp_num_j,
+     x   rl_length, rl_num,
+     x   rtable, mptemp, mpval,
+     x   l_csub_gid
+
+#if     (defined(SOLARIS_SYS) || defined(LINUXIA32_SYS) || defined(LINUXIA64_SYS)) && defined(DYN_MOD)
+#include "csubdata.inc"
+#else
+#include "ans2bmf/csubdata.inc"
+#endif
+
+c     number of warnings issued
+      COMMON /ans2bmf_msg/ wcount
+      INTEGER wcount
+
+c     dataspace for feeding erhandler subroutine
+      REAL     *        8  derrinfo(10)
+      CHARACTER(LEN=PARMSIZE) :: cerrinfo(10)
+
+c Local Variables:
+c compile-command:"cd .. ; make test"
+c End:
