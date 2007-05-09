@@ -1,9 +1,5 @@
 #include "impcom.inc"
 
-#ifndef __WIN32
-#include "ansver.inc"
-#endif
-
 #include "ansysdef.inc"
 #include "echprm.inc"
 #include "syspar.inc"
