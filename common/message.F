@@ -1,11 +1,7 @@
 c     issue warnings and update message count
       SUBROUTINE a2b_message(wcode,n1,n2)
 
-#if     (defined(SOLARIS_SYS) || defined(LINUXIA32_SYS) || defined(LINUXIA64_SYS)) && defined(DYN_MOD)
 #include "common.F"
-#else
-#include "ans2bmf/common.F"
-#endif
 
       CHARACTER(LEN=4) :: wcode
       INTEGER n1,n2
