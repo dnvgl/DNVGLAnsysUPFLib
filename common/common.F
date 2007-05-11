@@ -36,7 +36,7 @@ c     variables to interface with ANSYS
       CHARACTER(LEN=SYS_LNG_CMDLN) :: cmd
 #endif
 
-      CHARACTER(LEN=PARMSIZE) para
+      CHARACTER(LEN=PARMSIZE) :: para
 
 c     global information about ANSYS model
       INTEGER n_nodes, n_nloads, n_elem, n_masses, n_mass_groups
@@ -68,11 +68,7 @@ c     this block holds the component information
       CHARACTER(LEN=16) :: l_comp_name (max_components)
       INTEGER        l_comp_pos  (max_components)
       INTEGER        l_comp_len  (max_components)
-#if   ANSVER >= 70
       CHARACTER(LEN=PARMSIZE) :: l_comp_ansys(max_components)
-#else
-      CHARACTER(LEN=8) :: l_comp_ansys(max_components)
-#endif
       INTEGER :: l_comp_csub(max_components)
       INTEGER :: l_csub_gid(max_components)
       INTEGER comp_num
@@ -98,11 +94,7 @@ c     this block holds the component information
      x   rtable, mptemp, mpval,
      x   l_csub_gid
 
-#if     (defined(SOLARIS_SYS) || defined(LINUXIA32_SYS) || defined(LINUXIA64_SYS)) && defined(DYN_MOD)
 #include "csubdata.inc"
-#else
-#include "ans2bmf/csubdata.inc"
-#endif
 
 c     number of warnings issued
       COMMON /ans2bmf_msg/ wcount
@@ -113,5 +105,5 @@ c     dataspace for feeding erhandler subroutine
       CHARACTER(LEN=PARMSIZE) :: cerrinfo(10)
 
 c Local Variables:
-c compile-command:"cd .. ; make test"
+c compile-command:"make -C .. test"
 c End:

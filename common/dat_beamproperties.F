@@ -10,11 +10,7 @@ c get beam properties
 
       SUBROUTINE dat_beamproperties(bp_data, rl_data)
 
-#if     (defined(SOLARIS_SYS) || defined(LINUXIA32_SYS) || defined(LINUXIA64_SYS)) && defined(DYN_MOD)
 #include "common.F"
-#else
-#include "ans2bmf/common.F"
-#endif
 
       DOUBLE PRECISION bp_data(*)
       INTEGER rl_data(*)
@@ -275,11 +271,7 @@ c###########################################################
 
       SUBROUTINE ans2bmf_rlallsel()
 
-#if     (defined(SOLARIS_SYS) || defined(LINUXIA32_SYS) || defined(LINUXIA64_SYS)) && defined(DYN_MOD)
 #include "common.F"
-#else
-#include "ans2bmf/common.F"
-#endif
 
       INTEGER r,rmax
 
@@ -298,11 +290,7 @@ c-----------------------------------------------------------
 
       SUBROUTINE ans2bmf_rlnosel()
 
-#if     (defined(SOLARIS_SYS) || defined(LINUXIA32_SYS) || defined(LINUXIA64_SYS)) && defined(DYN_MOD)
 #include "common.F"
-#else
-#include "ans2bmf/common.F"
-#endif
 
       INTEGER r,rmax
 
@@ -321,11 +309,7 @@ c-----------------------------------------------------------
 
       SUBROUTINE ans2bmf_rlsle()
 
-#if     (defined(SOLARIS_SYS) || defined(LINUXIA32_SYS) || defined(LINUXIA64_SYS)) && defined(DYN_MOD)
 #include "common.F"
-#else
-#include "ans2bmf/common.F"
-#endif
 
       INTEGER el
 
@@ -348,5 +332,5 @@ c     constant sets
       END
 
 c Local Variables:
-c compile-command:"cd .. ; make test"
+c compile-command:"make -C .. test"
 c End:
