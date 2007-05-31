@@ -36,9 +36,6 @@ c     collect components
       CALL TrackBegin('dat_components')
 
 c     find number of components: -> ansys_comp
-      !DEBUG_LOC('ans2bmf_elread')
-!      CALL ans2bmf_get_d('COMP,,NCOMP',res)
-!      ansys_comp = nint( res )
       ansys_comp = nint(getf(Entity='COMP', ENTNUM=0, Item1='NCOMP   '))
 
       derrinfo(1) = ansys_comp
@@ -87,8 +84,9 @@ c     get name of component: -> comp_name(an_cnum)
      $           comp_name(an_cnum+1))
 
 c     get type of component
-            CALL ans2bmf_get_d('COMP,'//comp_name(an_cnum+1)
-     x           //',TYPE',res)
+!            CALL ans2bmf_get_d('COMP,'//comp_name(an_cnum+1)
+!     x           //',TYPE',res)
+            res = getf('COMP', comp_name(an_cnum+1), 'TYPE    ')
 
 c     check if this is a component of elements
             IF (nint(res).GT.10) THEN
@@ -215,7 +213,7 @@ c###########################################################
 
       IF ( csub.EQ.ANS_SHELL63_M .OR.
      $     csub.EQ.ANS_SHELL181_M ) THEN
-        ! deselect elements without membrane option set.
+!     deselect elements without membrane option set.
          elid = 0
  10      elid = elnext(elid)
          IF (ELID.GT.0) THEN
@@ -229,14 +227,14 @@ c###########################################################
                print *, 'Error should not occur 2', stat
             END IF
             IF (ielc(KYOP1).NE.1) THEN
-               ! deselect element without membrane property
+!     deselect element without membrane property
                CALL elsel(elid, -1)
             END IF
             GOTO 10
          END IF
       ELSE IF ( csub.EQ.ANS_SHELL63 .OR.
      $          csub.EQ.ANS_SHELL181 ) THEN
-         ! deselect elements with membrane option set.
+!     deselect elements with membrane option set.
          elid = 0
  20      elid = elnext(elid)
          IF (ELID.GT.0) THEN
@@ -250,7 +248,7 @@ c###########################################################
                print *, 'Error should not occur 4', stat
             END IF
             IF (ielc(KYOP1).EQ.1) THEN
-               ! deselect element with membrane property
+!     deselect element with membrane property
                CALL elsel(elid, -1)
             END IF
             GOTO 20

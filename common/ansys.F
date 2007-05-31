@@ -1129,6 +1129,24 @@ c *** primary function:    Display ANSYS error messages
 ! 8.3.20. vnorme Subroutine (Normalizing a Three-Component Vector)
 ! 8.3.21. vnorm Subroutine (Normalizing a Vector to Unit Length)
 ! 8.3.22. ndgxyz Function (Getting the X,Y,Z Vector for a Node)
+
+! *** primary function:    get x,y,z vector for a node.
+!     input arguments:
+!        node     (int,sc,in)       - node number for operation.
+!     output arguments:
+!        ndgxyz   (int,sc,out)      - status of node.
+!                                       0=node is undefined.
+!                                      -1=node is unselected.
+!                                       1=node is selected.
+!        xyz      (dp,ar(3),out)    - vector containing x,y,z
+      INTERFACE
+         FUNCTION ndgxyz(node, xyz)
+         INTEGER :: ndgxyz
+         INTEGER, INTENT(IN) :: node
+         DOUBLE PRECISION, INTENT(OUT), DIMENSION(3) :: xyz
+         END FUNCTION ndgxyz
+      END INTERFACE
+
 ! 8.3.23. ndpxyz Subroutine (Storing X,Y,Z for a Node)
 ! 8.4. Matrix Subroutines
 ! 8.4.1. maxv Subroutine (Multiplying a Vector by a Matrix)

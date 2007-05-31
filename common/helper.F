@@ -13,7 +13,7 @@ C CVSID: $Id$
       MODULE glans
 
       INTERFACE getf
-        MODULE PROCEDURE getf, getfi
+        MODULE PROCEDURE getf, getfs, getfi
       END INTERFACE getf
 
       INTERFACE gets
@@ -782,15 +782,51 @@ C ======================================================================
       CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
       CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: IT2NUM
 
-      CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
+#if   ANSVER >= 70
+      CHARACTER(LEN=CMD_MAX_LENG) :: cmd
+      DOUBLE PRECISION :: Dummy
+#else
+      CHARACTER(LEN=SYS_LNG_CMDLN) :: cmd
+      CHARACTER(LEN=8) :: res_char8
+      DOUBLE PRECISION :: res_double
+      EQUIVALENCE      (res_double, res_char8)
+#endif
+      CHARACTER(LEN=PARMSIZE) :: para
+
+      INTEGER :: iErr
 
       CALL TrackBegin('glans:gets')
 
-      CALL erhandler(fname, __LINE__, ERH_FATAL,
-     $        trim(libname)//': glans:gets not implemented',
-     $        derrinfo, cerrinfo)
+      WRITE(cmd,100) '*GET,PARA', TRIM(Entity)
+      WRITE(cmd,101) TRIM(cmd), ENTNUM
+      WRITE(cmd,100) TRIM(cmd), TRIM(Item1)
+      IF (PRESENT(IT1NUM)) THEN
+         WRITE(cmd,100) TRIM(cmd), TRIM(IT1NUM)
+      ELSE
+         WRITE(cmd,100) TRIM(cmd), ''
+      END IF
+      IF (PRESENT(Item2)) THEN
+         WRITE(cmd,100) TRIM(cmd), TRIM(Item2)
+      ELSE
+         WRITE(cmd,100) TRIM(cmd), ''
+      END IF
+      IF (PRESENT(IT2NUM)) THEN
+         WRITE(cmd,100) TRIM(cmd), TRIM(IT2NUM)
+      ELSE
+         WRITE(cmd,100) TRIM(cmd), ''
+      END IF
+      iErr = RunCommand(LEN_TRIM(cmd), TRIM(cmd))
+      para ='PARA'
 
-      value = 'empty'
+#if   ANSVER >= 70
+      CALL parevl(para, 0, subc, 2, dummy, value, kerr)
+#else
+      res_double = parevl(para, 0, subc, 2, kerr)
+      value = trim(res_char8)
+#endif
+
+ 100  FORMAT(A,',',A)
+ 101  FORMAT(A,',',I)
 
       CALL TrackEnd('glans:gets')
 
@@ -864,8 +900,6 @@ C ======================================================================
       CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
       CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: IT2NUM
 
-      CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
-
 #if   ANSVER >= 70
       CHARACTER(LEN=CMD_MAX_LENG) :: cmd
       CHARACTER(LEN=STRING_MAX_LENG) :: dummy
@@ -911,6 +945,78 @@ C ======================================================================
       CALL TrackEnd('glans:getf')
 
       END FUNCTION getf
+
+      FUNCTION getfs(Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM)
+     $     RESULT(value)
+      USE ANSYS
+
+#include "common.F"
+
+C     Purpose:
+C
+C     Parameter:
+C     in/out Name          Task
+C            Entity
+C            ENTNUM
+C            Item1
+C            IT1NUM
+C            Item2
+C            IT2NUM
+C ----------------------------------------------------------------------
+C     Created: 2007-05-29  hoel
+C ======================================================================
+      DOUBLE PRECISION :: value
+      CHARACTER(LEN=4), INTENT(IN) :: Entity
+      CHARACTER(LEN=8), INTENT(IN) :: ENTNUM
+      CHARACTER(LEN=8), INTENT(IN) :: Item1
+      CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: IT1NUM
+      CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
+      CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: IT2NUM
+
+#if   ANSVER >= 70
+      CHARACTER(LEN=CMD_MAX_LENG) :: cmd
+      CHARACTER(LEN=STRING_MAX_LENG) :: dummy
+#else
+      CHARACTER(LEN=SYS_LNG_CMDLN) :: cmd
+#endif
+      CHARACTER(LEN=PARMSIZE) :: para
+
+      INTEGER :: iErr
+
+      CALL TrackBegin('glans:getfs')
+
+      WRITE(cmd,100) '*GET,PARA', TRIM(Entity)
+      WRITE(cmd,100) TRIM(cmd), ENTNUM
+      WRITE(cmd,100) TRIM(cmd), TRIM(Item1)
+      IF (PRESENT(IT1NUM)) THEN
+         WRITE(cmd,100) TRIM(cmd), TRIM(IT1NUM)
+      ELSE
+         WRITE(cmd,100) TRIM(cmd), ''
+      END IF
+      IF (PRESENT(Item2)) THEN
+         WRITE(cmd,100) TRIM(cmd), TRIM(Item2)
+      ELSE
+         WRITE(cmd,100) TRIM(cmd), ''
+      END IF
+      IF (PRESENT(IT2NUM)) THEN
+         WRITE(cmd,100) TRIM(cmd), TRIM(IT2NUM)
+      ELSE
+         WRITE(cmd,100) TRIM(cmd), ''
+      END IF
+      iErr = RunCommand(LEN_TRIM(cmd), TRIM(cmd))
+      para ='PARA'
+
+#if   ANSVER >= 70
+      CALL parevl(para, 0, subc, 2, value, dummy, kerr)
+#else
+      value = parevl(para,0,subc,2,kerr)
+#endif
+
+ 100  FORMAT(A,',',A)
+
+      CALL TrackEnd('glans:getfs')
+
+      END FUNCTION getfs
 
       FUNCTION getfi(Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM)
      $     RESULT(value)
