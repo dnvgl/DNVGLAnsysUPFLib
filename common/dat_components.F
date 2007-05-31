@@ -31,11 +31,9 @@ c     collect components
 #endif
       CHARACTER(LEN=PARMSIZE) :: para
 
-      CHARACTER(LEN=40) :: fname
+      CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
 
       CALL TrackBegin('dat_components')
-
-      fname = __FILE__
 
 c     find number of components: -> ansys_comp
       !DEBUG_LOC('ans2bmf_elread')
@@ -201,11 +199,9 @@ c###########################################################
       INTEGER :: elid, stat, type
       INTEGER :: iErr
 
-      CHARACTER(LEN=40) :: fname
+      CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
 
       CALL TrackBegin('ans2bmf_cstore')
-
-      fname = __FILE__
 
       CALL cmselect('s', 'XXXCOMP')
 
@@ -302,8 +298,6 @@ c-----------------------------------------------------------
       INTEGER n, nmax, el
 
       CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
-
-
 
       CALL TrackBegin('ans2bmf_elread')
 
