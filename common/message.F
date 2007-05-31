@@ -1,10 +1,14 @@
 c     issue warnings and update message count
       SUBROUTINE a2b_message(wcode,n1,n2)
 
+      USE ansys
+
 #include "common.F"
 
       CHARACTER(LEN=4) :: wcode
       INTEGER n1,n2
+
+      CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
 
       CALL TrackBegin('a2b_message')
 
@@ -14,57 +18,36 @@ c     issue warnings and update message count
       derrinfo(2) = n2
       IF (wcode.EQ.'comp') THEN
          derrinfo(1) = n1
-         CALL erhandler(
-     $        __FILE__,
-     $        __LINE__,
-     $        ANS_MSGLVL_WARN,
-     $        'WARNING (ans2bmf): Not all elements of component %i '//
-     $        'converted !\n'//
+         CALL erhandler(fname, __LINE__, ERH_WARNING,
+     $        'ans2bmf: Not all elements of component %i '//
+     $        'converted !%/'//
      $        '(Check if element types are allowed in present version)',
      $        derrinfo, cerrinfo)
       ELSE IF (wcode.EQ.'matE') THEN
-         CALL erhandler(
-     $        __FILE__,
-     $        __LINE__,
-     $        ANS_MSGLVL_WARN,
-     $        'WARNING (ans2bmf): no E-Module found in MP %i',
+         CALL erhandler(fname, __LINE__, ERH_WARNING,
+     $        'ans2bmf: no E-Module found in MP %i',
      $        derrinfo, cerrinfo)
       ELSE IF (wcode.EQ.'matP') THEN
-         CALL erhandler(
-     $        __FILE__,
-     $        __LINE__,
-     $        ANS_MSGLVL_WARN,
-     $        'WARNING (ans2bmf): no Poisson ratio found in MP %i',
+         CALL erhandler(fname, __LINE__, ERH_WARNING,
+     $        'ans2bmf: no Poisson ratio found in MP %i',
      $        derrinfo, cerrinfo)
       ELSE IF (wcode.EQ.'matD') THEN
-         CALL erhandler(
-     $        __FILE__,
-     $        __LINE__,
-     $        ANS_MSGLVL_WARN,
-     $        'WARNING (ans2bmf): no density value found in MP %i',
+         CALL erhandler(fname, __LINE__, ERH_WARNING,
+     $        'ans2bmf: no density value found in MP %i',
      $        derrinfo, cerrinfo)
       ELSE IF (wcode.EQ.'beam') THEN
-         CALL erhandler(
-     $        __FILE__,
-     $        __LINE__,
-     $        ANS_MSGLVL_WARN,
-     $        'WARNING (ans2bmf): beam at nodes %i %i '//
+         CALL erhandler(fname, __LINE__, ERH_WARNING,
+     $        'ans2bmf: beam at nodes %i %i '//
      $        'does not have orientation node',
      $        derrinfo, cerrinfo)
       ELSE IF (wcode.EQ.'pses') THEN
-         CALL erhandler(
-     $        __FILE__,
-     $        __LINE__,
-     $        ANS_MSGLVL_WARN,
-     $        'WARNING (ans2bmf): shells with different thicknesses '//
+         CALL erhandler(fname, __LINE__, ERH_WARNING,
+     $        'ans2bmf: shells with different thicknesses '//
      $        'not supported (el. %i). Average value taken.',
      $        derrinfo, cerrinfo)
       ELSE IF (wcode.EQ.'shel') THEN
-         CALL erhandler(
-     $        __FILE__,
-     $        __LINE__,
-     $        ANS_MSGLVL_WARN,
-     $        'WARNING (ans2bmf): shells with different thicknesses '//
+         CALL erhandler(fname, __LINE__, ERH_WARNING,
+     $        'ans2bmf: shells with different thicknesses '//
      $        'not supported (el. %i). Average value taken.',
      $        derrinfo, cerrinfo)
       END IF

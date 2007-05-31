@@ -12,13 +12,23 @@ C CVSID: $Id$
 
       SUBROUTINE dat_masses()
 
+      USE ansys
+
 #include "common.F"
+
+      INTEGER :: iErr
+
+#if   ANSVER >= 70
+      CHARACTER(LEN=CMD_MAX_LENG) :: cmd
+#else
+      CHARACTER(LEN=SYS_LNG_CMDLN) :: cmd
+#endif
 
       CALL TrackBegin('dat_masses')
 
 c     select all nodal mass elements
       cmd = 'ESEL,S,ENAME,,MASS21'
-      i=runcmd(cmd)
+      iErr = RunCommand(LEN_TRIM(cmd), cmd)
 
       n_masses = elmiqr(0,DB_NUMSELECTED)
 

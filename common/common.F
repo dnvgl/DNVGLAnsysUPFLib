@@ -1,50 +1,19 @@
+
 #include "impcom.inc"
 
-#include "ansysdef.inc"
-#include "echprm.inc"
-#include "syspar.inc"
-#include "elempr.inc"
-
 c     external functions from ANSYS library
-      EXTERNAL  wrinqr, ndinqr, ndgxyz, ndnext, runcmd
-      INTEGER   wrinqr, ndinqr, ndgxyz, ndnext, runcmd
-      EXTERNAL  fAnsMemAlloc, fAnsMemFree
-      PTRFTN    fAnsMemAlloc
-
-      EXTERNAL  elnext, elmiqr, disiqr, ndgall, mpinqr, mpget, elmget
-      INTEGER   elnext, elmiqr, disiqr, ndgall, mpinqr, mpget, elmget
-      EXTERNAL  rlget, rlinqr, etyget, forget, foriqr
-      INTEGER   rlget, rlinqr, etyget, forget, foriqr
-
-#if   ANSVER < 70
-      EXTERNAL         parevl
-      DOUBLE PRECISION parevl
-#endif
 
 c     external procedures
-      EXTERNAL  HeapDealloc, anserr, rlsel
+!      EXTERNAL anserr, rlsel
 
 c     variables to interface with ANSYS
-      INTEGER i, nodes(NNMAX), elmdat(EL_DIM), kerr
+      INTEGER nodes(NNMAX), elmdat(EL_DIM), kerr
       INTEGER ityp, ielc(IelCSZ)
       DOUBLE PRECISION rtable(400), mptemp(100), mpval(100), subc(3)
 
 
-#if   ANSVER >= 70
-      CHARACTER(LEN=CMD_MAX_LENG) :: cmd
-#else
-      CHARACTER(LEN=SYS_LNG_CMDLN) :: cmd
-#endif
-
-      CHARACTER(LEN=PARMSIZE) :: para
-
 c     global information about ANSYS model
       INTEGER n_nodes, n_nloads, n_elem, n_masses, n_mass_groups
-
-
-c     local functions from ans2bmf program
-C      EXTERNAL len_trim
-C      INTEGER  len_trim
 
 c     variables and parameters
 
@@ -66,6 +35,7 @@ c     this block holds the component information
       INTEGER max_components
       PARAMETER (max_components = 1024)
       CHARACTER(LEN=16) :: l_comp_name (max_components)
+      CHARACTER(LEN=PARMSIZE) :: comp_name(max_components)
       INTEGER        l_comp_pos  (max_components)
       INTEGER        l_comp_len  (max_components)
       CHARACTER(LEN=PARMSIZE) :: l_comp_ansys(max_components)
@@ -83,11 +53,11 @@ c     this block holds the component information
       INTEGER rl_length, rl_num
 
       COMMON / ans2bmf_ans2bmf /
-     x   i, nodes, elmdat, subc, kerr, para, cmd,
+     x   nodes, elmdat, subc, kerr,
      x     ityp, ielc, n_nodes, n_nloads, n_sfiles, max_loadcases,
      x   jobname, outfile, sfiles, n_elem, n_masses, n_mass_groups,
      x   el_offset, el_length, el_count,
-     x     l_comp_name, l_comp_pos, l_comp_len, comp_num,
+     x     l_comp_name, comp_name, l_comp_pos, l_comp_len, comp_num,
      x     l_comp_ansys, l_comp_csub,
      x   bp_length, bp_num_i, bp_num_j,
      x   rl_length, rl_num,

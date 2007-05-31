@@ -10,6 +10,9 @@ c get beam properties
 
       SUBROUTINE dat_beamproperties(bp_data, rl_data)
 
+      USE ansys
+      USE glans
+
 #include "common.F"
 
       DOUBLE PRECISION bp_data(*)
@@ -19,6 +22,9 @@ c get beam properties
       LOGICAL identical
 
       DOUBLE PRECISION t_min, t_max
+      INTEGER :: iErr, i
+
+      CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
 
 #ifdef DEBUG
  100  FORMAT (A,':',I3,':dat_beamproperties')
@@ -28,8 +34,9 @@ c get beam properties
 
 c     select all real constants of BEAM44 elements
       CALL ans2bmf_rlnosel()
-      cmd = 'ESEL,S,ENAME,,BEAM44'
-      i = runcmd(cmd)
+!      cmd = 'ESEL,S,ENAME,,BEAM44'
+!      iErr = RunCommand(LEN_TRIM(cmd), cmd)
+      CALL esel('S', 'ENAME', VMIN='BEAM44')
 
 c     loop through all selected elements and select associated real
 c     constant sets
@@ -39,17 +46,11 @@ c     constant sets
       rmax = rlinqr(0,DB_MAXDEFINED)
 
       derrinfo(1) = rnum
-      CALL erhandler(
-     $     __FILE__,
-     $     __LINE__,
-     $     ANS_MSGLVL_NOTE,
+      CALL erhandler(fname, __LINE__, ERH_NOTE,
      $     'ans2bmf:   no. of BEAM44 rconst.: %i',
      $     derrinfo, cerrinfo)
       derrinfo(1) = rmax
-      CALL erhandler(
-     $     __FILE__,
-     $     __LINE__,
-     $     ANS_MSGLVL_NOTE,
+      CALL erhandler(fname, __LINE__, ERH_NOTE,
      $     'ans2bmf:   no.of rconsts to test: %i',
      $     derrinfo, cerrinfo)
 
@@ -68,10 +69,7 @@ c     check for overflow
             IF (bp_num_i.GT.rnum) THEN
                derrinfo(1) = rnum
                derrinfo(2) = bp_num_i
-               CALL erhandler(
-     $        __FILE__,
-     $              __LINE__,
-     $              ANS_MSGLVL_ERR,
+               CALL erhandler(fname, __LINE__, ERH_ERROR,
      $              'ans2bmf: ERROR: %i  beam properties allocated. '//
      $              'Pos. %i accessed. This is greater or too close '//
      $              'to maximum.',
@@ -81,10 +79,7 @@ c     check for overflow
             IF (rl_num.ge.rnum) THEN
                derrinfo(1) = rnum
                derrinfo(2) = rl_num
-               CALL erhandler(
-     $        __FILE__,
-     $              __LINE__,
-     $              ANS_MSGLVL_ERR,
+               CALL erhandler(fname, __LINE__, ERH_ERROR,
      $              'ans2bmf: ERROR: %i conversion table places av.. '//
      $              'Pos. %i accessed. This is greater or too close '//
      $              'to maximum.',
@@ -94,8 +89,8 @@ c     check for overflow
 
 c     read real constant set from ANSYS and convert BEAM44 properties in
 c     beam properties
-            CALL vzero (rtable(1),40)
-            i  = rlget (n,rtable(1))
+            CALL vzero (rtable, 40)
+            i  = rlget (n, rtable)
 
             oi = 1 + bp_rlen * bp_num_i
             oj = 1 + bp_rlen * (rnum+bp_num_j)
@@ -254,10 +249,7 @@ c     sets are different: keep both sets of beam props
       derrinfo(1) = bp_num_i+bp_num_j
       derrinfo(2) = bp_num_i
       derrinfo(3) = bp_num_j
-      CALL erhandler(
-     $     __FILE__,
-     $     __LINE__,
-     $     ANS_MSGLVL_NOTE,
+      CALL erhandler(fname, __LINE__, ERH_NOTE,
      $     'ans2bmf:   no.beam prop. generated: %i %i %i',
      $     derrinfo, cerrinfo)
 
@@ -270,6 +262,8 @@ c     sets are different: keep both sets of beam props
 c###########################################################
 
       SUBROUTINE ans2bmf_rlallsel()
+
+      USE ansys
 
 #include "common.F"
 
@@ -290,6 +284,8 @@ c-----------------------------------------------------------
 
       SUBROUTINE ans2bmf_rlnosel()
 
+      USE ansys
+
 #include "common.F"
 
       INTEGER r,rmax
@@ -309,9 +305,11 @@ c-----------------------------------------------------------
 
       SUBROUTINE ans2bmf_rlsle()
 
+      USE ansys
+
 #include "common.F"
 
-      INTEGER el
+      INTEGER :: el, i
 
       CALL TrackBegin('ans2bmf_rlsle')
 
@@ -322,7 +320,7 @@ c     constant sets
 
       el = elnext(0)
       DO WHILE (el.GT.0)
-         i = elmget(el,elmdat(1),nodes(1))
+         i = elmget(el, elmdat, nodes)
          CALL rlsel(elmdat(3),1)
          el = elnext(el)
       END DO

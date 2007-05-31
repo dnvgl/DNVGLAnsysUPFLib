@@ -1,9 +1,14 @@
 c     get jobname
       SUBROUTINE dat_jobname()
 
+      USE ansys
+      USE glans
+
 #include "common.F"
 
       CHARACTER(LEN=STRING_MAX_LENG) :: dummy
+
+      CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
 
       CALL TrackBegin('dat_jobname')
 
@@ -19,11 +24,8 @@ c     reads jobname from database. See description of *GET
       jobname(25:32) = dummy(1:8)
 
       cerrinfo(1) = jobname
-      CALL erhandler(
-     $     __FILE__,
-     $     __LINE__,
-     $     ANS_MSGLVL_NOTE,
-     $     'ans2bmf:   jobname: %s',
+      CALL erhandler(fname, __LINE__, ERH_NOTE,
+     $     trim(libname)//':   jobname: %s',
      $     derrinfo, cerrinfo)
 
       CALL TrackEnd('dat_jobname')

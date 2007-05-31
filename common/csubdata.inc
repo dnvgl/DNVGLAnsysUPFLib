@@ -40,13 +40,14 @@ C CVSID: $Id$
       COMMON / ans2bmf_csub /
      x     l_csub_ename, l_csub_eid, l_csub_postfix
 
-c     values for error reporting
-      INTEGER ANS_MSGLVL_TIME, ANS_MSGLVL_NO, ANS_MSGLVL_NOTE,
-     $     ANS_MSGLVL_WARN, ANS_MSGLVL_ERR, ANS_MSGLVL_FTL
+!c     values for error reporting
+!      INTEGER ANS_MSGLVL_TIME, ANS_MSGLVL_NO, ANS_MSGLVL_NOTE,
+!     $     ANS_MSGLVL_WARN, ANS_MSGLVL_ERR, ANS_MSGLVL_FTL
 
-      COMMON / ans2bmf_errors /
-     $     ANS_MSGLVL_TIME, ANS_MSGLVL_NO, ANS_MSGLVL_NOTE,
-     $     ANS_MSGLVL_WARN, ANS_MSGLVL_ERR, ANS_MSGLVL_FTL
+C     name of actual library, to be used in common error messages
+      CHARACTER(LEN=20) libname
+      COMMON / ans2conv_msg /
+     $     libname
 
 C Local Variables:
 C compile-command:"make test"

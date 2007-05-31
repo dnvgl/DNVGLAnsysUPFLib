@@ -1,5 +1,7 @@
       SUBROUTINE dat_loadcases()
 
+      USE ansys
+
 #include "common.F"
 
       CHARACTER(LEN=2) :: ext
@@ -9,6 +11,8 @@
       INTEGER*2 l
       INTEGER s_file
 
+      CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
+
       CALL TrackBegin('dat_loadcases')
 
       max_loadcases = 0
@@ -16,7 +20,7 @@
 c     inquiry on nodal loads in model and define global parameter
 c     n_nloads
 
-      n_nloads = foriqr(0,DB_NUMDEFINED)
+      n_nloads = foriqr(0, DB_NUMDEFINED)
       IF (n_nloads.GT.0) THEN
          max_loadcases = max_loadcases + 1
       END IF
@@ -67,10 +71,7 @@ c     we have found the last file
 
       max_loadcases = max_loadcases + n_sfiles
       derrinfo(1) = max_loadcases
-      CALL erhandler(
-     $     __FILE__,
-     $     __LINE__,
-     $     ANS_MSGLVL_NOTE,
+      CALL erhandler(fname, __LINE__, ERH_NOTE,
      $     'ans2bmf:   loadcases defined:  %i', derrinfo, cerrinfo)
 
       CALL TrackEnd('dat_loadcases')
