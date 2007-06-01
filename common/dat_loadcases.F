@@ -1,8 +1,16 @@
       SUBROUTINE dat_loadcases()
 
       USE ansys
+      USE LOCMOD
 
-#include "common.F"
+      IMPLICIT NONE
+C     Purpose: 
+C     
+C     Parameter:
+C     in/out Name          Task
+C ----------------------------------------------------------------------
+C     Created: 2007-06-01  hoel
+C ======================================================================
 
       CHARACTER(LEN=2) :: ext
       CHARACTER(LEN=1) :: cl

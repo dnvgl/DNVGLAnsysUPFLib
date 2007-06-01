@@ -13,8 +13,16 @@ C CVSID: $Id$
       SUBROUTINE dat_masses()
 
       USE ansys
+      USE LOCMOD
 
-#include "common.F"
+      IMPLICIT NONE
+C     Purpose: 
+C     
+C     Parameter:
+C     in/out Name          Task
+C ----------------------------------------------------------------------
+C     Created: 2007-06-01  hoel
+C ======================================================================
 
       INTEGER :: iErr
 

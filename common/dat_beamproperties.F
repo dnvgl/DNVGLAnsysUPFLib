@@ -12,9 +12,16 @@ c get beam properties
 
       USE ansys
       USE glans
+      USE LOCMOD
 
-#include "common.F"
-
+      IMPLICIT NONE
+C     Purpose: 
+C     
+C     Parameter:
+C     in/out Name          Task
+C ----------------------------------------------------------------------
+C     Created: 2007-06-01  hoel
+C ======================================================================
       DOUBLE PRECISION bp_data(*)
       INTEGER rl_data(*)
 
@@ -265,8 +272,14 @@ c###########################################################
 
       USE ansys
 
-#include "common.F"
-
+      IMPLICIT NONE
+C     Purpose: 
+C     
+C     Parameter:
+C     in/out Name          Task
+C ----------------------------------------------------------------------
+C     Created: 2007-06-01  hoel
+C ======================================================================
       INTEGER r,rmax
 
       CALL TrackBegin('ans2bmf_rlallsel')
@@ -286,8 +299,14 @@ c-----------------------------------------------------------
 
       USE ansys
 
-#include "common.F"
-
+      IMPLICIT NONE
+C     Purpose: 
+C     
+C     Parameter:
+C     in/out Name          Task
+C ----------------------------------------------------------------------
+C     Created: 2007-06-01  hoel
+C ======================================================================
       INTEGER r,rmax
 
       CALL TrackBegin('ans2bmf_rlnosel')
@@ -306,9 +325,16 @@ c-----------------------------------------------------------
       SUBROUTINE ans2bmf_rlsle()
 
       USE ansys
+      USE LOCMOD
 
-#include "common.F"
-
+      IMPLICIT NONE
+C     Purpose: 
+C     
+C     Parameter:
+C     in/out Name          Task
+C ----------------------------------------------------------------------
+C     Created: 2007-06-01  hoel
+C ======================================================================
       INTEGER :: el, i
 
       CALL TrackBegin('ans2bmf_rlsle')

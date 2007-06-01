@@ -12,8 +12,16 @@ c     collect components
 
       USE glans
       USE ansys
+      USE LOCMOD
 
-#include "common.F"
+      IMPLICIT NONE
+C     Purpose: 
+C     
+C     Parameter:
+C     in/out Name          Task
+C ----------------------------------------------------------------------
+C     Created: 2007-06-01  hoel
+C ======================================================================
 
       INTEGER el_data(*)
 
@@ -186,8 +194,16 @@ c###########################################################
 
       USE glans
       USE ansys
+      USE LOCMOD
 
-#include "common.F"
+      IMPLICIT NONE
+C     Purpose: 
+C     
+C     Parameter:
+C     in/out Name          Task
+C ----------------------------------------------------------------------
+C     Created: 2007-06-01  hoel
+C ======================================================================
 
       CHARACTER(LEN=*) :: comp
       INTEGER :: csub, el_data(*)
@@ -289,8 +305,16 @@ c-----------------------------------------------------------
       SUBROUTINE ans2bmf_elread(el_data)
 
       USE ansys
+      USE LOCMOD
 
-#include "common.F"
+      IMPLICIT NONE
+C     Purpose: 
+C     
+C     Parameter:
+C     in/out Name          Task
+C ----------------------------------------------------------------------
+C     Created: 2007-06-01  hoel
+C ======================================================================
 
       INTEGER el_data(*)
       INTEGER n, nmax, el

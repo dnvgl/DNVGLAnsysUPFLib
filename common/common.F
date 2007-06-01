@@ -1,11 +1,4 @@
 
-#include "impcom.inc"
-
-c     external functions from ANSYS library
-
-c     external procedures
-!      EXTERNAL anserr, rlsel
-
 c     variables to interface with ANSYS
       INTEGER nodes(NNMAX), elmdat(EL_DIM), kerr
       INTEGER ityp, ielc(IelCSZ)

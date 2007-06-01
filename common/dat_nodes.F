@@ -2,8 +2,16 @@ c     find out and store # of nodes
       SUBROUTINE dat_nodes()
 
       USE ansys
+      USE LOCMOD
 
-#include "common.F"
+      IMPLICIT NONE
+C     Purpose: 
+C     
+C     Parameter:
+C     in/out Name          Task
+C ----------------------------------------------------------------------
+C     Created: 2007-06-01  hoel
+C ======================================================================
 
       CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
 

@@ -7,7 +7,6 @@ C     Author    Berthold Höllmann <hoel@GL-Group.com>
 C     Project   ans2bmf
 C     ======================================================================
 
-
 C CVSID: $Id$
 
       MODULE glans
@@ -31,9 +30,16 @@ c     reads ANSYS command string 'cmd_str'
 c     puts out double precision parameter 'dout'
 
       USE ansys
+      USE LOCMOD
 
-#include "common.F"
-
+      IMPLICIT NONE
+C     Purpose: 
+C     
+C     Parameter:
+C     in/out Name          Task
+C ----------------------------------------------------------------------
+C     Created: 2007-06-01  hoel
+C ======================================================================
       CHARACTER(LEN=*) :: cmd_str
       DOUBLE PRECISION dout
 
@@ -65,9 +71,16 @@ c     reads ANSYS command string 'cmd_str'
 c     writes a string of length 8 into 'sout'
 
       USE ansys
+      USE LOCMOD
 
-#include "common.F"
-
+      IMPLICIT NONE
+C     Purpose: 
+C     
+C     Parameter:
+C     in/out Name          Task
+C ----------------------------------------------------------------------
+C     Created: 2007-06-01  hoel
+C ======================================================================
       CHARACTER(LEN=*) :: cmd_str
       CHARACTER(LEN=PARMSIZE) :: sout
       DOUBLE PRECISION res_double
@@ -126,9 +139,9 @@ c     writes a string of length 8 into 'sout'
       SUBROUTINE cmselect(mode, name)
 !     select component
       USE ansys
+      USE LOCMOD
 
-#include "common.F"
-
+      IMPLICIT NONE
 !     Purpose:
 !
 !       Select given ANSYS component
@@ -194,9 +207,9 @@ c     writes a string of length 8 into 'sout'
       SUBROUTINE eseli(Type, Item, Comp, VMIN, VMAX, VINC, KABS)
 
       USE ansys
+      USE LOCMOD
 
-#include "common.F"
-
+      IMPLICIT NONE
 !     Purpose: select elements
 !
 !     Parameter:
@@ -405,9 +418,9 @@ c     writes a string of length 8 into 'sout'
       SUBROUTINE esels(Type, Item, Comp, VMIN)
 
       USE ansys
+      USE LOCMOD
 
-#include "common.F"
-
+      IMPLICIT NONE
 !     Purpose: select elements
 !
 !     Parameter:
@@ -564,10 +577,11 @@ c     writes a string of length 8 into 'sout'
       END SUBROUTINE esels
 
       SUBROUTINE nsel(Type, Item, Comp, VMIN, VMAX, VINC, KABS)
+
       USE ansys
+      USE LOCMOD
 
-#include "common.F"
-
+      IMPLICIT NONE
 !     Purpose: select nodes
 !
 !     Parameter:
@@ -749,7 +763,7 @@ C ======================================================================
       stderr = wrinqr(WR_OUTPUT)
       WRITE(stderr,100) file, line, func
  100  FORMAT (X,A,':',I3,':',A)
-      res = COMMITQQ(6)
+      res = COMMITQQ(stderr)
 
       CALL TrackEnd('glans:doDebugLoc')
 
@@ -757,10 +771,11 @@ C ======================================================================
 
       FUNCTION gets(Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM)
      $     RESULT(value)
-      USE ANSYS
 
-#include "common.F"
+      USE ansys
+      USE LOCMOD
 
+      IMPLICIT NONE
 C     Purpose:
 C
 C     Parameter:
@@ -834,10 +849,11 @@ C ======================================================================
 
       FUNCTION getsi(Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM)
      $     RESULT(value)
-      USE ANSYS
 
-#include "common.F"
+      USE ansys
+      USE LOCMOD
 
+      IMPLICIT NONE
 C     Purpose:
 C
 C     Parameter:
@@ -875,10 +891,11 @@ C ======================================================================
 
       FUNCTION getf(Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM)
      $     RESULT(value)
-      USE ANSYS
 
-#include "common.F"
+      USE ansys
+      USE LOCMOD
 
+      IMPLICIT NONE
 C     Purpose:
 C
 C     Parameter:
@@ -948,10 +965,11 @@ C ======================================================================
 
       FUNCTION getfs(Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM)
      $     RESULT(value)
-      USE ANSYS
 
-#include "common.F"
+      USE ansys
+      USE LOCMOD
 
+      IMPLICIT NONE
 C     Purpose:
 C
 C     Parameter:
@@ -1020,10 +1038,11 @@ C ======================================================================
 
       FUNCTION getfi(Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM)
      $     RESULT(value)
-      USE ANSYS
 
-#include "common.F"
+      USE ansys
+      USE LOCMOD
 
+      IMPLICIT NONE
 C     Purpose:
 C
 C     Parameter:

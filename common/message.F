@@ -2,8 +2,16 @@ c     issue warnings and update message count
       SUBROUTINE a2b_message(wcode,n1,n2)
 
       USE ansys
+      USE LOCMOD
 
-#include "common.F"
+      IMPLICIT NONE
+C     Purpose: 
+C     
+C     Parameter:
+C     in/out Name          Task
+C ----------------------------------------------------------------------
+C     Created: 2007-06-01  hoel
+C ======================================================================
 
       CHARACTER(LEN=4) :: wcode
       INTEGER n1,n2

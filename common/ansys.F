@@ -12,8 +12,7 @@
 
       MODULE ansys
 
-      IMPLICIT NONE
-
+#include "impcom.inc"
 #include "computer.h"
 #include "ansysdef.inc"
 #include "echprm.inc"
@@ -476,10 +475,11 @@ c *** Notice - This file contains ANSYS Confidential information ***
          FUNCTION elmget(ielem, elmdat, nodes)
          IMPLICIT NONE
 #include "ansysdef.inc"
+#include "elempr.inc"
          INTEGER :: elmget
          INTEGER, INTENT(IN) :: ielem
          INTEGER, INTENT(OUT), DIMENSION(EL_DIM) :: elmdat
-         INTEGER, INTENT(OUT), DIMENSION(*) :: nodes
+         INTEGER, INTENT(OUT), DIMENSION(NNMAX) :: nodes
          END FUNCTION elmget
       END INTERFACE
 
@@ -544,7 +544,7 @@ c     output arguments:  none.
          IMPLICIT NONE
          INTEGER :: etyget
          INTEGER, INTENT(IN) :: itype
-         INTEGER, INTENT(OUT), DIMENSION(*) :: ielx
+         INTEGER, INTENT(OUT), DIMENSION(150) :: ielx
          END FUNCTION etyget
       END INTERFACE
 
@@ -1128,6 +1128,7 @@ c *** primary function:    Display ANSYS error messages
 ! 8.3.19. vcross Subroutine (Defining a Vector via a Cross Product)
 ! 8.3.20. vnorme Subroutine (Normalizing a Three-Component Vector)
 ! 8.3.21. vnorm Subroutine (Normalizing a Vector to Unit Length)
+
 ! 8.3.22. ndgxyz Function (Getting the X,Y,Z Vector for a Node)
 
 ! *** primary function:    get x,y,z vector for a node.
