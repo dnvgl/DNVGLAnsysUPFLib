@@ -15,8 +15,8 @@ c get beam properties
       USE LOCMOD
 
       IMPLICIT NONE
-C     Purpose: 
-C     
+C     Purpose:
+C
 C     Parameter:
 C     in/out Name          Task
 C ----------------------------------------------------------------------
@@ -41,8 +41,6 @@ C ======================================================================
 
 c     select all real constants of BEAM44 elements
       CALL ans2bmf_rlnosel()
-!      cmd = 'ESEL,S,ENAME,,BEAM44'
-!      iErr = RunCommand(LEN_TRIM(cmd), cmd)
       CALL esel('S', 'ENAME', VMIN='BEAM44')
 
 c     loop through all selected elements and select associated real
@@ -273,8 +271,8 @@ c###########################################################
       USE ansys
 
       IMPLICIT NONE
-C     Purpose: 
-C     
+C     Purpose:
+C
 C     Parameter:
 C     in/out Name          Task
 C ----------------------------------------------------------------------
@@ -300,8 +298,8 @@ c-----------------------------------------------------------
       USE ansys
 
       IMPLICIT NONE
-C     Purpose: 
-C     
+C     Purpose:
+C
 C     Parameter:
 C     in/out Name          Task
 C ----------------------------------------------------------------------
@@ -328,8 +326,9 @@ c-----------------------------------------------------------
       USE LOCMOD
 
       IMPLICIT NONE
-C     Purpose: 
-C     
+C     Purpose:
+C     loop through all selected elements and select associated real
+C     constant sets
 C     Parameter:
 C     in/out Name          Task
 C ----------------------------------------------------------------------
@@ -340,9 +339,6 @@ C ======================================================================
       CALL TrackBegin('ans2bmf_rlsle')
 
       CALL ans2bmf_rlnosel()
-
-c     loop through all selected elements and select associated real
-c     constant sets
 
       el = elnext(0)
       DO WHILE (el.GT.0)

@@ -92,8 +92,6 @@ c     get name of component: -> comp_name(an_cnum)
      $           comp_name(an_cnum+1))
 
 c     get type of component
-!            CALL ans2bmf_get_d('COMP,'//comp_name(an_cnum+1)
-!     x           //',TYPE',res)
             res = getf('COMP', comp_name(an_cnum+1), 'TYPE    ')
 
 c     check if this is a component of elements

@@ -138,7 +138,7 @@
          FUNCTION parevl(ParName, nDim, subc, lvl, kerr)
 #else
          SUBROUTINE parevl(ParName, nDim, subc, lvl, dpValue, chValue,
-     $     kerr)
+     &     kerr)
 #endif
          IMPLICIT NONE
 #include "ansysdef.inc"
@@ -230,6 +230,14 @@
          INTEGER :: elnext
          INTEGER, INTENT(IN) :: next
          END FUNCTION elnext
+      END INTERFACE
+
+      INTERFACE
+         FUNCTION etnext(next)
+         IMPLICIT NONE
+         INTEGER :: etnext
+         INTEGER, INTENT(IN) :: next
+         END FUNCTION etnext
       END INTERFACE
 
 ! 7.3.6. elprev Function (Getting the Number of the Previous Selected Element)
@@ -525,6 +533,39 @@ c     output arguments:  none.
       END INTERFACE
 
 ! 7.5.4. etyiqr Function (Getting a Data Item About an Element Type)
+! *** primary function:    get information about an element type.
+!     input arguments:
+!        itype    (int,sc,in)       - element type number
+!                                      Should be 0 for key=11, DB_NUMDEFINED,
+!                                      DB_NUMSELECTED, DB_MAXDEFINED, and
+!                                      DB_MAXRECLENG
+!        key      (int,sc,in)       - information flag.
+!                 = DB_SELECTED    - return select status:
+!                      etyiqr = 0 - element type is undefined.
+!                             =-1 - element type is unselected.
+!                             = 1 - element type is selected.
+!                 = DB_NUMDEFINED  - return number of defined element types
+!                 = DB_NUMSELECTED - return number of selected element types
+!                 = DB_MAXDEFINED  - return highest element type number defined
+!                 = DB_MAXRECLENG  - return maximum record length (int words)
+!                = -n, return element characteristic n from etycom for element
+!                       type itype.
+!                      n is correlated to the parameter names in echprm.
+!                      see elccmt for definitions of element characteristics.
+!                      note- this will not overwrite the current setting of
+!                       etycom.
+!     output arguments:
+!        etyiqr   (int,func,out)    - the returned value of etyiqr is based on
+!                                      setting of key.
+      INTERFACE
+         FUNCTION etyiqr(itype, key)
+         IMPLICIT NONE
+         INTEGER :: etyiqr
+         INTEGER, INTENT(IN) :: itype
+         INTEGER, INTENT(IN) :: key
+         END FUNCTION etyiqr
+      END INTERFACE
+
 
 ! 7.5.5. etyget Function (Getting Information About an Element Type)
 ! primary function:    get element type data.
@@ -635,6 +676,14 @@ c     output arguments:  none.
 ! 7.5.11. mpput Subroutine (Storing a Material Property Table)
 ! 7.5.12. mpdel Subroutine (Deleting a Material Property Table)
 
+      INTERFACE
+         FUNCTION rlnext (rlId)
+         INTEGER :: rlnext
+         INTEGER, INTENT(IN) :: rlId
+         END FUNCTION rlnext
+      END INTERFACE
+
+
 ! 7.5.13. rlinqr Function (Getting Information About a Real Constant Set)
 ! primary function:    get information about a real constant set
 ! secondary functions: none
@@ -678,7 +727,7 @@ c     output arguments:  none.
          FUNCTION rlget (nreal,rtable)
          IMPLICIT NONE
          INTEGER :: rlget
-         INTEGER, INTENT(OUT) :: nreal
+         INTEGER, INTENT(IN) :: nreal
          DOUBLE PRECISION, INTENT(OUT), DIMENSION(*) :: rtable
          END FUNCTION rlget
       END INTERFACE
@@ -1069,7 +1118,7 @@ c *** primary function:    Display ANSYS error messages
 !                                  characters
       INTERFACE
          SUBROUTINE erhandler(filein, msgid, msglvl, lngstrng,
-     $        dperr, cherr)
+     &        dperr, cherr)
          CHARACTER(LEN=40), INTENT(IN) :: filein
          INTEGER, INTENT(IN) :: msgid
          INTEGER, INTENT(IN) :: msglvl
@@ -1089,6 +1138,8 @@ c *** primary function:    Display ANSYS error messages
 ! 8.3.4. lastv Function (Retrieving the Position of the Last Nonzero Term in a Double Precision Vector)
 
 ! 8.3.5. izero Function (Setting an Integer Vector to Zero)
+
+! **********  set an integer vector to zero  **********
       INTERFACE
          SUBROUTINE izero (ivect, n)
          IMPLICIT NONE

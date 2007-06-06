@@ -830,6 +830,7 @@ C ======================================================================
       ELSE
          WRITE(cmd,100) TRIM(cmd), ''
       END IF
+      write(wrinqr(WR_OUTPUT),*) 'cmd: ', trim(cmd)
       iErr = RunCommand(LEN_TRIM(cmd), TRIM(cmd))
       para ='PARA'
 
@@ -947,6 +948,7 @@ C ======================================================================
       ELSE
          WRITE(cmd,100) TRIM(cmd), ''
       END IF
+      write(wrinqr(WR_OUTPUT),*) 'cmd: ', trim(cmd)
       iErr = RunCommand(LEN_TRIM(cmd), TRIM(cmd))
       para ='PARA'
 
@@ -1021,6 +1023,7 @@ C ======================================================================
       ELSE
          WRITE(cmd,100) TRIM(cmd), ''
       END IF
+      write(wrinqr(WR_OUTPUT),*) 'cmd: ', trim(cmd)
       iErr = RunCommand(LEN_TRIM(cmd), TRIM(cmd))
       para ='PARA'
 
