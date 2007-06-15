@@ -91,7 +91,6 @@
          INTEGER, INTENT(IN) :: key
          CHARACTER(LEN=16), INTENT(IN) :: c16Label
          END FUNCTION fAnsMemAlloc
-
       END INTERFACE
 
 ! 6.11.3. Subroutine fAnsMemFree (Deallocating Space)
@@ -158,8 +157,6 @@
          END SUBROUTINE parevl
 #endif 
       END INTERFACE
-
-
 
 ! 6.12.3. Subroutine pardef (Adding a Parameter)
 ! 6.13. Miscellaneous Useful Functions
@@ -238,6 +235,13 @@
          INTEGER :: etnext
          INTEGER, INTENT(IN) :: next
          END FUNCTION etnext
+      END INTERFACE
+
+      INTERFACE
+         FUNCTION rlnext (rlId)
+         INTEGER :: rlnext
+         INTEGER, INTENT(IN) :: rlId
+         END FUNCTION rlnext
       END INTERFACE
 
 ! 7.3.6. elprev Function (Getting the Number of the Previous Selected Element)
@@ -675,14 +679,6 @@ c     output arguments:  none.
 
 ! 7.5.11. mpput Subroutine (Storing a Material Property Table)
 ! 7.5.12. mpdel Subroutine (Deleting a Material Property Table)
-
-      INTERFACE
-         FUNCTION rlnext (rlId)
-         INTEGER :: rlnext
-         INTEGER, INTENT(IN) :: rlId
-         END FUNCTION rlnext
-      END INTERFACE
-
 
 ! 7.5.13. rlinqr Function (Getting Information About a Real Constant Set)
 ! primary function:    get information about a real constant set
