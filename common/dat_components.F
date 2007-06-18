@@ -210,6 +210,8 @@ C ======================================================================
 
       INTEGER :: elid, stat, type
       INTEGER :: iErr
+      INTEGER, DIMENSION(EL_DIM) :: elmdat
+      INTEGER, DIMENSION(NNMAX) :: nodes
 
       CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
 

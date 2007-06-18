@@ -31,6 +31,8 @@ C ======================================================================
       DOUBLE PRECISION t_min, t_max
       INTEGER :: iErr, i
 
+      DOUBLE PRECISION, DIMENSION(400) :: rTable
+
       CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
 
 #ifdef DEBUG
@@ -335,6 +337,8 @@ C ----------------------------------------------------------------------
 C     Created: 2007-06-01  hoel
 C ======================================================================
       INTEGER :: el, i
+      INTEGER, DIMENSION(EL_DIM) :: elmdat
+      INTEGER, DIMENSION(NNMAX) :: nodes
 
       CALL TrackBegin('ans2bmf_rlsle')
 

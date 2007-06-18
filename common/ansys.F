@@ -587,9 +587,10 @@ c     output arguments:  none.
       INTERFACE
          FUNCTION etyget (itype,ielx)
          IMPLICIT NONE
+#include "echprm.inc"
          INTEGER :: etyget
          INTEGER, INTENT(IN) :: itype
-         INTEGER, INTENT(OUT), DIMENSION(150) :: ielx
+         INTEGER, INTENT(OUT), DIMENSION(IELCSZ) :: ielx
          END FUNCTION etyget
       END INTERFACE
 
@@ -636,13 +637,23 @@ c     output arguments:  none.
 !        mpinqr   (int,func,out)    - returned value of mpinqr is based on
 !                                      setting of key.
       INTERFACE
-         FUNCTION mpinqr (mat, iprop, key)
+         FUNCTION mpinqr(mat, iprop, key)
+         IMPLICIT NONE
          INTEGER :: mpinqr
          INTEGER, INTENT(IN) :: mat
          INTEGER, INTENT(IN) :: iprop
          INTEGER, INTENT(IN) :: key
          END FUNCTION mpinqr
       END INTERFACE
+
+      INTERFACE
+         FUNCTION mpnext(next)
+         IMPLICIT NONE
+         INTEGER :: mpnext
+         INTEGER, INTENT(IN) :: next
+         END FUNCTION mpnext
+      END INTERFACE
+      
 
 ! 7.5.10. mpget Function (Getting a Material Property Table)
 ! primary function:    get a material property table.

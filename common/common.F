@@ -1,8 +1,8 @@
 
 c     variables to interface with ANSYS
-      INTEGER nodes(NNMAX), elmdat(EL_DIM), kerr
+      INTEGER kerr
       INTEGER ityp, ielc(IelCSZ)
-      DOUBLE PRECISION rtable(400), mptemp(100), mpval(100), subc(3)
+      DOUBLE PRECISION mptemp(100), mpval(100), subc(3)
 
 
 c     global information about ANSYS model
@@ -46,7 +46,7 @@ c     this block holds the component information
       INTEGER rl_length, rl_num
 
       COMMON / ans2bmf_ans2bmf /
-     x   nodes, elmdat, subc, kerr,
+     x   subc, kerr,
      x     ityp, ielc, n_nodes, n_nloads, n_sfiles, max_loadcases,
      x   jobname, outfile, sfiles, n_elem, n_masses, n_mass_groups,
      x   el_offset, el_length, el_count,
@@ -54,7 +54,7 @@ c     this block holds the component information
      x     l_comp_ansys, l_comp_csub,
      x   bp_length, bp_num_i, bp_num_j,
      x   rl_length, rl_num,
-     x   rtable, mptemp, mpval,
+     x   mptemp, mpval,
      x   l_csub_gid
 
 #include "csubdata.inc"
