@@ -2,7 +2,7 @@
 c     variables to interface with ANSYS
       INTEGER kerr
       INTEGER ityp, ielc(IelCSZ)
-      DOUBLE PRECISION mptemp(100), mpval(100), subc(3)
+      DOUBLE PRECISION subc(3)
 
 
 c     global information about ANSYS model
@@ -54,7 +54,6 @@ c     this block holds the component information
      x     l_comp_ansys, l_comp_csub,
      x   bp_length, bp_num_i, bp_num_j,
      x   rl_length, rl_num,
-     x   mptemp, mpval,
      x   l_csub_gid
 
 #include "csubdata.inc"
