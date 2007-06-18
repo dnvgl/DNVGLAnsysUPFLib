@@ -10,7 +10,7 @@
 
 ! CVSID: $Id$
 
-      MODULE ansys
+      MODULE ansys_par
 
 #include "impcom.inc"
 #include "computer.h"
@@ -18,6 +18,10 @@
 #include "echprm.inc"
 #include "syspar.inc"
 #include "elempr.inc"
+
+      END MODULE ansys_par
+
+      MODULE ansys_fun
 
 !    **************************************************************
 !    Functions for accessing data on the command line
@@ -139,8 +143,8 @@
          SUBROUTINE parevl(ParName, nDim, subc, lvl, dpValue, chValue,
      &     kerr)
 #endif
+         USE ansys_par
          IMPLICIT NONE
-#include "ansysdef.inc"
 #if   ANSVER < 70
          DOUBLE PRECISION :: parevl
 #endif
@@ -485,9 +489,8 @@ c *** Notice - This file contains ANSYS Confidential information ***
 !        nodes    (int,ar(*),out)   - node numbers for element.
       INTERFACE
          FUNCTION elmget(ielem, elmdat, nodes)
+         USE ansys_par
          IMPLICIT NONE
-#include "ansysdef.inc"
-#include "elempr.inc"
          INTEGER :: elmget
          INTEGER, INTENT(IN) :: ielem
          INTEGER, INTENT(OUT), DIMENSION(EL_DIM) :: elmdat
@@ -527,8 +530,8 @@ c *** Notice - This file contains ANSYS Confidential information ***
 c     output arguments:  none.
       INTERFACE
          SUBROUTINE elmput (ielem, elmdat, nnod, nodes)
+         USE ansys_par
          IMPLICIT NONE
-#include "ansysdef.inc"
          INTEGER, INTENT(IN) :: ielem
          INTEGER, INTENT(IN), DIMENSION(EL_DIM) :: elmdat
          INTEGER, INTENT(IN) :: nnod
@@ -586,8 +589,8 @@ c     output arguments:  none.
 !                                     description of data.
       INTERFACE
          FUNCTION etyget (itype,ielx)
+         USE ansys_par
          IMPLICIT NONE
-#include "echprm.inc"
          INTEGER :: etyget
          INTEGER, INTENT(IN) :: itype
          INTEGER, INTENT(OUT), DIMENSION(IELCSZ) :: ielx
@@ -1219,7 +1222,7 @@ c *** primary function:    Display ANSYS error messages
 ! 8.4.9. tran Subroutine (Transposing a matrix)
 ! 8.4.10. symeqn Subroutine (Solving Simultaneous Linear Equations)
 
-      END MODULE ansys
+      END MODULE ansys_fun
 
 ! Local Variables:
 ! compile-command:"make -C .. test"

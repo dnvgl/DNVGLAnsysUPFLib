@@ -1,7 +1,8 @@
 c     get jobname
       SUBROUTINE dat_jobname()
 
-      USE ansys
+      USE ansys_par
+      USE ansys_fun
       USE glans
       USE LOCMOD
 

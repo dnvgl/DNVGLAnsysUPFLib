@@ -12,7 +12,8 @@ C CVSID: $Id$
 
       SUBROUTINE dat_masses()
 
-      USE ansys
+      USE ansys_par
+      USE ansys_fun
       USE LOCMOD
 
       IMPLICIT NONE

@@ -10,7 +10,8 @@ c get beam properties
 
       SUBROUTINE dat_beamproperties(bp_data, rl_data)
 
-      USE ansys
+      USE ansys_par
+      USE ansys_fun
       USE glans
       USE LOCMOD
 
@@ -270,7 +271,8 @@ c###########################################################
 
       SUBROUTINE ans2bmf_rlallsel()
 
-      USE ansys
+      USE ansys_par
+      USE ansys_fun
 
       IMPLICIT NONE
 C     Purpose:
@@ -297,7 +299,8 @@ c-----------------------------------------------------------
 
       SUBROUTINE ans2bmf_rlnosel()
 
-      USE ansys
+      USE ansys_par
+      USE ansys_fun
 
       IMPLICIT NONE
 C     Purpose:
@@ -324,7 +327,8 @@ c-----------------------------------------------------------
 
       SUBROUTINE ans2bmf_rlsle()
 
-      USE ansys
+      USE ansys_par
+      USE ansys_fun
       USE LOCMOD
 
       IMPLICIT NONE

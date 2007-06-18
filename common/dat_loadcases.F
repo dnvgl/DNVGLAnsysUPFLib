@@ -1,6 +1,7 @@
       SUBROUTINE dat_loadcases()
 
-      USE ansys
+      USE ansys_par
+      USE ansys_fun
       USE LOCMOD
 
       IMPLICIT NONE

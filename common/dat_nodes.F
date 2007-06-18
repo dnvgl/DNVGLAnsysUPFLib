@@ -1,7 +1,8 @@
 c     find out and store # of nodes
       SUBROUTINE dat_nodes()
 
-      USE ansys
+      USE ansys_par
+      USE ansys_fun
       USE LOCMOD
 
       IMPLICIT NONE

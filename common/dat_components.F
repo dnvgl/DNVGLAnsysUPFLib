@@ -11,7 +11,8 @@ c     collect components
       SUBROUTINE dat_components(el_data)
 
       USE glans
-      USE ansys
+      USE ansys_par
+      USE ansys_fun
       USE LOCMOD
 
       IMPLICIT NONE
@@ -191,7 +192,8 @@ c###########################################################
       SUBROUTINE ans2bmf_cstore(comp, csub, el_data)
 
       USE glans
-      USE ansys
+      USE ansys_par
+      USE ansys_fun
       USE LOCMOD
 
       IMPLICIT NONE
@@ -304,7 +306,8 @@ c-----------------------------------------------------------
 
       SUBROUTINE ans2bmf_elread(el_data)
 
-      USE ansys
+      USE ansys_par
+      USE ansys_fun
       USE LOCMOD
 
       IMPLICIT NONE

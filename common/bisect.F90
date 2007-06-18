@@ -16,7 +16,7 @@ MODULE bisect
   FUNCTION idToInd(id, array, lena, dima) RESULT(ind)
 
     USE LOCMOD
-    USE ansys
+    USE ansys_fun
 
     IMPLICIT NONE
     !     Purpose:

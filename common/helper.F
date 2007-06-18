@@ -29,7 +29,8 @@ C CVSID: $Id$
 c     reads ANSYS command string 'cmd_str'
 c     puts out double precision parameter 'dout'
 
-      USE ansys
+      USE ansys_par
+      USE ansys_fun
       USE LOCMOD
 
       IMPLICIT NONE
@@ -70,7 +71,8 @@ C ======================================================================
 c     reads ANSYS command string 'cmd_str'
 c     writes a string of length 8 into 'sout'
 
-      USE ansys
+      USE ansys_par
+      USE ansys_fun
       USE LOCMOD
 
       IMPLICIT NONE
@@ -115,7 +117,7 @@ C ======================================================================
       FUNCTION upcase(string) RESULT(upper)
 !     Convert input string to uppercase
 
-      USE ANSYS
+      USE ansys_fun
 
       IMPLICIT NONE
       CHARACTER(LEN=*), INTENT(IN) :: string
@@ -138,7 +140,8 @@ C ======================================================================
 
       SUBROUTINE cmselect(mode, name)
 !     select component
-      USE ansys
+      USE ansys_par
+      USE ansys_fun
       USE LOCMOD
 
       IMPLICIT NONE
@@ -206,7 +209,8 @@ C ======================================================================
 
       SUBROUTINE eseli(Type, Item, Comp, VMIN, VMAX, VINC, KABS)
 
-      USE ansys
+      USE ansys_par
+      USE ansys_fun
       USE LOCMOD
 
       IMPLICIT NONE
@@ -417,7 +421,8 @@ C ======================================================================
 
       SUBROUTINE esels(Type, Item, Comp, VMIN)
 
-      USE ansys
+      USE ansys_par
+      USE ansys_fun
       USE LOCMOD
 
       IMPLICIT NONE
@@ -578,7 +583,8 @@ C ======================================================================
 
       SUBROUTINE nsel(Type, Item, Comp, VMIN, VMAX, VINC, KABS)
 
-      USE ansys
+      USE ansys_par
+      USE ansys_fun
       USE LOCMOD
 
       IMPLICIT NONE
@@ -738,7 +744,8 @@ C ======================================================================
       SUBROUTINE doDebugLoc(func, file, line)
 
       USE ifcore
-      USE ansys
+      USE ansys_par
+      USE ansys_fun
 
       IMPLICIT NONE
 C     Purpose: 
@@ -772,7 +779,8 @@ C ======================================================================
       FUNCTION gets(Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM)
      $     RESULT(value)
 
-      USE ansys
+      USE ansys_par
+      USE ansys_fun
       USE LOCMOD
 
       IMPLICIT NONE
@@ -851,7 +859,8 @@ C ======================================================================
       FUNCTION getsi(Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM)
      $     RESULT(value)
 
-      USE ansys
+      USE ansys_par
+      USE ansys_fun
       USE LOCMOD
 
       IMPLICIT NONE
@@ -893,7 +902,8 @@ C ======================================================================
       FUNCTION getf(Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM)
      $     RESULT(value)
 
-      USE ansys
+      USE ansys_par
+      USE ansys_fun
       USE LOCMOD
 
       IMPLICIT NONE
@@ -968,7 +978,8 @@ C ======================================================================
       FUNCTION getfs(Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM)
      $     RESULT(value)
 
-      USE ansys
+      USE ansys_par
+      USE ansys_fun
       USE LOCMOD
 
       IMPLICIT NONE
@@ -1042,7 +1053,8 @@ C ======================================================================
       FUNCTION getfi(Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM)
      $     RESULT(value)
 
-      USE ansys
+      USE ansys_par
+      USE ansys_fun
       USE LOCMOD
 
       IMPLICIT NONE

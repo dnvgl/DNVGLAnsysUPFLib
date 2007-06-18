@@ -1,7 +1,7 @@
 c     issue warnings and update message count
       SUBROUTINE a2b_message(wcode,n1,n2)
 
-      USE ansys
+      USE ansys_fun
       USE LOCMOD
 
       IMPLICIT NONE
