@@ -1,17 +1,17 @@
-c     issue warnings and update message count
+!     issue warnings and update message count
       SUBROUTINE a2b_message(wcode,n1,n2)
 
       USE ansys_fun
       USE LOCMOD
 
       IMPLICIT NONE
-C     Purpose: 
-C     
-C     Parameter:
-C     in/out Name          Task
-C ----------------------------------------------------------------------
-C     Created: 2007-06-01  hoel
-C ======================================================================
+!     Purpose: 
+!     
+!     Parameter:
+!     in/out Name          Task
+! ----------------------------------------------------------------------
+!     Created: 2007-06-01  hoel
+! ======================================================================
 
       CHARACTER(LEN=4) :: wcode
       INTEGER n1,n2
@@ -64,6 +64,6 @@ C ======================================================================
 
       END
 
-c Local Variables:
-c compile-command:"make -C .. test"
-c End:
+! Local Variables:
+! compile-command:"make -C .. test"
+! End:
