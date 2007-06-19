@@ -162,7 +162,7 @@ c     subselect all different types in the component an_cnum and store on stack
         END IF
 
         IF (el_count.LT.el_length) THEN
-           CALL a2b_message('comp',n,n)
+           CALL message('comp',n,n)
 
 c     check specifically for BEAM4 elements
            CALL cmselect('S', 'XXXCOMP')
