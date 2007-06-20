@@ -51,9 +51,9 @@ CONTAINS
     INTEGER :: iErr
 
     CALL TrackBegin("glans:ans2bmf_get_d")
-    cmd = '*GET,_PAR,'//cmd_str
+    cmd = '*GET,PAR_,'//cmd_str
     iErr = RunCommand(LEN_TRIM(cmd), cmd)
-    para ='_PAR'
+    para ='PAR_'
 
 #if   ANSVER >= 70
     CALL parevl(para, 0, subc, 2, dout, dummy, kerr)
@@ -96,9 +96,9 @@ CONTAINS
 
     CALL TrackBegin("glans:ans2bmf_get_s")
 
-    cmd = '*GET,_PAR,'//cmd_str
+    cmd = '*GET,PAR_,'//cmd_str
     iErr = RunCommand(LEN_TRIM(cmd), cmd)
-    para ='_PAR'
+    para ='PAR_'
 #if ANSVER < 70
     res_double = parevl(para,0,subc,2,kerr)
     sout = res_char8
@@ -820,7 +820,7 @@ CONTAINS
     numwrn = erinqr(ER_NUMWARNING)
     numerr = erinqr(ER_NUMERROR)
 
-    WRITE(cmd,100) '*GET,_PAR', TRIM(Entity)
+    WRITE(cmd,100) '*GET,PAR_', TRIM(Entity)
     WRITE(cmd,101) TRIM(cmd), ENTNUM
     WRITE(cmd,100) TRIM(cmd), TRIM(Item1)
     IF (PRESENT(IT1NUM)) THEN
@@ -838,9 +838,9 @@ CONTAINS
     ELSE
        WRITE(cmd,100) TRIM(cmd), ''
     END IF
-    WRITE(wrinqr(WR_OUTPUT),*) 'cmd: ', TRIM(cmd)
+    !WRITE(wrinqr(WR_OUTPUT),*) 'cmd: ', TRIM(cmd)
     iErr = RunCommand(LEN_TRIM(cmd), TRIM(cmd))
-    para ='_PAR'
+    para ='PAR_'
 
 #if ANSVER >= 70
     CALL parevl(para, 0, subc, 2, dummy, value, kerr)
@@ -966,7 +966,7 @@ CONTAINS
     numwrn = erinqr(ER_NUMWARNING)
     numerr = erinqr(ER_NUMERROR)
 
-    WRITE(cmd,100) '*GET,_PAR', TRIM(Entity)
+    WRITE(cmd,100) '*GET,PAR_', TRIM(Entity)
     WRITE(cmd,101) TRIM(cmd), ENTNUM
     WRITE(cmd,100) TRIM(cmd), TRIM(Item1)
     IF (PRESENT(IT1NUM)) THEN
@@ -984,9 +984,9 @@ CONTAINS
     ELSE
        WRITE(cmd,100) TRIM(cmd), ''
     END IF
-    write(wrinqr(WR_OUTPUT),*) 'cmd: ', trim(cmd)
+    ! write(wrinqr(WR_OUTPUT),*) 'cmd: ', trim(cmd)
     iErr = RunCommand(LEN_TRIM(cmd), TRIM(cmd))
-    para ='_PAR'
+    para ='PAR_'
 
 #if ANSVER >= 70
     CALL parevl(para, 0, subc, 2, value, dummy, kerr)
@@ -1053,7 +1053,7 @@ CONTAINS
     numwrn = erinqr(ER_NUMWARNING)
     numerr = erinqr(ER_NUMERROR)
 
-    WRITE(cmd,100) '*GET,_PAR', TRIM(Entity)
+    WRITE(cmd,100) '*GET,PAR_', TRIM(Entity)
     WRITE(cmd,100) TRIM(cmd), ENTNUM
     WRITE(cmd,100) TRIM(cmd), TRIM(Item1)
     IF (PRESENT(IT1NUM)) THEN
@@ -1071,9 +1071,9 @@ CONTAINS
     ELSE
        WRITE(cmd,100) TRIM(cmd), ''
     END IF
-    WRITE(wrinqr(WR_OUTPUT),*) 'cmd: ', TRIM(cmd)
+    ! WRITE(wrinqr(WR_OUTPUT),*) 'cmd: ', TRIM(cmd)
     iErr = RunCommand(LEN_TRIM(cmd), TRIM(cmd))
-    para ='_PAR'
+    para ='PAR_'
 
 #if ANSVER >= 70
     CALL parevl(para, 0, subc, 2, value, dummy, kerr)
