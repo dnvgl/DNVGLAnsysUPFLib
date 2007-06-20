@@ -27,7 +27,7 @@ C ======================================================================
       INTEGER el_data(*)
 
       INTEGER ansys_comp,an_cnum,n,m,el_b4, msglvl
-      DOUBLE PRECISION res
+      INTEGER :: res
 
       LOGICAL batch
       COMMON /arguments/ batch
@@ -40,12 +40,20 @@ C ======================================================================
 #endif
       CHARACTER(LEN=PARMSIZE) :: para
 
+      LOGICAL :: flag
+
       CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
 
       CALL TrackBegin('dat_components')
 
 c     find number of components: -> ansys_comp
-      ansys_comp = nint(getf(Entity='COMP', ENTNUM=0, Item1='NCOMP   '))
+      flag = get(ansys_comp, Entity='COMP', ENTNUM=0, Item1='NCOMP   ')
+      if (flag) THEN
+         CALL erhandler(fname, __LINE__, ERH_FATAL, 
+     &        trim(libname)// 
+     &        ': Could not determine number of components.', 
+     &        derrinfo, cerrinfo)
+      END IF
 
       derrinfo(1) = ansys_comp
       CALL erhandler(fname, __LINE__, ERH_NOTE,
@@ -93,10 +101,19 @@ c     get name of component: -> comp_name(an_cnum)
      $           comp_name(an_cnum+1))
 
 c     get type of component
-            res = getf('COMP', comp_name(an_cnum+1), 'TYPE    ')
+            flag = get(res, 'COMP', comp_name(an_cnum+1), 'TYPE    ')
+            if (flag) THEN
+               cerrinfo(1) = comp_name(an_cnum+1)
+               CALL erhandler(fname, __LINE__, ERH_FATAL, 
+     &              trim(libname)// 
+     &              ': Could not determine type for component '//
+     &              'named %s.', 
+     &              derrinfo, cerrinfo)
+      END IF
+
 
 c     check if this is a component of elements
-            IF (nint(res).GT.10) THEN
+            IF (res.GT.10) THEN
                cerrinfo(1) = comp_name(an_cnum+1)
                IF (batch) THEN
                   msglvl = ERH_FATAL
@@ -111,7 +128,7 @@ c     check if this is a component of elements
                an_cnum = an_cnum + 1
                GOTO 1000
             ENDIF
-            IF (nint(res).NE.2) THEN
+            IF (res.NE.2) THEN
                cerrinfo(1) = comp_name(an_cnum+1)
                CALL erhandler(fname, __LINE__, ERH_WARNING,
      $              trim(libname)//': Component %s is not of type ELEM',

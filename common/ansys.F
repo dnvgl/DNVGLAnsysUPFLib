@@ -23,9 +23,9 @@
 
       MODULE ansys_fun
 
-!    **************************************************************
-!    Functions for accessing data on the command line
-!    integer function  intinfun(iField) - gets an integer from field iField
+! **************************************************************
+! Functions for accessing data on the command line
+! integer function  intinfun(iField) - gets an integer from field iField
       INTERFACE
          FUNCTION intinfun(iField)
          IMPLICIT NONE
@@ -33,7 +33,7 @@
          INTEGER, INTENT(IN) :: iField
          END FUNCTION intinfun
       END INTERFACE
-!    double precision function dpinfun(iField) - gets double precision
+! double precision function dpinfun(iField) - gets double precision
       INTERFACE
          FUNCTION dpinfun(iField)
          IMPLICIT NONE
@@ -41,7 +41,7 @@
          INTEGER, INTENT(IN) :: iField
          END FUNCTION dpinfun 
       END INTERFACE
-!    character*4 ch4infun(iField) - gets (upper case) 4 characters
+! character*4 ch4infun(iField) - gets (upper case) 4 characters
       INTERFACE
          FUNCTION ch4infun(iField)
          IMPLICIT NONE
@@ -49,7 +49,7 @@
          INTEGER, INTENT(IN) :: iField
          END FUNCTION ch4infun
       END INTERFACE
-!    character*8 ch8infun(iField) - gets (mixed case) 8 characters
+! character*8 ch8infun(iField) - gets (mixed case) 8 characters
       INTERFACE
          FUNCTION ch8infun(iField)
          IMPLICIT NONE
@@ -57,7 +57,7 @@
          INTEGER, INTENT(IN) :: iField
          END FUNCTION ch8infun
       END INTERFACE
-!    character*32  ch32infun(iField) - gets (mixed case) 32 characters
+! character*32  ch32infun(iField) - gets (mixed case) 32 characters
       INTERFACE
          FUNCTION ch32infun(iField)
          IMPLICIT NONE
@@ -1058,7 +1058,102 @@ c     output arguments:
       END INTERFACE
 
 ! 8.2.3. erinqr Subroutine (Obtaining Information from the Errors Common)
-
+! *** primary function:    obtain information from errors common
+!
+! *** Notice - This file contains ANSYS Confidential information ***
+!
+!  input arguments:
+!     key      (int,sc,in)       - item to be returned
+!                                  1=keyerr, 2=errfil,    3=numnot, 4=numwrn,
+!                                  5=numerr, 6=numfat,    7=maxmsg, 8=lvlerr,
+!                                  9=mxpcmd, 10=nercmd,  11=nertim,12=nomore,
+!                                  13=eropen,14=ikserr,  15=kystat,16=mxr4r5,
+!                                  17=mshkey,            19=opterr,20=flowrn,
+!                                  21=errhpi,22=noreport,23=pdserr,24=mxpcmdw
+!                                  25=kystop,26=icloads, 27=ifkey
+!
+! ---- below definitions copied from errcom 7/92 for user information
+!
+!                            *** key number= ..........................
+!                    (see ansysdef for parameter definitions)          |
+!                                                                      \/
+!
+!o keyerr - master error flag                                    (ER_ERRORFLAG)
+!o errfil - errors file unit number                              (ER_ERRORFILE)
+!o numnot - total number of notes displayed                      (ER_NUMNOTE)
+!o numwrn - total number of warnings displayed                   (ER_NUMWARNING)
+!o numerr - total number of errors displayed                     (ER_NUMERROR)
+!o numfat - total number of fatals displayed                     (ER_NUMFATAL)
+!o maxmsg - max allowed number of displayed messages before abort(ER_MAXMESSAGE)
+!o lvlerr - used basicly in solution (from cnvr command.)        (ER_ERRORLEVEL)
+!o           -1=do not set keyerr for notes/errors/warnings.
+!o           -2=same as -1 but do not display message either.
+!o mxpcmd - maximum number of messages allowed per command       (ER_MAXCOMMAND)
+!o nercmd - number of messages displayed for any one command     (ER_NUMCOMMAND)
+!o nertim - key as to how message cleared from u/i pop-up        (ER_UICLEAR)
+!o          (as per rsg/pft 5/1/92 - only for "info" calls
+!o           -1=message is timed before removal
+!o            0=message needs pick or keyboard before removal
+!o            1=message stays up untill replaced by another message
+!o nomore   display any more messages                            (ER_NOMOREMSG)
+!o           0=display messages
+!o           1=display discontinue message and stop displaying
+!o eropen - 0=errors file is closed                              (ER_FILEOPEN)
+!o          1=errors file is opened
+!o ikserr - 0=if interactive do not set keyerr                   (ER_INTERERROR)
+!         - 1=if interactive set keyerr (used by mesher and tessalation)
+!o kystat - flag to bypass keyopt tests in the elcxx routines    (ER_KEYOPTTEST)
+!           associated with status/panel info  inquiries.
+!            0=do not bypass keyopt tests
+!            1=perform all keyopt tests
+!           also flag to bypass setting of _STATUS upon resume
+!o mxr4r5 - mixed rev4-rev5 input logic (*do,*if,*go,*if-go)     (ER_MIXEDREV)
+!            (used in chkmix called from rdmac)
+!            1=rev5 found (*do,*fi-then-*endif)
+!            2=rev4 found (*go,:xxx,*if,....,:xxx)
+!            3=warning printed. do not issue any more.
+!o mshkey - cpu intensive meshing etc. this will cause           (ER_MESHING)
+!           "nertim (11)" to be set to -1 for "notes", 1 for "warnings",
+!           and 0 for "errors". checking of this key is done in "anserr".
+!            0=not meshing or cpu intensive
+!            1=yes, meshing or cpu intensive
+!o syerro - systop error code. read by anserr if set.            (18)
+!o opterr - 0=no error in main ansys during opt looping          (ER_OPTLOOPING)
+!           1=an error has happened in main ansys during opt looping
+!o flowrn - flag used by "floqa" as to list floqa.ans            (20)
+!           0=list "floqa.ans"
+!           1="floqa.ans" has been listed. do not list again.
+!o noreport- used in GUI for turning off errors due to strsub calls (22)
+!           0=process errors as usual
+!           1=do NOT report errors
+!o pdserr - 0=no error in main ansys during pds looping          (ER_PDSLOOPING)
+!           1=an error has happened in main ansys during pds looping
+!o mxpcmdw- number of messages written to file.err for any one   (24)
+!o          command
+!           0=write all errors to file.err
+!           1=only write displayed errors to file.err
+!o icloads - key to forbid the iclist command from listing solution    (26)
+!            data instead of the input data.
+!           0=iclist is OK
+!           1=do not permit iclist
+!o ifkey   - key on whether or not to abort during /input on error     (27)
+!           0=do not abort
+!           1=abort
+!
+!o espare - spare integer variables
+!
+!  --- end of information from errcom
+!
+!  output arguments:
+!     erinqr   (int,sc,out)      - value corresponding to key
+      INTERFACE
+         FUNCTION erinqr(key)
+         IMPLICIT NONE
+         INTEGER :: erinqr
+         INTEGER, INTENT(IN) :: key
+         END FUNCTION erinqr
+      END INTERFACE
+      
 ! 8.2.4. TrackBegin Subroutine (Beginning Tracking for a Subroutine Call)
 ! function: mark beginning of track ansys call
 !  input arguments:

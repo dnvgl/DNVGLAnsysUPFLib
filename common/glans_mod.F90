@@ -11,12 +11,8 @@
 
 MODULE glans
 
-  INTERFACE getf
-     MODULE PROCEDURE getf, getfs, getfi
-  END INTERFACE
-
-  INTERFACE gets
-     MODULE PROCEDURE gets, getsi
+  INTERFACE get
+     MODULE PROCEDURE getf, getfs, getfi, geti, getis, getii, gets, getsi
   END INTERFACE
 
   INTERFACE esel
@@ -55,9 +51,9 @@ CONTAINS
     INTEGER :: iErr
 
     CALL TrackBegin("glans:ans2bmf_get_d")
-    cmd = '*GET,PARA,'//cmd_str
+    cmd = '*GET,_PAR,'//cmd_str
     iErr = RunCommand(LEN_TRIM(cmd), cmd)
-    para ='PARA'
+    para ='_PAR'
 
 #if   ANSVER >= 70
     CALL parevl(para, 0, subc, 2, dout, dummy, kerr)
@@ -100,9 +96,9 @@ CONTAINS
 
     CALL TrackBegin("glans:ans2bmf_get_s")
 
-    cmd = '*GET,PARA,'//cmd_str
+    cmd = '*GET,_PAR,'//cmd_str
     iErr = RunCommand(LEN_TRIM(cmd), cmd)
-    para ='PARA'
+    para ='_PAR'
 #if ANSVER < 70
     res_double = parevl(para,0,subc,2,kerr)
     sout = res_char8
@@ -358,7 +354,7 @@ CONTAINS
              CALL erhandler(fname, __LINE__, ERH_FATAL, &
                   & TRIM(libname) &
                   & //': item '//uitem//' not yet supported.', &
-                  & derrinfo, cerrinfo) 
+                  & derrinfo, cerrinfo)
           ELSE IF (uitem.EQ.'PATH') THEN
              CALL erhandler(fname, __LINE__, ERH_FATAL, &
                   & TRIM(libname) &
@@ -773,8 +769,8 @@ CONTAINS
 
   END SUBROUTINE doDebugLoc
 
-  FUNCTION gets(Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
-       & RESULT(value)
+  FUNCTION gets(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
+       & RESULT(flag)
 
     USE ansys_par
     USE ansys_fun
@@ -794,7 +790,8 @@ CONTAINS
     ! ----------------------------------------------------------------------
     ! Created: 2007-05-29  hoel
     ! ======================================================================
-    CHARACTER(LEN=STRING_MAX_LENG) :: value
+    LOGICAL :: flag
+    CHARACTER(LEN=STRING_MAX_LENG), INTENT(OUT) :: value
     CHARACTER(LEN=4), INTENT(IN) :: Entity
     INTEGER, INTENT(IN) :: ENTNUM
     CHARACTER(LEN=8), INTENT(IN) :: Item1
@@ -815,9 +812,15 @@ CONTAINS
 
     INTEGER :: iErr
 
+    INTEGER :: numwrn
+    INTEGER :: numerr
+
     CALL TrackBegin('glans:gets')
 
-    WRITE(cmd,100) '*GET,PARA', TRIM(Entity)
+    numwrn = erinqr(ER_NUMWARNING)
+    numerr = erinqr(ER_NUMERROR)
+
+    WRITE(cmd,100) '*GET,_PAR', TRIM(Entity)
     WRITE(cmd,101) TRIM(cmd), ENTNUM
     WRITE(cmd,100) TRIM(cmd), TRIM(Item1)
     IF (PRESENT(IT1NUM)) THEN
@@ -837,7 +840,7 @@ CONTAINS
     END IF
     WRITE(wrinqr(WR_OUTPUT),*) 'cmd: ', TRIM(cmd)
     iErr = RunCommand(LEN_TRIM(cmd), TRIM(cmd))
-    para ='PARA'
+    para ='_PAR'
 
 #if ANSVER >= 70
     CALL parevl(para, 0, subc, 2, dummy, value, kerr)
@@ -845,6 +848,11 @@ CONTAINS
     res_double = parevl(para, 0, subc, 2, kerr)
     value = TRIM(res_char8)
 #endif
+    print *, 'value: !', trim(value), '!'
+
+    numwrn = erinqr(ER_NUMWARNING) - numwrn
+    numerr = erinqr(ER_NUMERROR) - numerr
+    flag = (numwrn + numerr).NE.0
 
 100 FORMAT(A,',',A)
 101 FORMAT(A,',',I)
@@ -853,8 +861,8 @@ CONTAINS
 
   END FUNCTION gets
 
-  FUNCTION getsi(Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
-    & RESULT(value)
+  FUNCTION getsi(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
+       & RESULT(flag)
 
     USE ansys_par
     USE ansys_fun
@@ -874,6 +882,7 @@ CONTAINS
     ! ----------------------------------------------------------------------
     ! Created: 2007-05-29  hoel
     ! ======================================================================
+    LOGICAL :: flag
     CHARACTER(LEN=STRING_MAX_LENG) :: value
     CHARACTER(LEN=4), INTENT(IN) :: Entity
     INTEGER, INTENT(IN) :: ENTNUM
@@ -884,7 +893,13 @@ CONTAINS
 
     CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
 
+    INTEGER :: numwrn
+    INTEGER :: numerr
+
     CALL TrackBegin('glans:getsi')
+
+    numwrn = erinqr(ER_NUMWARNING)
+    numerr = erinqr(ER_NUMERROR)
 
     CALL erhandler(fname, __LINE__, ERH_FATAL, &
          & TRIM(libname)//': glans:getsi not implemented', &
@@ -892,12 +907,18 @@ CONTAINS
 
     value = 'empty'
 
+    numwrn = erinqr(ER_NUMWARNING) - numwrn
+    numerr = erinqr(ER_NUMERROR) - numerr
+    flag = (numwrn + numerr).NE.0
+
+    flag = .FALSE.
+
     CALL TrackEnd('glans:getsi')
 
   END FUNCTION getsi
 
-  FUNCTION getf(Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
-       & RESULT(value)
+  FUNCTION getf(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
+       & RESULT(flag)
 
     USE ansys_par
     USE ansys_fun
@@ -917,6 +938,7 @@ CONTAINS
     ! ----------------------------------------------------------------------
     ! Created: 2007-05-29  hoel
     ! ======================================================================
+    LOGICAL :: flag
     DOUBLE PRECISION :: value
     CHARACTER(LEN=4), INTENT(IN) :: Entity
     INTEGER, INTENT(IN) :: ENTNUM
@@ -935,9 +957,16 @@ CONTAINS
 
     INTEGER :: iErr
 
+    INTEGER :: numwrn
+    INTEGER :: numerr
+
+
     CALL TrackBegin('glans:getf')
 
-    WRITE(cmd,100) '*GET,PARA', TRIM(Entity)
+    numwrn = erinqr(ER_NUMWARNING)
+    numerr = erinqr(ER_NUMERROR)
+
+    WRITE(cmd,100) '*GET,_PAR', TRIM(Entity)
     WRITE(cmd,101) TRIM(cmd), ENTNUM
     WRITE(cmd,100) TRIM(cmd), TRIM(Item1)
     IF (PRESENT(IT1NUM)) THEN
@@ -957,13 +986,17 @@ CONTAINS
     END IF
     write(wrinqr(WR_OUTPUT),*) 'cmd: ', trim(cmd)
     iErr = RunCommand(LEN_TRIM(cmd), TRIM(cmd))
-    para ='PARA'
+    para ='_PAR'
 
 #if ANSVER >= 70
     CALL parevl(para, 0, subc, 2, value, dummy, kerr)
 #else
     value = parevl(para,0,subc,2,kerr)
 #endif
+
+    numwrn = erinqr(ER_NUMWARNING) - numwrn
+    numerr = erinqr(ER_NUMERROR) - numerr
+    flag = (numwrn + numerr).NE.0
 
 100 FORMAT(A,',',A)
 101 FORMAT(A,',',I)
@@ -972,8 +1005,8 @@ CONTAINS
 
   END FUNCTION getf
 
-  FUNCTION getfs(Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
-    & RESULT(value)
+  FUNCTION getfs(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
+       & RESULT(flag)
 
     USE ansys_par
     USE ansys_fun
@@ -993,6 +1026,7 @@ CONTAINS
     ! ----------------------------------------------------------------------
     ! Created: 2007-05-29  hoel
     ! ======================================================================
+    LOGICAL :: flag
     DOUBLE PRECISION :: value
     CHARACTER(LEN=4), INTENT(IN) :: Entity
     CHARACTER(LEN=8), INTENT(IN) :: ENTNUM
@@ -1009,11 +1043,17 @@ CONTAINS
 #endif
     CHARACTER(LEN=PARMSIZE) :: para
 
+    INTEGER :: numwrn
+    INTEGER :: numerr
+
     INTEGER :: iErr
 
     CALL TrackBegin('glans:getfs')
 
-    WRITE(cmd,100) '*GET,PARA', TRIM(Entity)
+    numwrn = erinqr(ER_NUMWARNING)
+    numerr = erinqr(ER_NUMERROR)
+
+    WRITE(cmd,100) '*GET,_PAR', TRIM(Entity)
     WRITE(cmd,100) TRIM(cmd), ENTNUM
     WRITE(cmd,100) TRIM(cmd), TRIM(Item1)
     IF (PRESENT(IT1NUM)) THEN
@@ -1033,7 +1073,7 @@ CONTAINS
     END IF
     WRITE(wrinqr(WR_OUTPUT),*) 'cmd: ', TRIM(cmd)
     iErr = RunCommand(LEN_TRIM(cmd), TRIM(cmd))
-    para ='PARA'
+    para ='_PAR'
 
 #if ANSVER >= 70
     CALL parevl(para, 0, subc, 2, value, dummy, kerr)
@@ -1041,14 +1081,18 @@ CONTAINS
     value = parevl(para,0,subc,2,kerr)
 #endif
 
+    numwrn = erinqr(ER_NUMWARNING) - numwrn
+    numerr = erinqr(ER_NUMERROR) - numerr
+    flag = (numwrn + numerr).NE.0
+
 100 FORMAT(A,',',A)
 
     CALL TrackEnd('glans:getfs')
 
   END FUNCTION getfs
 
-  FUNCTION getfi(Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
-       & RESULT(value)
+  FUNCTION getfi(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
+       & RESULT(flag)
 
     USE ansys_par
     USE ansys_fun
@@ -1068,6 +1112,7 @@ CONTAINS
     ! ----------------------------------------------------------------------
     ! Created: 2007-05-29  hoel
     ! ======================================================================
+    LOGICAL :: flag
     DOUBLE PRECISION :: value
     CHARACTER(LEN=4), INTENT(IN) :: Entity
     INTEGER, INTENT(IN) :: ENTNUM
@@ -1078,7 +1123,13 @@ CONTAINS
 
     CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
 
+    INTEGER :: numwrn
+    INTEGER :: numerr
+
     CALL TrackBegin('glans:getfi')
+
+    numwrn = erinqr(ER_NUMWARNING)
+    numerr = erinqr(ER_NUMERROR)
 
     CALL erhandler(fname, __LINE__, ERH_FATAL, &
          & TRIM(libname)//': glans:getfi not implemented', &
@@ -1086,10 +1137,139 @@ CONTAINS
 
     value = 0d0
 
+    numwrn = erinqr(ER_NUMWARNING) - numwrn
+    numerr = erinqr(ER_NUMERROR) - numerr
+    flag = (numwrn + numerr).NE.0
+
+    flag = .FALSE.
+
     CALL TrackEnd('glans:getfi')
 
   END FUNCTION getfi
 
+  FUNCTION geti(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
+       & RESULT(flag)
+
+    USE ansys_par
+    USE ansys_fun
+    USE LOCMOD
+
+    IMPLICIT NONE
+    ! Purpose:
+    !
+    ! Parameter:
+    ! in/out Name          Task
+    !        Entity
+    !        ENTNUM
+    !        Item1
+    !        IT1NUM
+    !        Item2
+    !        IT2NUM
+    ! ----------------------------------------------------------------------
+    ! Created: 2007-05-29  hoel
+    ! ======================================================================
+    LOGICAL :: flag
+    INTEGER, INTENT(OUT) :: value
+    CHARACTER(LEN=4), INTENT(IN) :: Entity
+    INTEGER, INTENT(IN) :: ENTNUM
+    CHARACTER(LEN=8), INTENT(IN) :: Item1
+    CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: IT1NUM
+    CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
+    CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: IT2NUM
+
+    DOUBLE PRECISION :: fvalue
+
+    CALL TrackBegin('glans:geti')
+
+    flag = getf(fvalue, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM)
+    value = INT(fvalue)
+
+    CALL TrackEnd('glans:geti')
+
+  END FUNCTION geti
+
+  FUNCTION getis(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
+       & RESULT(flag)
+
+    USE ansys_par
+    USE ansys_fun
+    USE LOCMOD
+
+    IMPLICIT NONE
+    ! Purpose:
+    !
+    ! Parameter:
+    ! in/out Name          Task
+    !        Entity
+    !        ENTNUM
+    !        Item1
+    !        IT1NUM
+    !        Item2
+    !        IT2NUM
+    ! ----------------------------------------------------------------------
+    ! Created: 2007-05-29  hoel
+    ! ======================================================================
+    LOGICAL :: flag
+    INTEGER, INTENT(OUT) :: value
+    CHARACTER(LEN=4), INTENT(IN) :: Entity
+    CHARACTER(LEN=8), INTENT(IN) :: ENTNUM
+    CHARACTER(LEN=8), INTENT(IN) :: Item1
+    CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: IT1NUM
+    CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
+    CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: IT2NUM
+
+    DOUBLE PRECISION :: fvalue
+
+    CALL TrackBegin('glans:getis')
+
+    flag = getfs(fvalue, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM)
+    value = INT(fvalue)
+
+    CALL TrackEnd('glans:getis')
+
+  END FUNCTION getis
+  
+  FUNCTION getii(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
+       & RESULT(flag)
+
+    USE ansys_par
+    USE ansys_fun
+    USE LOCMOD
+
+    IMPLICIT NONE
+    ! Purpose:
+    !
+    ! Parameter:
+    ! in/out Name          Task
+    !        Entity
+    !        ENTNUM
+    !        Item1
+    !        IT1NUM
+    !        Item2
+    !        IT2NUM
+    ! ----------------------------------------------------------------------
+    ! Created: 2007-05-29  hoel
+    ! ======================================================================
+    LOGICAL :: flag
+    INTEGER, INTENT(OUT) :: value
+    CHARACTER(LEN=4), INTENT(IN) :: Entity
+    INTEGER, INTENT(IN) :: ENTNUM
+    CHARACTER(LEN=8), INTENT(IN) :: Item1
+    INTEGER, INTENT(IN) :: IT1NUM
+    CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
+    INTEGER, INTENT(IN), OPTIONAL :: IT2NUM
+
+    DOUBLE PRECISION :: fvalue
+
+    CALL TrackBegin('glans:getii')
+
+    flag = getfi(fvalue, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM)
+    value = INT(fvalue)
+
+    CALL TrackEnd('glans:getii')
+
+  END FUNCTION getii
+  
   ! issue warnings and update message count
   SUBROUTINE message(wcode,n1,n2)
 
