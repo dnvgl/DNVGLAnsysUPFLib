@@ -351,7 +351,7 @@ C ======================================================================
       el = elnext(0)
       DO WHILE (el.GT.0)
          i = elmget(el, elmdat, nodes)
-         CALL rlsel(elmdat(3),1)
+         CALL rlsel(elmdat(EL_REAL),1)
          el = elnext(el)
       END DO
 

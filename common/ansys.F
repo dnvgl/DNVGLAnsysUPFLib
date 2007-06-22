@@ -19,6 +19,8 @@
 #include "syspar.inc"
 #include "elempr.inc"
 
+      INTEGER, PARAMETER :: RL_DIM  = 40
+
       END MODULE ansys_par
 
       MODULE ansys_fun
@@ -39,7 +41,7 @@
          IMPLICIT NONE
          DOUBLE PRECISION :: dpinfun
          INTEGER, INTENT(IN) :: iField
-         END FUNCTION dpinfun 
+         END FUNCTION dpinfun
       END INTERFACE
 ! character*4 ch4infun(iField) - gets (upper case) 4 characters
       INTERFACE
@@ -61,7 +63,7 @@
       INTERFACE
          FUNCTION ch32infun(iField)
          IMPLICIT NONE
-         CHARACTER(LEN=32) :: ch32infun 
+         CHARACTER(LEN=32) :: ch32infun
          INTEGER, INTENT(IN) :: iField
          END FUNCTION ch32infun
       END INTERFACE
@@ -132,7 +134,7 @@
 !  output arguments:
 !     dpValue (dp,sc,out)           - the value of the parameter (may be a
 !                                    packed character*8
-!     chValue (ch*STRING_MAX_LENG,sc,out)       - character output 
+!     chValue (ch*STRING_MAX_LENG,sc,out)       - character output
 !     kerr    (int,sc,out)          - error flag  (0,ok  -1,output is packed
 !                                     0=ok,  1=error,  2=error but TINY is used
 !                                      -2, output is string in chValue
@@ -159,7 +161,7 @@
          CHARACTER(LEN=STRING_MAX_LENG), INTENT(OUT) :: chValue
          INTEGER, INTENT(OUT) :: kerr
          END SUBROUTINE parevl
-#endif 
+#endif
       END INTERFACE
 
 ! 6.12.3. Subroutine pardef (Adding a Parameter)
@@ -656,7 +658,7 @@ c     output arguments:  none.
          INTEGER, INTENT(IN) :: next
          END FUNCTION mpnext
       END INTERFACE
-      
+
 
 ! 7.5.10. mpget Function (Getting a Material Property Table)
 ! primary function:    get a material property table.
@@ -735,10 +737,11 @@ c     output arguments:  none.
 !        rtable   (dp,ar(*),out)    - real constant data obtained
       INTERFACE
          FUNCTION rlget (nreal,rtable)
+         USE ansys_par
          IMPLICIT NONE
          INTEGER :: rlget
          INTEGER, INTENT(IN) :: nreal
-         DOUBLE PRECISION, INTENT(OUT), DIMENSION(*) :: rtable
+         DOUBLE PRECISION, INTENT(OUT), DIMENSION(RL_DIM) :: rtable
          END FUNCTION rlget
       END INTERFACE
 
@@ -1153,7 +1156,7 @@ c     output arguments:
          INTEGER, INTENT(IN) :: key
          END FUNCTION erinqr
       END INTERFACE
-      
+
 ! 8.2.4. TrackBegin Subroutine (Beginning Tracking for a Subroutine Call)
 ! function: mark beginning of track ansys call
 !  input arguments:
