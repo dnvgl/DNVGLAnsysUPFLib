@@ -848,7 +848,6 @@ CONTAINS
     res_double = parevl(para, 0, subc, 2, kerr)
     value = TRIM(res_char8)
 #endif
-    print *, 'value: !', trim(value), '!'
 
     numwrn = erinqr(ER_NUMWARNING) - numwrn
     numerr = erinqr(ER_NUMERROR) - numerr
