@@ -1,6 +1,5 @@
 
 c     variables to interface with ANSYS
-      INTEGER kerr
       INTEGER ityp, ielc(IelCSZ)
       DOUBLE PRECISION subc(3)
 
@@ -46,7 +45,7 @@ c     this block holds the component information
       INTEGER rl_length, rl_num
 
       COMMON / ans2bmf_ans2bmf /
-     x   subc, kerr,
+     x   subc,
      x     ityp, ielc, n_nodes, n_nloads, n_sfiles, max_loadcases,
      x   jobname, outfile, sfiles, n_elem, n_masses, n_mass_groups,
      x   el_offset, el_length, el_count,

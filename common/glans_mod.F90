@@ -56,9 +56,9 @@ CONTAINS
     para ='PAR_'
 
 #if   ANSVER >= 70
-    CALL parevl(para, 0, subc, 2, dout, dummy, kerr)
+    CALL parevl(para, 0, subc, 2, dout, dummy, iErr)
 #else
-    dout = parevl(para,0,subc,2,kerr)
+    dout = parevl(para, 0, subc, 2, iErr)
 #endif
     CALL TrackEnd("glans:ans2bmf_get_d")
   END SUBROUTINE ans2bmf_get_d
@@ -100,10 +100,10 @@ CONTAINS
     iErr = RunCommand(LEN_TRIM(cmd), cmd)
     para ='PAR_'
 #if ANSVER < 70
-    res_double = parevl(para,0,subc,2,kerr)
+    res_double = parevl(para, 0, subc, 2, iErr)
     sout = res_char8
 #else
-    CALL parevl(para, 0, subc, 2, res_double, dummy, kerr)
+    CALL parevl(para, 0, subc, 2, res_double, dummy, iErr)
     sout = TRIM(dummy)
 #endif
 
@@ -843,9 +843,9 @@ CONTAINS
     para ='PAR_'
 
 #if ANSVER >= 70
-    CALL parevl(para, 0, subc, 2, dummy, value, kerr)
+    CALL parevl(para, 0, subc, 2, dummy, value, iErr)
 #else
-    res_double = parevl(para, 0, subc, 2, kerr)
+    res_double = parevl(para, 0, subc, 2, iErr)
     value = TRIM(res_char8)
 #endif
 
@@ -988,9 +988,9 @@ CONTAINS
     para ='PAR_'
 
 #if ANSVER >= 70
-    CALL parevl(para, 0, subc, 2, value, dummy, kerr)
+    CALL parevl(para, 0, subc, 2, value, dummy, iErr)
 #else
-    value = parevl(para,0,subc,2,kerr)
+    value = parevl(para, 0, subc, 2, iErr)
 #endif
 
     numwrn = erinqr(ER_NUMWARNING) - numwrn
@@ -1075,9 +1075,9 @@ CONTAINS
     para ='PAR_'
 
 #if ANSVER >= 70
-    CALL parevl(para, 0, subc, 2, value, dummy, kerr)
+    CALL parevl(para, 0, subc, 2, value, dummy, iErr)
 #else
-    value = parevl(para,0,subc,2,kerr)
+    value = parevl(para, 0, subc, 2, iErr)
 #endif
 
     numwrn = erinqr(ER_NUMWARNING) - numwrn
@@ -1227,7 +1227,7 @@ CONTAINS
     CALL TrackEnd('glans:getis')
 
   END FUNCTION getis
-  
+
   FUNCTION getii(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
 
@@ -1268,7 +1268,7 @@ CONTAINS
     CALL TrackEnd('glans:getii')
 
   END FUNCTION getii
-  
+
   ! issue warnings and update message count
   SUBROUTINE message(wcode,n1,n2)
 

@@ -350,8 +350,8 @@
          IMPLICIT NONE
          INTEGER, INTENT(IN) :: node
          DOUBLE PRECISION, INTENT(OUT), DIMENSION(6) :: v
-         INTEGER, INTENT(IN) :: kerr
-         INTEGER, INTENT(INOUT) :: kcrot
+         INTEGER, INTENT(INOUT) :: kerr
+         INTEGER, INTENT(IN) :: kcrot
          END SUBROUTINE getnod
       END INTERFACE
 
