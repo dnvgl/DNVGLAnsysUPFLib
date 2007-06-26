@@ -9,6 +9,14 @@
 
 ! CVSID: $Id$
 
+#ifndef DEBUG_LOC
+#ifdef DEBUG
+#define DEBUG_LOC(func) call doDebugLoc(func,__FILE__,__LINE__)
+#else
+#define DEBUG_LOC
+#endif !DEBUG_LOC
+#endif
+
 MODULE glans
 
   INTERFACE get
@@ -762,7 +770,7 @@ CONTAINS
 
     stderr = wrinqr(WR_OUTPUT)
     WRITE(stderr,100) file, line, func
-100 FORMAT (X,A,':',I3,':',A)
+100 FORMAT (X,A,':',I4,':',A)
     res = COMMITQQ(stderr)
 
     CALL TrackEnd('glans:doDebugLoc')
@@ -820,6 +828,8 @@ CONTAINS
     numwrn = erinqr(ER_NUMWARNING)
     numerr = erinqr(ER_NUMERROR)
 
+    value = ''
+
     WRITE(cmd,100) '*GET,PAR_', TRIM(Entity)
     WRITE(cmd,101) TRIM(cmd), ENTNUM
     WRITE(cmd,100) TRIM(cmd), TRIM(Item1)
@@ -840,8 +850,15 @@ CONTAINS
     END IF
     !WRITE(wrinqr(WR_OUTPUT),*) 'cmd: ', TRIM(cmd)
     iErr = RunCommand(LEN_TRIM(cmd), TRIM(cmd))
-    para ='PAR_'
 
+    flag = ((erinqr(ER_NUMWARNING) - numwrn) + (erinqr(ER_NUMERROR) - numerr)).NE.0
+
+    IF (flag) THEN
+       CALL TrackEnd('glans:gets')
+       RETURN
+    END IF
+
+    para ='PAR_'
 #if ANSVER >= 70
     CALL parevl(para, 0, subc, 2, dummy, value, iErr)
 #else
@@ -910,7 +927,7 @@ CONTAINS
     numerr = erinqr(ER_NUMERROR) - numerr
     flag = (numwrn + numerr).NE.0
 
-    flag = .FALSE.
+    flag = .TRUE.
 
     CALL TrackEnd('glans:getsi')
 
@@ -938,7 +955,7 @@ CONTAINS
     ! Created: 2007-05-29  hoel
     ! ======================================================================
     LOGICAL :: flag
-    DOUBLE PRECISION :: value
+    DOUBLE PRECISION, INTENT(OUT) :: value
     CHARACTER(LEN=4), INTENT(IN) :: Entity
     INTEGER, INTENT(IN) :: ENTNUM
     CHARACTER(LEN=8), INTENT(IN) :: Item1
@@ -959,8 +976,9 @@ CONTAINS
     INTEGER :: numwrn
     INTEGER :: numerr
 
-
     CALL TrackBegin('glans:getf')
+
+    value = 0d0
 
     numwrn = erinqr(ER_NUMWARNING)
     numerr = erinqr(ER_NUMERROR)
@@ -985,8 +1003,15 @@ CONTAINS
     END IF
     ! write(wrinqr(WR_OUTPUT),*) 'cmd: ', trim(cmd)
     iErr = RunCommand(LEN_TRIM(cmd), TRIM(cmd))
-    para ='PAR_'
 
+    flag = ((erinqr(ER_NUMWARNING) - numwrn) + (erinqr(ER_NUMERROR) - numerr)).NE.0
+
+    IF (flag) THEN
+       CALL TrackEnd('glans:getf')
+       RETURN
+    END IF
+
+    para ='PAR_'
 #if ANSVER >= 70
     CALL parevl(para, 0, subc, 2, value, dummy, iErr)
 #else
@@ -1026,7 +1051,7 @@ CONTAINS
     ! Created: 2007-05-29  hoel
     ! ======================================================================
     LOGICAL :: flag
-    DOUBLE PRECISION :: value
+    DOUBLE PRECISION, INTENT(OUT) :: value
     CHARACTER(LEN=4), INTENT(IN) :: Entity
     CHARACTER(LEN=8), INTENT(IN) :: ENTNUM
     CHARACTER(LEN=8), INTENT(IN) :: Item1
@@ -1048,6 +1073,8 @@ CONTAINS
     INTEGER :: iErr
 
     CALL TrackBegin('glans:getfs')
+
+    value = 0d0
 
     numwrn = erinqr(ER_NUMWARNING)
     numerr = erinqr(ER_NUMERROR)
@@ -1072,8 +1099,15 @@ CONTAINS
     END IF
     ! WRITE(wrinqr(WR_OUTPUT),*) 'cmd: ', TRIM(cmd)
     iErr = RunCommand(LEN_TRIM(cmd), TRIM(cmd))
-    para ='PAR_'
 
+    flag = ((erinqr(ER_NUMWARNING) - numwrn) + (erinqr(ER_NUMERROR) - numerr)).NE.0
+
+    IF (flag) THEN
+       CALL TrackEnd('glans:getfs')
+       RETURN
+    END IF
+
+    para ='PAR_'
 #if ANSVER >= 70
     CALL parevl(para, 0, subc, 2, value, dummy, iErr)
 #else
@@ -1140,7 +1174,7 @@ CONTAINS
     numerr = erinqr(ER_NUMERROR) - numerr
     flag = (numwrn + numerr).NE.0
 
-    flag = .FALSE.
+    flag = .TRUE.
 
     CALL TrackEnd('glans:getfi')
 
