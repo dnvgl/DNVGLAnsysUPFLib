@@ -5,8 +5,8 @@
       USE LOCMOD
 
       IMPLICIT NONE
-C     Purpose: 
-C     
+C     Purpose:
+C
 C     Parameter:
 C     in/out Name          Task
 C ----------------------------------------------------------------------
@@ -19,6 +19,10 @@ C ======================================================================
       LOGICAL ex, eof
       INTEGER*2 l
       INTEGER s_file
+
+!     dataspace for feeding erhandler subroutine
+      DOUBLE PRECISION ::  derrinfo(10)
+      CHARACTER(LEN=PARMSIZE) :: cerrinfo(10)
 
       CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
 

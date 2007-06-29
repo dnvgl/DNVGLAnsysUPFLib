@@ -1,7 +1,6 @@
 
 c     variables to interface with ANSYS
       INTEGER ityp, ielc(IelCSZ)
-      DOUBLE PRECISION subc(3)
 
 
 c     global information about ANSYS model
@@ -45,7 +44,6 @@ c     this block holds the component information
       INTEGER rl_length, rl_num
 
       COMMON / ans2bmf_ans2bmf /
-     x   subc,
      x     ityp, ielc, n_nodes, n_nloads, n_sfiles, max_loadcases,
      x   jobname, outfile, sfiles, n_elem, n_masses, n_mass_groups,
      x   el_offset, el_length, el_count,
@@ -56,14 +54,6 @@ c     this block holds the component information
      x   l_csub_gid
 
 #include "csubdata.inc"
-
-c     number of warnings issued
-      COMMON /ans2bmf_msg/ wcount
-      INTEGER wcount
-
-c     dataspace for feeding erhandler subroutine
-      REAL     *        8  derrinfo(10)
-      CHARACTER(LEN=PARMSIZE) :: cerrinfo(10)
 
 c Local Variables:
 c compile-command:"make -C .. test"

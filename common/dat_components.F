@@ -16,8 +16,8 @@ c     collect components
       USE LOCMOD
 
       IMPLICIT NONE
-C     Purpose: 
-C     
+C     Purpose:
+C
 C     Parameter:
 C     in/out Name          Task
 C ----------------------------------------------------------------------
@@ -42,6 +42,10 @@ C ======================================================================
 
       LOGICAL :: flag
 
+!     dataspace for feeding erhandler subroutine
+      DOUBLE PRECISION ::  derrinfo(10)
+      CHARACTER(LEN=PARMSIZE) :: cerrinfo(10)
+
       CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
 
       CALL TrackBegin('dat_components')
@@ -49,9 +53,9 @@ C ======================================================================
 c     find number of components: -> ansys_comp
       flag = get(ansys_comp, Entity='COMP', ENTNUM=0, Item1='NCOMP   ')
       if (flag) THEN
-         CALL erhandler(fname, __LINE__, ERH_FATAL, 
-     &        trim(libname)// 
-     &        ': Could not determine number of components.', 
+         CALL erhandler(fname, __LINE__, ERH_FATAL,
+     &        trim(libname)//
+     &        ': Could not determine number of components.',
      &        derrinfo, cerrinfo)
       END IF
 
@@ -104,10 +108,10 @@ c     get type of component
             flag = get(res, 'COMP', comp_name(an_cnum+1), 'TYPE    ')
             if (flag) THEN
                cerrinfo(1) = comp_name(an_cnum+1)
-               CALL erhandler(fname, __LINE__, ERH_FATAL, 
-     &              trim(libname)// 
+               CALL erhandler(fname, __LINE__, ERH_FATAL,
+     &              trim(libname)//
      &              ': Could not determine type for component '//
-     &              'named %s.', 
+     &              'named %s.',
      &              derrinfo, cerrinfo)
       END IF
 
@@ -214,8 +218,8 @@ c###########################################################
       USE LOCMOD
 
       IMPLICIT NONE
-C     Purpose: 
-C     
+C     Purpose:
+C
 C     Parameter:
 C     in/out Name          Task
 C ----------------------------------------------------------------------
@@ -231,6 +235,10 @@ C ======================================================================
       INTEGER :: iErr
       INTEGER, DIMENSION(EL_DIM) :: elmdat
       INTEGER, DIMENSION(NNMAX) :: nodes
+
+!     dataspace for feeding erhandler subroutine
+      DOUBLE PRECISION ::  derrinfo(10)
+      CHARACTER(LEN=PARMSIZE) :: cerrinfo(10)
 
       CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
 
@@ -328,8 +336,8 @@ c-----------------------------------------------------------
       USE LOCMOD
 
       IMPLICIT NONE
-C     Purpose: 
-C     
+C     Purpose:
+C
 C     Parameter:
 C     in/out Name          Task
 C ----------------------------------------------------------------------
@@ -338,6 +346,10 @@ C ======================================================================
 
       INTEGER el_data(*)
       INTEGER n, nmax, el
+
+!     dataspace for feeding erhandler subroutine
+      DOUBLE PRECISION ::  derrinfo(10)
+      CHARACTER(LEN=PARMSIZE) :: cerrinfo(10)
 
       CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
 

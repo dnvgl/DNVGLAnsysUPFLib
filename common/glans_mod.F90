@@ -27,6 +27,9 @@ MODULE glans
      MODULE PROCEDURE esels, eseli
   END INTERFACE
 
+  ! number of warnings issued
+  INTEGER :: wcount = 0
+
 CONTAINS
 
   SUBROUTINE ans2bmf_get_d(cmd_str, dout)
@@ -35,7 +38,6 @@ CONTAINS
 
     USE ansys_par
     USE ansys_fun
-    USE LOCMOD
 
     IMPLICIT NONE
     ! Purpose:
@@ -46,7 +48,8 @@ CONTAINS
     ! Created: 2007-06-01  hoel
     ! ======================================================================
     CHARACTER(LEN=*) :: cmd_str
-    DOUBLE PRECISION dout
+    DOUBLE PRECISION :: dout
+    DOUBLE PRECISION, DIMENSION(3) :: subc
 
 #if ANSVER >= 70
     CHARACTER(LEN=CMD_MAX_LENG) :: cmd
@@ -77,7 +80,6 @@ CONTAINS
 
     USE ansys_par
     USE ansys_fun
-    USE LOCMOD
 
     IMPLICIT NONE
     ! Purpose:
@@ -90,6 +92,7 @@ CONTAINS
     CHARACTER(LEN=*) :: cmd_str
     CHARACTER(LEN=PARMSIZE) :: sout
     DOUBLE PRECISION res_double
+    DOUBLE PRECISION, DIMENSION(3) :: subc
 #if ANSVER >= 70
     CHARACTER(LEN=CMD_MAX_LENG) :: cmd
     CHARACTER(LEN=STRING_MAX_LENG) :: dummy
@@ -146,7 +149,6 @@ CONTAINS
     ! select component
     USE ansys_par
     USE ansys_fun
-    USE LOCMOD
 
     IMPLICIT NONE
     ! Purpose:
@@ -174,13 +176,17 @@ CONTAINS
     CHARACTER(LEN=LEN(mode)) :: umode
     INTEGER :: iErr
 
-    CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
-
 #if ANSVER >= 70
     CHARACTER(LEN=CMD_MAX_LENG) :: cmd
 #else
     CHARACTER(LEN=SYS_LNG_CMDLN) :: cmd
 #endif
+
+    ! dataspace for feeding erhandler subroutine
+    DOUBLE PRECISION ::  derrinfo(10)
+    CHARACTER(LEN=PARMSIZE) :: cerrinfo(10)
+
+    CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
 
     CALL TrackBegin('glans:cmselect')
 
@@ -193,7 +199,7 @@ CONTAINS
          & (umode.NE.'ALL').AND. &
          & (umode.NE.'NONE')) THEN
        CALL erhandler(fname, __LINE__, ERH_FATAL, &
-            & TRIM(libname)// ': invalid mode: '//TRIM(umode)//'.', &
+            & 'glansys: invalid mode: '//TRIM(umode)//'.', &
             & derrinfo, cerrinfo)
     END IF
 
@@ -215,7 +221,6 @@ CONTAINS
 
     USE ansys_par
     USE ansys_fun
-    USE LOCMOD
 
     IMPLICIT NONE
     ! Purpose: select elements
@@ -286,6 +291,10 @@ CONTAINS
     CHARACTER(LEN=SYS_LNG_CMDLN) :: cmd
 #endif
 
+    ! dataspace for feeding erhandler subroutine
+    DOUBLE PRECISION ::  derrinfo(10)
+    CHARACTER(LEN=PARMSIZE) :: cerrinfo(10)
+
     CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
 
     CALL TrackBegin('glans:eseli')
@@ -300,15 +309,14 @@ CONTAINS
          & (utype.NE.'NONE').AND. &
          & (utype.NE.'INVE')) THEN
        CALL erhandler(fname, __LINE__, ERH_FATAL, &
-            & TRIM(libname)//': invalid type: '//TRIM(utype)//'.', &
+            & 'glansys: invalid type: '//TRIM(utype)//'.', &
             & derrinfo, cerrinfo)
     END IF
 
     IF (PRESENT(Item)) THEN
        IF (LEN(item).GT.128) THEN
           CALL erhandler(fname, __LINE__, ERH_FATAL, &
-               & TRIM(libname)// &
-               & ': length of value item greater then 129.', &
+               & 'glansys: length of value item greater then 129.', &
                & derrinfo, cerrinfo)
        END IF
        uitem = upcase(item)
@@ -330,7 +338,7 @@ CONTAINS
             & (uitem.NE.'BFE').AND. &
             & (uitem.NE.'PATH')) THEN
           CALL erhandler(fname, __LINE__, ERH_FATAL, &
-               & TRIM(libname)//': invalid item: '//TRIM(uitem)//'.', &
+               & 'glansys: invalid item: '//TRIM(uitem)//'.', &
                & derrinfo, cerrinfo)
        END IF
        IF (PRESENT(comp)) THEN
@@ -349,32 +357,27 @@ CONTAINS
                & (uitem.EQ.'PEXC').AND. &
                & (uitem.EQ.'STRA')) THEN
              CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                  & TRIM(libname) &
-                  & //': invalid input: component not allowed '// &
+                  & 'glansys: invalid input: component not allowed '// &
                   & 'with item '//uitem//'.', &
                   & derrinfo, cerrinfo)
           ELSE IF (uitem.EQ.'SFE') THEN
              CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                  & TRIM(libname) &
-                  & //': item '//uitem//' not yet supported.', &
+                  & 'glansys: item '//uitem//' not yet supported.', &
                   & derrinfo, cerrinfo)
           ELSE IF (uitem.EQ.'BFE') THEN
              CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                  & TRIM(libname) &
-                  & //': item '//uitem//' not yet supported.', &
+                  & 'glansys: item '//uitem//' not yet supported.', &
                   & derrinfo, cerrinfo)
           ELSE IF (uitem.EQ.'PATH') THEN
              CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                  & TRIM(libname) &
-                  & //': item '//uitem//' not yet supported.', &
+                  & 'glansys: item '//uitem//' not yet supported.', &
                   & derrinfo, cerrinfo)
           END IF
        END IF
     ELSE
        IF (PRESENT(comp)) THEN
           CALL erhandler(fname, __LINE__, ERH_FATAL, &
-               & TRIM(libname)// &
-               & ': invaid call: comp given, but no item.', &
+               & 'glansys: invaid call: comp given, but no item.', &
                & derrinfo, cerrinfo)
        END IF
     END IF
@@ -426,7 +429,6 @@ CONTAINS
 
     USE ansys_par
     USE ansys_fun
-    USE LOCMOD
 
     IMPLICIT NONE
     ! Purpose: select elements
@@ -481,6 +483,10 @@ CONTAINS
     CHARACTER(LEN=SYS_LNG_CMDLN) :: cmd
 #endif
 
+    ! dataspace for feeding erhandler subroutine
+    DOUBLE PRECISION ::  derrinfo(10)
+    CHARACTER(LEN=PARMSIZE) :: cerrinfo(10)
+
     CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
 
     CALL TrackBegin('glans:esels')
@@ -495,14 +501,13 @@ CONTAINS
          & (utype.NE.'NONE').AND. &
          & (utype.NE.'INVE')) THEN
        CALL erhandler(fname, __LINE__, ERH_FATAL, &
-            & TRIM(libname)//': invalid type: '//TRIM(utype)//'.', &
+            & 'glansys: invalid type: '//TRIM(utype)//'.', &
             & derrinfo, cerrinfo)
     END IF
 
     IF (LEN(item).GT.STRING_MAX_LENG) THEN
        CALL erhandler(fname, __LINE__, ERH_FATAL, &
-            & TRIM(libname)// &
-            & ': length of value item greater then STRING_MAX_LENG.', &
+            & 'glansys: length of value item greater then STRING_MAX_LENG.', &
             & derrinfo, cerrinfo)
     END IF
     uitem = upcase(item)
@@ -524,7 +529,7 @@ CONTAINS
          & (uitem.NE.'BFE').AND. &
          & (uitem.NE.'PATH')) THEN
        CALL erhandler(fname, __LINE__, ERH_FATAL, &
-            & TRIM(libname)//': invalid item: '//TRIM(uitem)//'.', &
+            & 'glansys: invalid item: '//TRIM(uitem)//'.', &
             & derrinfo, cerrinfo)
     END IF
     IF (PRESENT(comp)) THEN
@@ -543,24 +548,20 @@ CONTAINS
             & (uitem.EQ.'PEXC').AND. &
             & (uitem.EQ.'STRA')) THEN
           CALL erhandler(fname, __LINE__, ERH_FATAL, &
-               & TRIM(libname) &
-               & //': invalid input: component not allowed '// &
+               & 'glansys: invalid input: component not allowed '// &
                & 'with item '//uitem//'.', &
                & derrinfo, cerrinfo)
        ELSE IF (uitem.EQ.'SFE') THEN
           CALL erhandler(fname, __LINE__, ERH_FATAL, &
-               & TRIM(libname) &
-               & //': item '//uitem//' not yet supported.', &
+               & 'glansys: item '//uitem//' not yet supported.', &
                & derrinfo, cerrinfo)
        ELSE IF (uitem.EQ.'BFE') THEN
           CALL erhandler(fname, __LINE__, ERH_FATAL, &
-               & TRIM(libname) &
-               & //': item '//uitem//' not yet supported.', &
+               & 'glansys: item '//uitem//' not yet supported.', &
                & derrinfo, cerrinfo)
        ELSE IF (uitem.EQ.'PATH') THEN
           CALL erhandler(fname, __LINE__, ERH_FATAL, &
-               & TRIM(libname) &
-               & //': item '//uitem//' not yet supported.', &
+               & 'glansys: item '//uitem//' not yet supported.', &
                & derrinfo, cerrinfo)
        END IF
     END IF
@@ -588,7 +589,6 @@ CONTAINS
 
     USE ansys_par
     USE ansys_fun
-    USE LOCMOD
 
     IMPLICIT NONE
     ! Purpose: select nodes
@@ -651,6 +651,10 @@ CONTAINS
     CHARACTER(LEN=SYS_LNG_CMDLN) :: cmd
 #endif
 
+    ! dataspace for feeding erhandler subroutine
+    DOUBLE PRECISION ::  derrinfo(10)
+    CHARACTER(LEN=PARMSIZE) :: cerrinfo(10)
+
     CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
 
     CALL TrackBegin('glans:nsel')
@@ -665,15 +669,14 @@ CONTAINS
          & (utype.NE.'NONE').AND. &
          & (utype.NE.'INVE')) THEN
        CALL erhandler(fname, __LINE__, ERH_FATAL, &
-            & TRIM(libname)//': invalid type: '//TRIM(utype)//'.', &
+            & 'glansys: invalid type: '//TRIM(utype)//'.', &
             & derrinfo, cerrinfo)
     END IF
 
     IF (PRESENT(Item)) THEN
        IF (LEN(item).GT.128) THEN
           CALL erhandler(fname, __LINE__, ERH_FATAL, &
-               & TRIM(libname)// &
-               & ': length of value item greater then 129.', &
+               & 'glansys: length of value item greater then 129.', &
                & derrinfo, cerrinfo)
        END IF
        uitem = upcase(item)
@@ -688,13 +691,12 @@ CONTAINS
             & (uitem.NE.'F').AND. &
             & (uitem.NE.'BF')) THEN
           CALL erhandler(fname, __LINE__, ERH_FATAL, &
-               & TRIM(libname)//': invalid item: '//TRIM(uitem)//'.', &
+               & 'glansys: invalid item: '//TRIM(uitem)//'.', &
                & derrinfo, cerrinfo)
        END IF
        IF (PRESENT(comp)) THEN
           CALL erhandler(fname, __LINE__, ERH_FATAL, &
-               & TRIM(libname) &
-               & //': component not yet allowed.', &
+               & 'glansys: component not yet allowed.', &
                & derrinfo, cerrinfo)
        END IF
     END IF
@@ -766,14 +768,14 @@ CONTAINS
     INTEGER :: res
     INTEGER :: stderr
 
-    CALL TrackBegin('glans:doDebugLoc')
+    !CALL TrackBegin('glans:doDebugLoc')
 
     stderr = wrinqr(WR_OUTPUT)
     WRITE(stderr,100) file, line, func
 100 FORMAT (X,A,':',I4,':',A)
     res = COMMITQQ(stderr)
 
-    CALL TrackEnd('glans:doDebugLoc')
+    !CALL TrackEnd('glans:doDebugLoc')
 
   END SUBROUTINE doDebugLoc
 
@@ -782,7 +784,6 @@ CONTAINS
 
     USE ansys_par
     USE ansys_fun
-    USE LOCMOD
 
     IMPLICIT NONE
     ! Purpose:
@@ -817,6 +818,7 @@ CONTAINS
     EQUIVALENCE      (res_double, res_char8)
 #endif
     CHARACTER(LEN=PARMSIZE) :: para
+    DOUBLE PRECISION, DIMENSION(3) :: subc
 
     INTEGER :: iErr
 
@@ -882,7 +884,6 @@ CONTAINS
 
     USE ansys_par
     USE ansys_fun
-    USE LOCMOD
 
     IMPLICIT NONE
     ! Purpose:
@@ -907,10 +908,14 @@ CONTAINS
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
     INTEGER, INTENT(IN), OPTIONAL :: IT2NUM
 
-    CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
-
     INTEGER :: numwrn
     INTEGER :: numerr
+
+    ! dataspace for feeding erhandler subroutine
+    DOUBLE PRECISION ::  derrinfo(10)
+    CHARACTER(LEN=PARMSIZE) :: cerrinfo(10)
+
+    CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
 
     CALL TrackBegin('glans:getsi')
 
@@ -918,7 +923,7 @@ CONTAINS
     numerr = erinqr(ER_NUMERROR)
 
     CALL erhandler(fname, __LINE__, ERH_FATAL, &
-         & TRIM(libname)//': glans:getsi not implemented', &
+         & 'glansys: glans:getsi not implemented', &
          & derrinfo, cerrinfo)
 
     value = 'empty'
@@ -938,7 +943,6 @@ CONTAINS
 
     USE ansys_par
     USE ansys_fun
-    USE LOCMOD
 
     IMPLICIT NONE
     ! Purpose:
@@ -970,6 +974,7 @@ CONTAINS
     CHARACTER(LEN=SYS_LNG_CMDLN) :: cmd
 #endif
     CHARACTER(LEN=PARMSIZE) :: para
+    DOUBLE PRECISION, DIMENSION(3) :: subc
 
     INTEGER :: iErr
 
@@ -1034,7 +1039,6 @@ CONTAINS
 
     USE ansys_par
     USE ansys_fun
-    USE LOCMOD
 
     IMPLICIT NONE
     ! Purpose:
@@ -1066,6 +1070,7 @@ CONTAINS
     CHARACTER(LEN=SYS_LNG_CMDLN) :: cmd
 #endif
     CHARACTER(LEN=PARMSIZE) :: para
+    DOUBLE PRECISION, DIMENSION(3) :: subc
 
     INTEGER :: numwrn
     INTEGER :: numerr
@@ -1129,7 +1134,6 @@ CONTAINS
 
     USE ansys_par
     USE ansys_fun
-    USE LOCMOD
 
     IMPLICIT NONE
     ! Purpose:
@@ -1154,10 +1158,14 @@ CONTAINS
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
     INTEGER, INTENT(IN), OPTIONAL :: IT2NUM
 
-    CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
-
     INTEGER :: numwrn
     INTEGER :: numerr
+
+    ! dataspace for feeding erhandler subroutine
+    DOUBLE PRECISION ::  derrinfo(10)
+    CHARACTER(LEN=PARMSIZE) :: cerrinfo(10)
+
+    CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
 
     CALL TrackBegin('glans:getfi')
 
@@ -1165,7 +1173,7 @@ CONTAINS
     numerr = erinqr(ER_NUMERROR)
 
     CALL erhandler(fname, __LINE__, ERH_FATAL, &
-         & TRIM(libname)//': glans:getfi not implemented', &
+         & 'glansys: glans:getfi not implemented', &
          & derrinfo, cerrinfo)
 
     value = 0d0
@@ -1185,7 +1193,6 @@ CONTAINS
 
     USE ansys_par
     USE ansys_fun
-    USE LOCMOD
 
     IMPLICIT NONE
     ! Purpose:
@@ -1226,7 +1233,6 @@ CONTAINS
 
     USE ansys_par
     USE ansys_fun
-    USE LOCMOD
 
     IMPLICIT NONE
     ! Purpose:
@@ -1267,7 +1273,6 @@ CONTAINS
 
     USE ansys_par
     USE ansys_fun
-    USE LOCMOD
 
     IMPLICIT NONE
     ! Purpose:
@@ -1307,7 +1312,7 @@ CONTAINS
   SUBROUTINE message(wcode,n1,n2)
 
     USE ansys_fun
-    USE LOCMOD
+    USE ansys_par
 
     IMPLICIT NONE
     ! Purpose:
@@ -1321,9 +1326,13 @@ CONTAINS
     CHARACTER(LEN=4) :: wcode
     INTEGER n1,n2
 
+    ! dataspace for feeding erhandler subroutine
+    DOUBLE PRECISION ::  derrinfo(10)
+    CHARACTER(LEN=PARMSIZE) :: cerrinfo(10)
+
     CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
 
-    CALL TrackBegin('message:message')
+    CALL TrackBegin('glans:message')
 
     wcount=wcount+1
 
@@ -1332,40 +1341,40 @@ CONTAINS
     IF (wcode.EQ.'comp') THEN
        derrinfo(1) = n1
        CALL erhandler(fname, __LINE__, ERH_WARNING, &
-            & 'ans2bmf: Not all elements of component %i '// &
+            & 'glans: Not all elements of component %i '// &
             & 'converted !%/'// &
             & '(Check if element types are allowed in present version)', &
             & derrinfo, cerrinfo)
     ELSE IF (wcode.EQ.'matE') THEN
        CALL erhandler(fname, __LINE__, ERH_WARNING, &
-            & 'ans2bmf: no E-Module found in MP %i', &
+            & 'glans: no E-Module found in MP %i', &
             & derrinfo, cerrinfo)
     ELSE IF (wcode.EQ.'matP') THEN
        CALL erhandler(fname, __LINE__, ERH_WARNING, &
-            & 'ans2bmf: no Poisson ratio found in MP %i', &
+            & 'glans: no Poisson ratio found in MP %i', &
             & derrinfo, cerrinfo)
     ELSE IF (wcode.EQ.'matD') THEN
        CALL erhandler(fname, __LINE__, ERH_WARNING, &
-            & 'ans2bmf: no density value found in MP %i', &
+            & 'glans: no density value found in MP %i', &
             & derrinfo, cerrinfo)
     ELSE IF (wcode.EQ.'beam') THEN
        CALL erhandler(fname, __LINE__, ERH_WARNING, &
-            & 'ans2bmf: beam at nodes %i %i '// &
+            & 'glans: beam at nodes %i %i '// &
             & 'does not have orientation node', &
             derrinfo, cerrinfo)
     ELSE IF (wcode.EQ.'pses') THEN
        CALL erhandler(fname, __LINE__, ERH_WARNING, &
-            & 'ans2bmf: shells with different thicknesses '// &
+            & 'glans: shells with different thicknesses '// &
             & 'not supported (el. %i). Average value taken.', &
             & derrinfo, cerrinfo)
     ELSE IF (wcode.EQ.'shel') THEN
        CALL erhandler(fname, __LINE__, ERH_WARNING, &
-            & 'ans2bmf: shells with different thicknesses '// &
+            & 'glans: shells with different thicknesses '// &
             & 'not supported (el. %i). Average value taken.', &
             & derrinfo, cerrinfo)
     END IF
 
-    CALL TrackEnd('message:message')
+    CALL TrackEnd('glans:message')
 
   END SUBROUTINE message
 

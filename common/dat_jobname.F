@@ -7,8 +7,8 @@ c     get jobname
       USE LOCMOD
 
       IMPLICIT NONE
-C     Purpose: 
-C     
+C     Purpose:
+C
 C     Parameter:
 C     in/out Name          Task
 C ----------------------------------------------------------------------
@@ -16,6 +16,10 @@ C     Created: 2007-06-01  hoel
 C ======================================================================
 
       CHARACTER(LEN=STRING_MAX_LENG) :: dummy
+
+!     dataspace for feeding erhandler subroutine
+      DOUBLE PRECISION ::  derrinfo(10)
+      CHARACTER(LEN=PARMSIZE) :: cerrinfo(10)
 
       CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
 
