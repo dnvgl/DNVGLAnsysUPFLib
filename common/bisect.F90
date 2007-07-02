@@ -15,8 +15,9 @@ MODULE bisect
 
   FUNCTION idToInd(id, array, lena, dima) RESULT(ind)
 
-    USE LOCMOD
-    USE ansys_fun
+    USE ansys_fun, ONLY : TrackBegin, TrackEnd, erhandler
+    USE ansys_par, ONLY : ERH_FATAL, PARMSIZE
+    USE LOCMOD, ONLY : libname
 
     IMPLICIT NONE
     !     Purpose:
@@ -68,9 +69,9 @@ MODULE bisect
           derrinfo(3) = dima
           CALL erhandler(fname, __LINE__, ERH_FATAL,&
                & trim(libname)// &
-          &           ': line for id %d not found in %d steps, but array '// &
-          &           'contains only %d lines.', &
-          &           derrinfo, cerrinfo)
+               & ': line for id %d not found in %d steps, but array '// &
+               & 'contains only %d lines.', &
+               & derrinfo, cerrinfo)
        END IF
        steps = steps + 1
     END DO

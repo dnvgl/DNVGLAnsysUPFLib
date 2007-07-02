@@ -10,10 +10,18 @@ c     collect components
 
       SUBROUTINE dat_components(el_data)
 
-      USE glans
-      USE ansys_par
-      USE ansys_fun
-      USE LOCMOD
+      USE ansys_fun, ONLY : TrackBegin, TrackEnd, RunCommand, erhandler,
+     &     elmiqr
+#if   ANSVER >= 70
+      USE ansys_par, ONLY : CMD_MAX_LENG,
+#else
+      USE ansys_par, ONLY : SYS_LNG_CMDLN,
+#endif
+     &     ERH_ERROR, ERH_FATAL, ERH_NOTE, ERH_WARNING, DB_NUMSELECTED,
+     &     PARMSIZE
+      USE glans, ONLY : cmselect, get, esel, ans2bmf_get_s
+      USE LOCMOD, ONLY : libname, comp_num, comp_name, csub_num,
+     &     el_count, el_length, max_components
 
       IMPLICIT NONE
 C     Purpose:
@@ -212,10 +220,15 @@ c###########################################################
 
       SUBROUTINE ans2bmf_cstore(comp, csub, el_data)
 
-      USE glans
-      USE ansys_par
-      USE ansys_fun
-      USE LOCMOD
+      USE ansys_fun, ONLY : TrackBegin, TrackEnd, elmget, elmiqr,
+     &     elnext, etyget, erhandler
+      USE ansys_par, ONLY : DB_NUMSELECTED, EL_DIM, EL_TYPE, ERH_NOTE,
+     &     NNMAX, PARMSIZE, KYOP1
+      USE glans, ONLY : cmselect, esel
+      USE LOCMOD, ONLY : comp_num, el_count, el_offset, ielc, libname,
+     &     l_comp_ansys, l_comp_csub, l_csub_ename, l_comp_len,
+     &     l_comp_name, l_comp_pos, l_csub_postfix,
+     &     ANS_SHELL63, ANS_SHELL181, ANS_SHELL63_M, ANS_SHELL181_M
 
       IMPLICIT NONE
 C     Purpose:
@@ -331,9 +344,10 @@ c-----------------------------------------------------------
 
       SUBROUTINE ans2bmf_elread(el_data)
 
-      USE ansys_par
-      USE ansys_fun
-      USE LOCMOD
+      USE ansys_fun, ONLY : TrackBegin, TrackEnd, elmiqr, elnext,
+     &     erhandler
+      USE ansys_par, ONLY : DB_NUMSELECTED, ERH_ERROR, PARMSIZE
+      USE LOCMOD, ONLY : el_offset, libname, n_elem
 
       IMPLICIT NONE
 C     Purpose:

@@ -1,9 +1,8 @@
       SUBROUTINE dat_loadcases()
-
-      USE ansys_par
-      USE ansys_fun
-      USE LOCMOD
-
+      USE ansys_fun, ONLY : TrackBegin, TrackEnd, erhandler, foriqr
+      USE ansys_par, ONLY : DB_NUMDEFINED, ERH_NOTE, PARMSIZE
+      USE LOCMOD, ONLY : libname, jobname, max_loadcases, n_nloads,
+     &     n_sfiles
       IMPLICIT NONE
 C     Purpose:
 C

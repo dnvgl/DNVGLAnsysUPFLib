@@ -19,9 +19,13 @@
 
 MODULE glans
 
+  PRIVATE :: getf, getfs, getfi, geti, getis, getii, gets, getsi
+
   INTERFACE get
      MODULE PROCEDURE getf, getfs, getfi, geti, getis, getii, gets, getsi
   END INTERFACE
+
+  PRIVATE :: esels, eseli
 
   INTERFACE esel
      MODULE PROCEDURE esels, eseli
@@ -36,9 +40,13 @@ CONTAINS
     ! reads ANSYS command string 'cmd_str'
     ! puts out double precision parameter 'dout'
 
-    USE ansys_par
-    USE ansys_fun
-
+    USE ansys_fun, ONLY : TrackBegin, TrackEnd, RunCommand, parevl
+#if ANSVER >= 70
+    USE ansys_par, ONLY : CMD_MAX_LENG, STRING_MAX_LENG, &
+#else
+    USE ansys_par, ONLY : SYS_LNG_CMDLN, &
+#endif
+    & PARMSIZE
     IMPLICIT NONE
     ! Purpose:
     !
@@ -77,10 +85,13 @@ CONTAINS
   SUBROUTINE ans2bmf_get_s(cmd_str, sout)
     ! reads ANSYS command string 'cmd_str'
     ! writes a string of length 8 into 'sout'
-
-    USE ansys_par
-    USE ansys_fun
-
+    USE ansys_fun, ONLY : TrackBegin, TrackEnd, RunCommand, parevl
+#if ANSVER >= 70
+    USE ansys_par, ONLY : CMD_MAX_LENG, STRING_MAX_LENG, &
+#else
+    USE ansys_par, ONLY : SYS_LNG_CMDLN, &
+#endif
+    & PARMSIZE
     IMPLICIT NONE
     ! Purpose:
     !
@@ -123,9 +134,7 @@ CONTAINS
 
   FUNCTION upcase(string) RESULT(upper)
     ! Convert input string to uppercase
-
-    USE ansys_fun
-
+    USE ansys_fun, ONLY : TrackBegin, TrackEnd
     IMPLICIT NONE
     CHARACTER(LEN=*), INTENT(IN) :: string
     CHARACTER(LEN=LEN(string)) :: upper
@@ -147,9 +156,13 @@ CONTAINS
 
   SUBROUTINE cmselect(mode, name)
     ! select component
-    USE ansys_par
-    USE ansys_fun
-
+    USE ansys_fun, ONLY : TrackBegin, TrackEnd, RunCommand
+#if ANSVER >= 70
+   USE ansys_par, ONLY : CMD_MAX_LENG, &
+#else
+   USE ansys_par, ONLY : SYS_LNG_CMDLN, &
+#endif
+   & ERH_FATAL, PARMSIZE
     IMPLICIT NONE
     ! Purpose:
     !
@@ -218,10 +231,13 @@ CONTAINS
   END SUBROUTINE cmselect
 
   SUBROUTINE eseli(Type, Item, Comp, VMIN, VMAX, VINC, KABS)
-
-    USE ansys_par
-    USE ansys_fun
-
+    USE ansys_fun, ONLY : TrackBegin, TrackEnd, RunCommand
+#if ANSVER >= 70
+    USE ansys_par, ONLY : CMD_MAX_LENG, &
+#else
+    USE ansys_par, ONLY : SYS_LNG_CMDLN, &
+#endif
+    & ERH_FATAL, PARMSIZE
     IMPLICIT NONE
     ! Purpose: select elements
     !
@@ -426,10 +442,13 @@ CONTAINS
   END SUBROUTINE eseli
 
   SUBROUTINE esels(Type, Item, Comp, VMIN)
-
-    USE ansys_par
-    USE ansys_fun
-
+    USE ansys_fun, ONLY : TrackBegin, TrackEnd, RunCommand, erhandler
+#if ANSVER >= 70
+    USE ansys_par, ONLY : CMD_MAX_LENG, &
+#else
+    USE ansys_par, ONLY : SYS_LNG_CMDLN, &
+#endif
+    & ERH_FATAL, PARMSIZE, STRING_MAX_LENG
     IMPLICIT NONE
     ! Purpose: select elements
     !
@@ -586,10 +605,13 @@ CONTAINS
   END SUBROUTINE esels
 
   SUBROUTINE nsel(Type, Item, Comp, VMIN, VMAX, VINC, KABS)
-
-    USE ansys_par
-    USE ansys_fun
-
+    USE ansys_fun, ONLY : TrackBegin, TrackEnd, RunCommand, erhandler
+#if ANSVER >= 70
+    USE ansys_par, ONLY : CMD_MAX_LENG, &
+#else
+    USE ansys_par, ONLY : SYS_LNG_CMDLN, &
+#endif
+    & ERH_FATAL, PARMSIZE
     IMPLICIT NONE
     ! Purpose: select nodes
     !
@@ -746,9 +768,9 @@ CONTAINS
 
   SUBROUTINE doDebugLoc(func, file, line)
 
-    USE ifcore
-    USE ansys_par
-    USE ansys_fun
+    USE ifcore, ONLY : COMMITQQ
+    USE ansys_fun, ONLY : wrinqr
+    USE ansys_par, ONLY : WR_OUTPUT
 
     IMPLICIT NONE
     ! Purpose:
@@ -768,23 +790,22 @@ CONTAINS
     INTEGER :: res
     INTEGER :: stderr
 
-    !CALL TrackBegin('glans:doDebugLoc')
-
     stderr = wrinqr(WR_OUTPUT)
     WRITE(stderr,100) file, line, func
 100 FORMAT (X,A,':',I4,':',A)
     res = COMMITQQ(stderr)
 
-    !CALL TrackEnd('glans:doDebugLoc')
-
   END SUBROUTINE doDebugLoc
 
   FUNCTION gets(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
-
-    USE ansys_par
-    USE ansys_fun
-
+    USE ansys_fun, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
+#if ANSVER >= 70
+    USE ansys_par, ONLY : CMD_MAX_LENG, &
+#else
+    USE ansys_par, ONLY : SYS_LNG_CMDLN, &
+#endif
+    & ER_NUMWARNING, ER_NUMERROR, PARMSIZE, STRING_MAX_LENG
     IMPLICIT NONE
     ! Purpose:
     !
@@ -881,10 +902,13 @@ CONTAINS
 
   FUNCTION getsi(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
-
-    USE ansys_par
-    USE ansys_fun
-
+    USE ansys_fun, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
+#if ANSVER >= 70
+    USE ansys_par, ONLY : CMD_MAX_LENG, &
+#else
+    USE ansys_par, ONLY : SYS_LNG_CMDLN, &
+#endif
+    & ER_NUMWARNING, ER_NUMERROR, ERH_FATAL, PARMSIZE, STRING_MAX_LENG
     IMPLICIT NONE
     ! Purpose:
     !
@@ -940,10 +964,13 @@ CONTAINS
 
   FUNCTION getf(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
-
-    USE ansys_par
-    USE ansys_fun
-
+    USE ansys_fun, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
+#if ANSVER >= 70
+    USE ansys_par, ONLY : CMD_MAX_LENG, &
+#else
+    USE ansys_par, ONLY : SYS_LNG_CMDLN, &
+#endif
+    & ER_NUMWARNING, ER_NUMERROR, PARMSIZE, STRING_MAX_LENG
     IMPLICIT NONE
     ! Purpose:
     !
@@ -1036,10 +1063,13 @@ CONTAINS
 
   FUNCTION getfs(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
-
-    USE ansys_par
-    USE ansys_fun
-
+    USE ansys_fun, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
+#if ANSVER >= 70
+    USE ansys_par, ONLY : CMD_MAX_LENG, &
+#else
+    USE ansys_par, ONLY : SYS_LNG_CMDLN, &
+#endif
+    & ER_NUMWARNING, ER_NUMERROR, PARMSIZE, STRING_MAX_LENG
     IMPLICIT NONE
     ! Purpose:
     !
@@ -1131,10 +1161,13 @@ CONTAINS
 
   FUNCTION getfi(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
-
-    USE ansys_par
-    USE ansys_fun
-
+    USE ansys_fun, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
+#if ANSVER >= 70
+    USE ansys_par, ONLY : CMD_MAX_LENG, &
+#else
+    USE ansys_par, ONLY : SYS_LNG_CMDLN, &
+#endif
+    & ER_NUMWARNING, ER_NUMERROR, ERH_FATAL, PARMSIZE, STRING_MAX_LENG
     IMPLICIT NONE
     ! Purpose:
     !
@@ -1190,10 +1223,13 @@ CONTAINS
 
   FUNCTION geti(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
-
-    USE ansys_par
-    USE ansys_fun
-
+    USE ansys_fun, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
+#if ANSVER >= 70
+    USE ansys_par, ONLY : CMD_MAX_LENG, &
+#else
+    USE ansys_par, ONLY : SYS_LNG_CMDLN, &
+#endif
+    & ER_NUMWARNING, ER_NUMERROR, PARMSIZE, STRING_MAX_LENG
     IMPLICIT NONE
     ! Purpose:
     !
@@ -1230,10 +1266,13 @@ CONTAINS
 
   FUNCTION getis(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
-
-    USE ansys_par
-    USE ansys_fun
-
+    USE ansys_fun, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
+#if ANSVER >= 70
+    USE ansys_par, ONLY : CMD_MAX_LENG, &
+#else
+    USE ansys_par, ONLY : SYS_LNG_CMDLN, &
+#endif
+    & ER_NUMWARNING, ER_NUMERROR, PARMSIZE, STRING_MAX_LENG
     IMPLICIT NONE
     ! Purpose:
     !
@@ -1270,10 +1309,13 @@ CONTAINS
 
   FUNCTION getii(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
-
-    USE ansys_par
-    USE ansys_fun
-
+    USE ansys_fun, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
+#if ANSVER >= 70
+    USE ansys_par, ONLY : CMD_MAX_LENG, &
+#else
+    USE ansys_par, ONLY : SYS_LNG_CMDLN, &
+#endif
+    & ER_NUMWARNING, ER_NUMERROR, PARMSIZE, STRING_MAX_LENG
     IMPLICIT NONE
     ! Purpose:
     !
@@ -1310,10 +1352,8 @@ CONTAINS
 
   ! issue warnings and update message count
   SUBROUTINE message(wcode,n1,n2)
-
-    USE ansys_fun
-    USE ansys_par
-
+    USE ansys_fun, ONLY : TrackBegin, TrackEnd, erhandler
+    USE ansys_par, ONLY : ERH_WARNING, PARMSIZE
     IMPLICIT NONE
     ! Purpose:
     !
@@ -1322,7 +1362,6 @@ CONTAINS
     ! ----------------------------------------------------------------------
     ! Created: 2007-06-01  hoel
     ! ======================================================================
-
     CHARACTER(LEN=4) :: wcode
     INTEGER n1,n2
 

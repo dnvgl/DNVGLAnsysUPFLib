@@ -145,7 +145,7 @@
          SUBROUTINE parevl(ParName, nDim, subc, lvl, dpValue, chValue,
      &     kerr)
 #endif
-         USE ansys_par
+         USE ansys_par, ONLY : STRING_MAX_LENG, PARMSIZE
          IMPLICIT NONE
 #if   ANSVER < 70
          DOUBLE PRECISION :: parevl
@@ -491,7 +491,7 @@ c *** Notice - This file contains ANSYS Confidential information ***
 !        nodes    (int,ar(*),out)   - node numbers for element.
       INTERFACE
          FUNCTION elmget(ielem, elmdat, nodes)
-         USE ansys_par
+         USE ansys_par, ONLY : EL_DIM, NNMAX
          IMPLICIT NONE
          INTEGER :: elmget
          INTEGER, INTENT(IN) :: ielem
@@ -532,7 +532,7 @@ c *** Notice - This file contains ANSYS Confidential information ***
 c     output arguments:  none.
       INTERFACE
          SUBROUTINE elmput (ielem, elmdat, nnod, nodes)
-         USE ansys_par
+         USE ansys_par, ONLY : EL_DIM
          IMPLICIT NONE
          INTEGER, INTENT(IN) :: ielem
          INTEGER, INTENT(IN), DIMENSION(EL_DIM) :: elmdat
@@ -591,7 +591,7 @@ c     output arguments:  none.
 !                                     description of data.
       INTERFACE
          FUNCTION etyget (itype,ielx)
-         USE ansys_par
+         USE ansys_par, ONLY : IELCSZ
          IMPLICIT NONE
          INTEGER :: etyget
          INTEGER, INTENT(IN) :: itype
@@ -737,7 +737,7 @@ c     output arguments:  none.
 !        rtable   (dp,ar(*),out)    - real constant data obtained
       INTERFACE
          FUNCTION rlget (nreal,rtable)
-         USE ansys_par
+         USE ansys_par, ONLY : RL_DIM
          IMPLICIT NONE
          INTEGER :: rlget
          INTEGER, INTENT(IN) :: nreal

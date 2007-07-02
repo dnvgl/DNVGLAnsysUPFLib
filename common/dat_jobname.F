@@ -1,10 +1,10 @@
 c     get jobname
       SUBROUTINE dat_jobname()
 
-      USE ansys_par
-      USE ansys_fun
-      USE glans
-      USE LOCMOD
+      USE ansys_fun, ONLY : TrackBegin, TrackEnd, erhandler
+      USE ansys_par, ONLY : ERH_NOTE, PARMSIZE, STRING_MAX_LENG
+      USE glans, ONLY : ans2bmf_get_s
+      USE LOCMOD, ONLY : jobname, libname
 
       IMPLICIT NONE
 C     Purpose:

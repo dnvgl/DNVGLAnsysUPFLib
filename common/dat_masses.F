@@ -1,5 +1,5 @@
 C     Copyright (C) 2005 by Germanischer Lloyd AG
-      
+
 C     ======================================================================
 C     Task      collect mass information from ANSYS model
 C     ----------------------------------------------------------------------
@@ -11,14 +11,17 @@ C     ======================================================================
 C CVSID: $Id$
 
       SUBROUTINE dat_masses()
-
-      USE ansys_par
-      USE ansys_fun
-      USE LOCMOD
-
+      USE ansys_fun, ONLY : TrackBegin, TrackEnd, RunCommand, elmiqr
+#if   ANSVER >= 70
+      USE ansys_par, ONLY : CMD_MAX_LENG,
+#else
+      USE ansys_par, ONLY : SYS_LNG_CMDLN,
+#endif
+     &     DB_NUMSELECTED
+      USE LOCMOD, ONLY : n_masses
       IMPLICIT NONE
-C     Purpose: 
-C     
+C     Purpose:
+C
 C     Parameter:
 C     in/out Name          Task
 C ----------------------------------------------------------------------
@@ -39,7 +42,7 @@ c     select all nodal mass elements
       cmd = 'ESEL,S,ENAME,,MASS21'
       iErr = RunCommand(LEN_TRIM(cmd), cmd)
 
-      n_masses = elmiqr(0,DB_NUMSELECTED)
+      n_masses = elmiqr(0, DB_NUMSELECTED)
 
       CALL TrackEnd('dat_masses')
 

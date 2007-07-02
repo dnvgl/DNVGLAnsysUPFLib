@@ -1,10 +1,8 @@
 c     find out and store # of nodes
       SUBROUTINE dat_nodes()
-
-      USE ansys_par
-      USE ansys_fun
-      USE LOCMOD
-
+      USE ansys_fun, ONLY : TrackBegin, TrackEnd, ndinqr, erhandler
+      USE ansys_par, ONLY : DB_NUMDEFINED, ERH_NOTE, PARMSIZE
+      USE LOCMOD, ONLY : libname, n_nodes
       IMPLICIT NONE
 C     Purpose:
 C
@@ -22,10 +20,10 @@ C ======================================================================
 
       CALL TrackBegin('dat_nodes')
 
-      n_nodes = ndinqr(0,DB_NUMDEFINED)
+      n_nodes = ndinqr(0, DB_NUMDEFINED)
       derrinfo(1) = n_nodes
       CALL erhandler(fname, __LINE__, ERH_NOTE,
-     $     'ans2bmf:   nodes defined: %i', derrinfo, cerrinfo)
+     $     trim(libname)//':   nodes defined: %i', derrinfo, cerrinfo)
 
       CALL TrackEnd('dat_nodes')
 

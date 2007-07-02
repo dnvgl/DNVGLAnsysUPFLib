@@ -10,11 +10,13 @@ c get beam properties
 
       SUBROUTINE dat_beamproperties(bp_data, rl_data)
 
-      USE ansys_par
-      USE ansys_fun
-      USE glans
-      USE LOCMOD
-
+      USE ansys_fun, ONLY : TrackBegin, TrackEnd, erhandler, rlget,
+     &     rlinqr, vzero
+      USE ansys_par, ONLY : DB_NUMSELECTED, DB_SELECTED, DB_MAXDEFINED,
+     &     ERH_ERROR, ERH_NOTE, PARMSIZE
+      USE glans, ONLY : esel
+      USE LOCMOD, ONLY : libname, bp_num_i, bp_num_j, bp_rlen, rl_num,
+     &     bp_R, bp_A, bp_I, bp_e, bp_d, bp_sf, bp_sc, NZERO
       IMPLICIT NONE
 C     Purpose:
 C
@@ -75,7 +77,7 @@ c     read real constants into array
 
 c     test if real constant set is selected (i.e. if it belongs to a
 c     BEAM44 element)
-         IF (rlinqr(n,DB_SELECTED).EQ.1) THEN
+         IF (rlinqr(n, DB_SELECTED).EQ.1) THEN
 
 c     check for overflow
             IF (bp_num_i.GT.rnum) THEN
@@ -101,8 +103,8 @@ c     check for overflow
 
 c     read real constant set from ANSYS and convert BEAM44 properties in
 c     beam properties
-            CALL vzero (rtable, 40)
-            i  = rlget (n, rtable)
+            CALL vzero(rtable, 40)
+            i  = rlget(n, rtable)
 
             oi = 1 + bp_rlen * bp_num_i
             oj = 1 + bp_rlen * (rnum+bp_num_j)
@@ -275,8 +277,8 @@ c###########################################################
 
       SUBROUTINE ans2bmf_rlallsel()
 
-      USE ansys_par
-      USE ansys_fun
+      USE ansys_fun, ONLY : TrackBegin, TrackEnd, rlinqr, rlsel
+      USE ansys_par, ONLY : DB_MAXDEFINED
 
       IMPLICIT NONE
 C     Purpose:
@@ -290,7 +292,7 @@ C ======================================================================
 
       CALL TrackBegin('ans2bmf_rlallsel')
 
-      rmax = rlinqr(0,DB_MAXDEFINED)
+      rmax = rlinqr(0, DB_MAXDEFINED)
       DO r = 1, rmax
          CALL rlsel(r,1)
       END DO
@@ -303,8 +305,8 @@ c-----------------------------------------------------------
 
       SUBROUTINE ans2bmf_rlnosel()
 
-      USE ansys_par
-      USE ansys_fun
+      USE ansys_fun, ONLY : TrackBegin, TrackEnd, rlinqr, rlsel
+      USE ansys_par, ONLY : DB_MAXDEFINED
 
       IMPLICIT NONE
 C     Purpose:
@@ -331,9 +333,8 @@ c-----------------------------------------------------------
 
       SUBROUTINE ans2bmf_rlsle()
 
-      USE ansys_par
-      USE ansys_fun
-      USE LOCMOD
+      USE ansys_fun, ONLY : TrackBegin, TrackEnd, elmget, elnext
+      USE ansys_par, ONLY : EL_DIM, EL_REAL, NNMAX
 
       IMPLICIT NONE
 C     Purpose:
