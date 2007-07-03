@@ -1,6 +1,15 @@
+#ifndef DEBUG_LOC
+#ifdef DEBUG
+#define DEBUG_LOC(func) call doDebugLoc(func,__FILE__,__LINE__)
+#else
+#define DEBUG_LOC
+#endif !DEBUG_LOC
+#endif
+
       SUBROUTINE dat_loadcases()
       USE ansys_fun, ONLY : TrackBegin, TrackEnd, erhandler, foriqr
       USE ansys_par, ONLY : DB_NUMDEFINED, ERH_NOTE, PARMSIZE
+      USE glans, ONLY : doDebugLoc
       USE LOCMOD, ONLY : libname, jobname, max_loadcases, n_nloads,
      &     n_sfiles
       IMPLICIT NONE
@@ -41,13 +50,13 @@ c     check on files for loadcases written with lswrite and define
 c     global parameter n_sfiles
       n_sfiles = 0
       ex = .TRUE.
-      l = 1
+      l = 0
       s_file = 12
 
 c     check if file.s** with # l exists
       DO WHILE (ex)
-
-c     create filename
+         l = l + 1
+c        create filename
          IF (l.LE.9) THEN
             WRITE(cl,'(i1)') l
             ext = '0'//cl
@@ -58,10 +67,8 @@ c     create filename
 c     check
          INQUIRE(FILE=jobname(1:len_trim(jobname))
      x        //'.s'//ext, EXIST=ex)
-
          IF (ex) THEN
-            l = l + 1
-c     and count all load lines on file
+c           and count all load lines on file
             eof = .FALSE.
             OPEN(UNIT=s_file, FILE=jobname(1:len_trim(jobname))
      x           //'.s'//ext)
@@ -72,14 +79,10 @@ c     and count all load lines on file
                END IF
             END DO
  500        CONTINUE
-         ELSE
-c     we have found the last file
-            l = l - 1
-            GOTO 100
          END IF
       END DO
 
- 100  n_sfiles = l
+      n_sfiles = l - 1
 
       max_loadcases = max_loadcases + n_sfiles
       derrinfo(1) = max_loadcases
