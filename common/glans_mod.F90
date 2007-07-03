@@ -1197,7 +1197,6 @@ CONTAINS
     ! dataspace for feeding erhandler subroutine
     DOUBLE PRECISION ::  derrinfo(10)
     CHARACTER(LEN=PARMSIZE) :: cerrinfo(10)
-
     CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
 
     CALL TrackBegin('glans:getfi')

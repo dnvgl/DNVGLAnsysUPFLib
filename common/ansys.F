@@ -899,8 +899,74 @@ c     output arguments:
 ! 7.7.27. nvdput Subroutine (Storing a Nodal Virtual Displacement)
 ! 7.7.28. nvddel Subroutine (Deleting a Nodal Virtual Displacement)
 ! 7.8. Element Loading Routines
+
 ! 7.8.1. epriqr Function (Getting Information About Element Pressure/Convection)
+! *** primary function: get information about element pressure/convection
+! *** Notice - This file contains ANSYS Confidential information ***
+!     input arguments:
+!        ielem    (int,sc,in)       - element number
+!                                      should be zero for key=DB_NUMDEFINED or
+!                                      DB_MAXRECLENG
+!        iface    (int,sc,in)       - face number for inquire (0-6)
+!                                      face number is needed for key=5. for
+!                                      other values of key, iface has different
+!                                      meaning (see below)
+!        key      (int,sc,in)       - key as to the information needed
+!                 = 1              - return pressure mask for element
+!                 = 5              - return number of pressures for this
+!                                      element face
+!                 = DB_NUMDEFINED,
+!                 = DB_MAXDEFINED  - return value is based on setting of iface
+!                                     NOTE: both DB_NUMDEFINED and
+!                                     DB_MAXDEFINED produce the same
+!                                     functionality
+!                             iface = 0 - return number of surface loads defined for model
+!                                   = 1-6 - return number of pressure loads
+!                                      defined for this element.
+!                                      NOTE:  only 1-6 is valid, but this
+!                                      routine simply checks that iface is in
+!                                      the range.  The actual value of iface
+!                                      does not matter in this case.
+!                 = DB_MAXRECLENG  - return the maximum number of element
+!                                     pressures on any element (max record
+!                                     length)
+!     output arguments:
+!        epriqr   (int,func,out)    - the returned value of epriqr is based on
+!                                      setting of key.
+      INTERFACE
+         FUNCTION epriqr(ielem, iface, key)
+         IMPLICIT NONE
+         INTEGER :: epriqr
+         INTEGER, INTENT(IN) :: ielem
+         INTEGER, INTENT(IN) :: iface
+         INTEGER, INTENT(IN) :: key
+         END FUNCTION epriqr
+      END INTERFACE
+
 ! 7.8.2. eprget Function (Getting an Element Face Pressure)
+! *** primary function:    get an element face pressure
+! *** Notice - This file contains ANSYS Confidential information ***
+!     input arguments:
+!        elem     (int,sc,in)       - element number (negative value for
+!                                       no partabeval)
+!        iface    (int,sc,in)       - face number (1-6)
+!     output arguments:
+!        eprget   (int,func,out)    - status of element.
+!                                     =-1 - element has no pressures
+!                                     = 0 - this element face has no pressures
+!                                     > 0 - number of values defined
+!        value    (dp ,ar(*),out)   - the element pressures (real,imag) at each
+!                                      face
+      INTERFACE
+         FUNCTION eprget(elem, iface, value)
+         IMPLICIT NONE
+         INTEGER :: eprget
+         INTEGER, INTENT(IN) :: elem
+         INTEGER, INTENT(IN) :: iface
+         DOUBLE PRECISION, INTENT(OUT), DIMENSION(*) :: value
+         END FUNCTION eprget
+      END INTERFACE
+
 ! 7.8.3. eprput Subroutine (Storing an Element Face Pressure)
 ! 7.8.4. eprdel Subroutine (Deleting an Element Pressure/Convection)
 ! 7.8.5. ecviqr Function (Getting Information About Element Convections)
