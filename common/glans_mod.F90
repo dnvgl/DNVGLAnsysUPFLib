@@ -19,17 +19,25 @@
 
 MODULE glans
 
-  PRIVATE :: getf, getfs, getfi, geti, getis, getii, gets, getsi
+  PRIVATE
 
   INTERFACE get
      MODULE PROCEDURE getf, getfs, getfi, geti, getis, getii, gets, getsi
   END INTERFACE
 
-  PRIVATE :: esels, eseli
-
   INTERFACE esel
      MODULE PROCEDURE esels, eseli
   END INTERFACE
+
+  PUBLIC :: get
+  PUBLIC :: esel
+  PUBLIC :: nsel
+  PUBLIC :: cmselect
+  PUBLIC :: message
+  PUBLIC :: doDebugLoc
+  PUBLIC :: ans2bmf_get_s
+
+  PUBLIC :: wcount
 
   ! number of warnings issued
   INTEGER :: wcount = 0
@@ -1352,7 +1360,8 @@ CONTAINS
   ! issue warnings and update message count
   SUBROUTINE message(wcode,n1,n2)
     USE ansys_fun, ONLY : TrackBegin, TrackEnd, erhandler
-    USE ansys_par, ONLY : ERH_WARNING, PARMSIZE
+    USE ansys_par, ONLY : ERH_WARNING, PARMSIZE, MP_EX, MP_NUXY, MP_DENS
+    USE LOCMOD, ONLY : libname
     IMPLICIT NONE
     ! Purpose:
     !
@@ -1367,47 +1376,56 @@ CONTAINS
     ! dataspace for feeding erhandler subroutine
     DOUBLE PRECISION ::  derrinfo(10)
     CHARACTER(LEN=PARMSIZE) :: cerrinfo(10)
-
     CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
+    CHARACTER(LEN=1024) :: msg
 
     CALL TrackBegin('glans:message')
-
     wcount=wcount+1
-
     derrinfo(1) = n1
     derrinfo(2) = n2
     IF (wcode.EQ.'comp') THEN
-       derrinfo(1) = n1
        CALL erhandler(fname, __LINE__, ERH_WARNING, &
-            & 'glans: Not all elements of component %i '// &
+            & TRIM(libname)//': Not all elements of component %i '// &
             & 'converted !%/'// &
             & '(Check if element types are allowed in present version)', &
             & derrinfo, cerrinfo)
+    ELSE IF (wcode.EQ.'mat ') THEN
+       IF (n2.EQ.MP_EX) THEN
+          msg = TRIM(libname)//': no E-Module found in MP %i'
+       ELSE IF (n2.EQ.MP_NUXY) THEN
+          msg = TRIM(libname)//': no Poisson ratio found in MP %i'
+       ELSE IF (n2.EQ.MP_DENS) THEN
+          msg = TRIM(libname)//': no density found in MP %i'
+       ELSE
+          msg = TRIM(libname)//': unspecified material property not found in MP %i'
+       END IF
+       CALL erhandler(fname, __LINE__, ERH_WARNING, TRIM(msg), &
+            & derrinfo, cerrinfo)
     ELSE IF (wcode.EQ.'matE') THEN
        CALL erhandler(fname, __LINE__, ERH_WARNING, &
-            & 'glans: no E-Module found in MP %i', &
+            & TRIM(libname)//': no E-Module found in MP %i', &
             & derrinfo, cerrinfo)
     ELSE IF (wcode.EQ.'matP') THEN
        CALL erhandler(fname, __LINE__, ERH_WARNING, &
-            & 'glans: no Poisson ratio found in MP %i', &
+            & TRIM(libname)//': no Poisson ratio found in MP %i', &
             & derrinfo, cerrinfo)
     ELSE IF (wcode.EQ.'matD') THEN
        CALL erhandler(fname, __LINE__, ERH_WARNING, &
-            & 'glans: no density value found in MP %i', &
+            & TRIM(libname)//': no density value found in MP %i', &
             & derrinfo, cerrinfo)
     ELSE IF (wcode.EQ.'beam') THEN
        CALL erhandler(fname, __LINE__, ERH_WARNING, &
-            & 'glans: beam at nodes %i %i '// &
+            & TRIM(libname)//': beam at nodes %i %i '// &
             & 'does not have orientation node', &
             derrinfo, cerrinfo)
     ELSE IF (wcode.EQ.'pses') THEN
        CALL erhandler(fname, __LINE__, ERH_WARNING, &
-            & 'glans: shells with different thicknesses '// &
+            & TRIM(libname)//': shells with different thicknesses '// &
             & 'not supported (el. %i). Average value taken.', &
             & derrinfo, cerrinfo)
     ELSE IF (wcode.EQ.'shel') THEN
        CALL erhandler(fname, __LINE__, ERH_WARNING, &
-            & 'glans: shells with different thicknesses '// &
+            & TRIM(libname)//': shells with different thicknesses '// &
             & 'not supported (el. %i). Average value taken.', &
             & derrinfo, cerrinfo)
     END IF
@@ -1421,7 +1439,3 @@ END MODULE glans
 ! Local Variables:
 ! compile-command:"make -C .. test"
 ! End:
-
-
-
-
