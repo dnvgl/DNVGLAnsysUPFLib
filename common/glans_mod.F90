@@ -36,6 +36,7 @@ MODULE glans
   PUBLIC :: message
   PUBLIC :: doDebugLoc
   PUBLIC :: ans2bmf_get_s
+  PUBLIC :: ans2bmf_get_d
 
   PUBLIC :: wcount
 
