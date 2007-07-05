@@ -821,6 +821,39 @@ c     output arguments:  none.
       END INTERFACE
 
 ! 7.7.2. disget Function (Getting a Constraint from the Database)
+! *** primary function:    get a constraint from the data base (in raw form)
+! *** Notice - This file contains ANSYS Confidential information ***
+!     input arguments:
+!     variable (typ,siz,intent)     description
+!        inode    (int,sc,in)       - node number (negative value for no
+!                                                  partabeval)
+!        idf      (int,sc,in)       - reference number for the DOF: (1-32)
+!    UX  = 1, UY  = 2, UZ  = 3, ROTX= 4, ROTY= 5, ROTZ= 6, AX  = 7, AY  = 8
+!    AZ  = 9, VX  =10, VY  =11, VZ  =12
+!    PRES=19, TEMP=20, VOLT=21, MAG =22, ENKE=23, ENDS=24
+!    EMF =25, CURR=26  SP01=27, SP02=28, SP03=29, SP04=30, SP05=31, SP06=32
+!                                 (missing entries are spares)
+!     output arguments:
+!        disget   (int,func,out)    - status of constraint.
+!                                     = 0 - no constraint on this node
+!                                            for this DOF
+!                                     = 4 - this node has a constraint
+!                                            defined for this DOF
+!                                     = -4 - this node has a pseudo-support
+!                                            defined for this DOF
+!        value    (dp,ar(4),out)    - constraint values
+!                         value(1-2) - (real,imag) values of present settings
+!                         value(3-4) - (real,imag) values of previous settings
+      INTERFACE
+         FUNCTION disget(inode, idf, value)
+         IMPLICIT NONE
+         INTEGER :: disget
+         INTEGER, INTENT(IN) :: inode
+         INTEGER, INTENT(IN) :: idf
+         DOUBLE PRECISION, DIMENSION(4), INTENT(OUT) :: value
+         END FUNCTION disget
+      END INTERFACE
+
 ! 7.7.3. disput Subroutine (Storing a Constraint at a Node)
 ! 7.7.4. disdel Subroutine (Deleting a Constraint at a Node)
 
