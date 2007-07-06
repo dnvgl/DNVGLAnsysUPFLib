@@ -35,15 +35,6 @@ MODULE linklist_mod
      TYPE(dd_list), POINTER :: next => NULL()
   END TYPE dd_list
 
-  TYPE :: ddddd_list
-     DOUBLE PRECISION :: value1 = 0d0
-     DOUBLE PRECISION :: value2 = 0d0
-     DOUBLE PRECISION :: value3 = 0d0
-     DOUBLE PRECISION :: value4 = 0d0
-     DOUBLE PRECISION :: value5 = 0d0
-     TYPE(ddddd_list), POINTER :: next => NULL()
-  END TYPE ddddd_list
-
 CONTAINS
 
   SUBROUTINE append_i_list(base, item)
@@ -357,59 +348,6 @@ CONTAINS
     base => NULL()
     CALL TrackEnd('linklist:clear_idd_list')
   END SUBROUTINE clear_dd_list
-
-  SUBROUTINE append_ddddd_list(base, item)
-    IMPLICIT NONE
-    ! Purpose:
-    !
-    ! Parameter:
-    ! in/out Name          Task
-    ! ----------------------------------------------------------------------
-    ! Created: 2007-06-29  hoel
-    ! ======================================================================
-    TYPE(ddddd_list), POINTER :: base
-    TYPE(ddddd_list), POINTER :: item
-
-    TYPE(ddddd_list), POINTER :: next
-    TYPE(ddddd_list), POINTER :: cur
-
-    CALL TrackBegin('linklist:append_ddddd_list')
-    next => base
-    DO WHILE (ASSOCIATED(next))
-       cur => next
-       next => next % next
-    END DO
-    IF (ASSOCIATED(cur)) THEN
-       cur % next => item
-    ELSE
-       base => item
-    END IF
-    CALL TrackEnd('linklist:append_ddddd_list')
-  END SUBROUTINE append_ddddd_list
-
-  SUBROUTINE clear_ddddd_list(base)
-    IMPLICIT NONE
-    ! Purpose:
-    !
-    ! Parameter:
-    ! in/out Name          Task
-    ! ----------------------------------------------------------------------
-    ! Created: 2007-06-29  hoel
-    ! ======================================================================
-    TYPE(ddddd_list), POINTER :: base
-
-    TYPE(ddddd_list), POINTER :: next
-    TYPE(ddddd_list), POINTER :: cur
-    CALL TrackBegin('linklist:clear_iddddd_list')
-    cur => base
-    DO WHILE (ASSOCIATED(cur))
-       next => cur % next
-       DEALLOCATE(cur)
-       cur => next
-    END DO
-    base => NULL()
-    CALL TrackEnd('linklist:clear_iddddd_list')
-  END SUBROUTINE clear_ddddd_list
 
 END MODULE linklist_mod
 
