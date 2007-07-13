@@ -51,8 +51,8 @@ C ======================================================================
       LOGICAL :: flag
 
 !     dataspace for feeding erhandler subroutine
-      DOUBLE PRECISION ::  derrinfo(10)
-      CHARACTER(LEN=PARMSIZE) :: cerrinfo(10)
+      DOUBLE PRECISION, DIMENSION(10) ::  derrinfo
+      CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
 
       CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
 
@@ -250,8 +250,8 @@ C ======================================================================
       INTEGER, DIMENSION(NNMAX) :: nodes
 
 !     dataspace for feeding erhandler subroutine
-      DOUBLE PRECISION ::  derrinfo(10)
-      CHARACTER(LEN=PARMSIZE) :: cerrinfo(10)
+      DOUBLE PRECISION, DIMENSION(10) ::  derrinfo
+      CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
 
       CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
 
@@ -362,8 +362,8 @@ C ======================================================================
       INTEGER n, nmax, el
 
 !     dataspace for feeding erhandler subroutine
-      DOUBLE PRECISION ::  derrinfo(10)
-      CHARACTER(LEN=PARMSIZE) :: cerrinfo(10)
+      DOUBLE PRECISION, DIMENSION(10) ::  derrinfo
+      CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
 
       CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
 

@@ -776,13 +776,87 @@ c     output arguments:  none.
 !     none c
       INTERFACE
          SUBROUTINE rlsel(nreai, ksel)
+         IMPLICIT NONE
          INTEGER, INTENT(IN) :: nreai
          INTEGER, INTENT(IN) :: ksel
          END SUBROUTINE rlsel
       END INTERFACE
 
 ! 7.5.16. csyiqr Function (Getting Information About a Coordinate System)
+! *** primary function:    get information about a coordinate system
+
+! *** Notice - This file contains ANSYS Confidential information ***
+!  input arguments:
+!     ncsy     (int,sc,in)       - coordinate system reference number
+!                                   should be zero for key= DB_NUMDEFINED
+!                                   or DB_MAXDEFINED
+!     key      (int,sc,in)       - information flag.
+!              = DB_SELECTED    - return status:
+!                            csyiqr = 0 - coordinate system is not defined
+!                                    -1 - coordinate system is not selected
+!                                     1 - coordinate system is selected
+!              = DB_NUMDEFINED  - number of defined coordinate systems
+!              = DB_MAXDEFINED  - maximum coordinate system reference
+!                                 number used.
+
+!  output arguments:
+!     csyiqr   (int,func,out)    - the returned value of csyiqr is based on
+!                                   setting of key.
+      INTERFACE
+         FUNCTION csyiqr (ncsy, key)
+         IMPLICIT NONE
+         INTEGER :: csyiqr
+         INTEGER, INTENT(OUT) :: ncsy
+         INTEGER, INTENT(OUT) :: key
+         END FUNCTION csyiqr
+      END INTERFACE
+
+
 ! 7.5.17. csyget Function (Getting a Coordinate System)
+! *** primary function:    get a coordinate system
+! *** secondary functions: none
+
+! *** Notice - This file contains ANSYS Confidential information ***
+!  NOTE:  As a time-saving device, this routine will not fetch the coordinate
+!         system data from the database (an expensive operation)
+!         if ncsy = csyinx(4), as this would indicate that the data is current.
+!         If you wish to force this routine to fetch coordinate system data (in
+!         the case of loading a local array, for example), you MUST set
+!         ncsy != csyinx(4) before function call.
+
+!     typ=int,dp,log,chr,dcp   siz=sc,ar(n),func    intent=in,out,inout
+!  input arguments:
+!     variable (typ,siz,intent)    description                  csycom name
+!     ncsy     (int,sc,in)       - coordinate system number
+!     csyinx(4) (int,sc,inout)   - coordinate system number     csyact
+
+!  output arguments:
+!     csydpx   (dp,ar(18),out)
+!                         csydpx(1-9)   - transformation matrix
+!                               (10-12) - origin (XC, YC, ZC)
+!                               (13-14) - coordinate system parameters  cparm
+!                                                                       cparm2
+!                               (15)    - spare
+!                               (16-18) - defining angles
+!     csyinx   (int,ar(6),out)
+!                         csyinx(1-2)   - theta, phi singularity keys
+!                               (3)     - coordinate system type        icdsys
+!         (csyinx(4) is inout)  (4)     - coordinate system number      csyact
+!                               (5)     - spare
+!                               (6)     - spare
+!     csyget   (int,func,out)      - status of coordinate system
+!                                   = 0 - coordinate system exists
+!                                   = 1 - coordinate system doesn't exist
+      INTERFACE
+         FUNCTION csyget (ncsy, csydpx, csyinx)
+         IMPLICIT NONE
+         INTEGER :: csyget
+         INTEGER, INTENT(IN) :: ncsy
+         DOUBLE PRECISION, INTENT(OUT), DIMENSION(18) :: csydpx
+         INTEGER, INTENT(INOUT), DIMENSION(6) :: csyinx
+         END FUNCTION csyget
+      END INTERFACE
+
 ! 7.5.18. csyput Subroutine (Storing a Coordinate System)
 ! 7.5.19. csydel Subroutine (Deleting a Coordinate System)
 ! 7.5.20. userac Subroutine (Demonstrates Use of Element Attribute Routines)

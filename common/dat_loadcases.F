@@ -9,7 +9,6 @@
       SUBROUTINE dat_loadcases()
       USE ansys_fun, ONLY : TrackBegin, TrackEnd, erhandler, foriqr
       USE ansys_par, ONLY : DB_NUMDEFINED, ERH_NOTE, PARMSIZE
-      USE glans, ONLY : doDebugLoc
       USE LOCMOD, ONLY : libname, jobname, max_loadcases, n_nloads,
      &     n_sfiles
       IMPLICIT NONE
@@ -29,8 +28,8 @@ C ======================================================================
       INTEGER s_file
 
 !     dataspace for feeding erhandler subroutine
-      DOUBLE PRECISION ::  derrinfo(10)
-      CHARACTER(LEN=PARMSIZE) :: cerrinfo(10)
+      DOUBLE PRECISION, DIMENSION(10) ::  derrinfo
+      CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
 
       CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
 

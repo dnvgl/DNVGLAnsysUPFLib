@@ -53,6 +53,7 @@ CONTAINS
     TYPE(i_list), POINTER :: cur
 
     CALL TrackBegin('linklist:append_i_list')
+    cur => NULL()
     next => base
     DO WHILE (ASSOCIATED(next))
        cur => next
@@ -106,6 +107,7 @@ CONTAINS
     TYPE(ii_list), POINTER :: cur
 
     CALL TrackBegin('linklist:append_ii_list')
+    cur => NULL()
     next => base
     DO WHILE (ASSOCIATED(next))
        cur => next
@@ -209,6 +211,7 @@ CONTAINS
     TYPE(il_list), POINTER :: cur
 
     CALL TrackBegin('linklist:append_il_list')
+    cur => NULL()
     next => base
     DO WHILE (ASSOCIATED(next))
        cur => next
@@ -312,6 +315,7 @@ CONTAINS
     TYPE(dd_list), POINTER :: cur
 
     CALL TrackBegin('linklist:append_dd_list')
+    cur => NULL()
     next => base
     DO WHILE (ASSOCIATED(next))
        cur => next
@@ -354,5 +358,3 @@ END MODULE linklist_mod
 ! Local Variables:
 ! compile-command: "make -C .. test"
 ! End:
-
-

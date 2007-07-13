@@ -205,8 +205,8 @@ CONTAINS
 #endif
 
     ! dataspace for feeding erhandler subroutine
-    DOUBLE PRECISION ::  derrinfo(10)
-    CHARACTER(LEN=PARMSIZE) :: cerrinfo(10)
+    DOUBLE PRECISION, DIMENSION(10) ::  derrinfo
+    CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
 
     CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
 
@@ -317,8 +317,8 @@ CONTAINS
 #endif
 
     ! dataspace for feeding erhandler subroutine
-    DOUBLE PRECISION ::  derrinfo(10)
-    CHARACTER(LEN=PARMSIZE) :: cerrinfo(10)
+    DOUBLE PRECISION, DIMENSION(10) ::  derrinfo
+    CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
 
     CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
 
@@ -512,8 +512,8 @@ CONTAINS
 #endif
 
     ! dataspace for feeding erhandler subroutine
-    DOUBLE PRECISION ::  derrinfo(10)
-    CHARACTER(LEN=PARMSIZE) :: cerrinfo(10)
+    DOUBLE PRECISION, DIMENSION(10) ::  derrinfo
+    CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
 
     CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
 
@@ -683,8 +683,8 @@ CONTAINS
 #endif
 
     ! dataspace for feeding erhandler subroutine
-    DOUBLE PRECISION ::  derrinfo(10)
-    CHARACTER(LEN=PARMSIZE) :: cerrinfo(10)
+    DOUBLE PRECISION, DIMENSION(10) ::  derrinfo
+    CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
 
     CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
 
@@ -945,8 +945,8 @@ CONTAINS
     INTEGER :: numerr
 
     ! dataspace for feeding erhandler subroutine
-    DOUBLE PRECISION ::  derrinfo(10)
-    CHARACTER(LEN=PARMSIZE) :: cerrinfo(10)
+    DOUBLE PRECISION, DIMENSION(10) ::  derrinfo
+    CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
 
     CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
 
@@ -1204,8 +1204,8 @@ CONTAINS
     INTEGER :: numerr
 
     ! dataspace for feeding erhandler subroutine
-    DOUBLE PRECISION ::  derrinfo(10)
-    CHARACTER(LEN=PARMSIZE) :: cerrinfo(10)
+    DOUBLE PRECISION, DIMENSION(10) ::  derrinfo
+    CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
     CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
 
     CALL TrackBegin('glans:getfi')
@@ -1375,8 +1375,8 @@ CONTAINS
     INTEGER n1,n2
 
     ! dataspace for feeding erhandler subroutine
-    DOUBLE PRECISION ::  derrinfo(10)
-    CHARACTER(LEN=PARMSIZE) :: cerrinfo(10)
+    DOUBLE PRECISION, DIMENSION(10) ::  derrinfo
+    CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
     CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
     CHARACTER(LEN=1024) :: msg
 

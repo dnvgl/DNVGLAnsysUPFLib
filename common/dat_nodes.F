@@ -13,8 +13,8 @@ C     Created: 2007-06-01  hoel
 C ======================================================================
 
 !     dataspace for feeding erhandler subroutine
-      DOUBLE PRECISION ::  derrinfo(10)
-      CHARACTER(LEN=PARMSIZE) :: cerrinfo(10)
+      DOUBLE PRECISION, DIMENSION(10) ::  derrinfo
+      CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
 
       CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
 
