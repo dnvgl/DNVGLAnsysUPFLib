@@ -777,7 +777,9 @@ CONTAINS
 
   SUBROUTINE doDebugLoc(func, file, line)
 
+#ifdef __INTEL_COMPILER
     USE ifcore, ONLY : COMMITQQ
+#endif
     USE ansys_fun, ONLY : wrinqr
     USE ansys_par, ONLY : WR_OUTPUT
 
@@ -796,13 +798,19 @@ CONTAINS
     CHARACTER(LEN=*) :: func
     CHARACTER(LEN=*) :: file
     INTEGER :: line
+#ifdef __INTEL_COMPILER
     INTEGER :: res
+#endif
     INTEGER :: stderr
 
     stderr = wrinqr(WR_OUTPUT)
     WRITE(stderr,100) file, line, func
 100 FORMAT (X,A,':',I4,':',A)
+#ifdef __INTEL_COMPILER
     res = COMMITQQ(stderr)
+#else
+    CALL flush(stderr)
+#endif
 
   END SUBROUTINE doDebugLoc
 
