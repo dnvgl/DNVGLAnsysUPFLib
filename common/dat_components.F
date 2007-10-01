@@ -114,7 +114,7 @@ c     get name of component: -> comp_name(an_cnum)
 
 c     get type of component
             flag = get(res, 'COMP', comp_name(an_cnum+1), 'TYPE    ')
-            if (flag) THEN
+            if (flag .OR. res.EQ.0) THEN
                cerrinfo(1) = comp_name(an_cnum+1)
                CALL erhandler(fname, __LINE__, ERH_FATAL,
      &              trim(libname)//
@@ -370,8 +370,6 @@ C ======================================================================
       CALL TrackBegin('ans2bmf_elread')
 
       nmax = elmiqr(0, DB_NUMSELECTED)
-      print *, "n_elem: ", n_elem
-      print *, "nmax  : ", nmax
       n_elem=n_elem-nmax
       IF (n_elem.LT.0) THEN
          derrinfo(1) = n_elem
