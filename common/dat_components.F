@@ -19,7 +19,7 @@ c     collect components
 #endif
      &     ERH_ERROR, ERH_FATAL, ERH_NOTE, ERH_WARNING, DB_NUMSELECTED,
      &     PARMSIZE
-      USE glans, ONLY : cmselect, get, esel, ans2bmf_get_s
+      USE glans, ONLY : cmselect, get, esel, ans2bmf_get_s, message
       USE LOCMOD, ONLY : libname, comp_num, comp_name, csub_num,
      &     el_count, el_length, max_components
 
@@ -32,12 +32,12 @@ C ----------------------------------------------------------------------
 C     Created: 2007-06-01  hoel
 C ======================================================================
 
-      INTEGER el_data(*)
+      INTEGER :: el_data(*)
 
-      INTEGER ansys_comp,an_cnum,n,m,el_b4, msglvl
+      INTEGER :: ansys_comp, an_cnum, n, m, el_b4, msglvl
       INTEGER :: res
 
-      LOGICAL batch
+      LOGICAL :: batch
       COMMON /arguments/ batch
       INTEGER :: iErr
 
@@ -191,7 +191,7 @@ c     subselect all different types in the component an_cnum and store on stack
         END IF
 
         IF (el_count.LT.el_length) THEN
-           CALL message('comp',n,n)
+           CALL message('comp', n, n)
 
 c     check specifically for BEAM4 elements
            CALL cmselect('S', 'XXXCOMP')
@@ -311,7 +311,6 @@ C ======================================================================
          END IF
       END IF
       sub_length=elmiqr(0, DB_NUMSELECTED)
-
 
       el_count = el_count + sub_length
       IF (sub_length.GT.0) THEN
