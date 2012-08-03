@@ -1,11 +1,11 @@
-!     Copyright (C) 2007 by Germanischer Lloyd AG
+! Copyright (C) 2007 by Germanischer Lloyd AG
 
-!$$$  ======================================================================
-!$$$  Task      interface definitions for ANSYS routines
-!$$$  ----------------------------------------------------------------------
-!$$$  Author    Berthold Höllmann <berthold.hoellmann@gl-group.com>
-!$$$  Project   ans2bmf
-!$$$  ======================================================================
+! ======================================================================
+! Task      interface definitions for ANSYS routines
+! ----------------------------------------------------------------------
+! Author    Berthold Höllmann <berthold.hoellmann@gl-group.com>
+! Project   ans2bmf
+! ======================================================================
 
 
 ! CVSID: $Id$
@@ -18,6 +18,7 @@
 #include "echprm.inc"
 #include "syspar.inc"
 #include "elempr.inc"
+#include "tblecm.inc"
 
       INTEGER, PARAMETER :: RL_DIM  = 40
 
@@ -70,7 +71,158 @@
 !    **************************************************************
 
 
-! 6.11. Memory Management Routines
+! 6.2. Supporting Subroutines for Element Creation ...................................................... 131
+! 6.2.1. Subroutine nminfo (Returning Element Reference Names) .......................................... 131
+! 6.2.2. Subroutine svgidx (Fetching the Index for Saved Variables) ..................................... 131
+! 6.2.3. Subroutine svrget (Fetching Saved Variable Data for an Element) ................................ 132
+! 6.2.4. Subroutine svrput (Writing an Element's Saved Variable Set) .................................... 132
+! 6.2.5. Subroutine svpidx (Writing the Saved Variable Element Index to a File) ......................... 133
+! 6.2.6. Subroutine mreuse (Determining Which Element Matrices Can Be Reused) ........................... 133
+! 6.2.7. Subroutine subrd (Reading Element Load Data for a Substructure Generation Run) ................. 134
+! 6.2.8. Subroutine subwrt (Writing an Element Load Vector to a File for a Substructure Generation Run) . 135
+! 6.2.9. Subroutine rvrget (Fetching Real Constants for an Element) ..................................... 135
+! 6.2.10. Subroutine propev (Evaluating a Group of Material Properties) ................................. 135
+! 6.2.11. Subroutine prope1 (Evaluating One Material Property) .......................................... 136
+! 6.2.12. Subroutine pstev1 (Evaluating Material Properties for 1-D Elements) ........................... 137
+
+! 6.2.13. Subroutine tbuser (Retrieving User Table Data) ................................................ 137
+! *** primary function:    return the tb data for the user table
+! *** Notice - This file contains ANSYS Confidential information ***
+!  input arguments:
+!     mat      (int,sc,in)         - material property number
+!     numitm   (int,sc,in)         - the number of data items requested
+!  output arguments:
+!     tbprop   (dp,ar(numitm),out) - array of tb data
+      INTERFACE
+         SUBROUTINE tbuser(mat, numitm, tbprop)
+         IMPLICIT NONE
+         INTEGER, INTENT(IN) :: mat
+         INTEGER, INTENT(IN) :: numitm
+         DOUBLE PRECISION, INTENT(OUT), DIMENSION(numitm) :: tbprop
+         END
+      END INTERFACE
+
+! 6.2.14. Subroutine plast1 (Updating an Element's Plastic History) ..................................... 137
+! 6.2.15. Subroutine plast3 (Updating an Element's Plastic History, 4 or 6 components) .................. 138
+! 6.2.16. Subroutine creep1 (Updating an Element's Creep History) ....................................... 139
+! 6.2.17. Subroutine creep3 (Updating an Element's Creep History, 3-D Elements) ......................... 139
+! 6.2.18. Subroutine swell1 (Updating an Element's Swelling History) .................................... 140
+! 6.2.19. Subroutine swell3 (Updating an Element's Swelling History, 3-D Elements) ...................... 140
+! 6.2.20. Function elLenPsvrBuf (Determining additional ESAV Record for Plasticity) ..................... 141
+
+! 6.2.21. Function nlget (Retrieving Material Nonlinear Property Information) ........................... 141
+! *** primary function:    get a material non-linear property (TB) table.
+
+! *** Notice - This file contains ANSYS Confidential information ***
+!     input arguments:
+!        variable (typ,siz,intent)    description
+!        mat      (int,sc,in)       - material number
+!        iprop    (int,sc,in)       - property number (tbpnum in tblecm)
+!                                        use 13 for tb,user
+!                                        use 14 for tb,nl
+!     output arguments:
+!        variable (typ,siz,intent)    description
+!        nlget   (int,sc,out)       - number of property values
+!        prop    (dp,ar(nlget),out) - vector of the property values
+!                                      (the first 15(tbhdsz) items are a header,
+!                                      given below.  The terms are defined in
+!                                      tblecm.inc)
+!        --- terms of the descriptor record:
+!        header(1) = tbtyp
+!        header(2) = tbtems
+!        header(3) = temloc
+!        header(4) = dprtem
+!        header(5) = tbrow
+!        header(6) = tbcol
+!        header(7) = rowkey
+!        header(8) = nxtloc
+!        header(9) = nxttem
+!        header(10) = temptr
+!        header(11) = tbpt
+!        header(12) = tbsiz
+!        header(13) = tbopt
+!        header(14) = hypopt
+!        header(15) = tbnpts
+      INTERFACE
+         FUNCTION nlget(mat, iprop, prop)
+         IMPLICIT NONE
+         INTEGER :: nlget
+         INTEGER, INTENT(IN) :: mat
+         INTEGER, INTENT(IN) :: iprop
+         DOUBLE PRECISION, INTENT(OUT), DIMENSION(*) :: prop
+         END FUNCTION nlget
+      END INTERFACE
+
+! 6.2.22. Subroutine usereo (Storing Data in the nmisc Record) .......................................... 142
+! 6.2.23. Subroutine eldwrtL (Writing Element Data to a File) ........................................... 142
+! 6.2.24. Subroutine eldwrnL (Writing Element Nonsummable Miscellaneous Data to the Results File) ....... 143
+! 6.2.25. Subroutine trrot (Computing the Rotation Vector) .............................................. 143
+! 6.2.26. Subroutine rottr (Computing the Transformation Matrix) ........................................ 143
+! 6.2.27. Subroutine xyzup3 (Updating an Element's 3-D Nodal Coordinates) ............................... 144
+! 6.2.28. Subroutine updrot (Updating the Rotation Pseudovector) ........................................ 144
+! 6.2.29. Subroutine tmpget (Defining Current Temperature Loads) ........................................ 144
+! 6.2.30. Subroutine prsget (Defining Current Pressure Loads) ........................................... 145
+! 6.2.31. Subroutine cnvget (Defining Current Convection Loads) ......................................... 145
+! 6.2.32. Subroutine hgnget (Defining Current Heat Generation Loads) .................................... 146
+! 6.2.33. Subroutine prinst (Computing principal stress and stress intensity) ........................... 146
+! 6.3. Routines for Modifying and Monitoring Existing Elements .......................................... 146
+! 6.3.1. Subroutine userfd (Computing the Complex Load Vector for Frequency Domain Logic) ............... 147
+! 6.3.2. Subroutine userou (Storing User-Supplied Element Output) ....................................... 148
+! 6.3.3. Subroutine useran (Modifying Orientation of Material Properties) ............................... 149
+! 6.3.4. Subroutine usanly (Modifying Orientation of Material Properties and Stresses of Layers) ........ 149
+! 6.3.5. Subroutine userrc (Performing User Operations on COMBIN7 and COMBIN37 Parameters) .............. 150
+! 6.3.6. Function userpe (Calculating Rotation Caused by Internal Pressure) ............................. 150
+! 6.3.7. Subroutine UElMatx (Accessing Element Matrices and Load Vectors) ............................... 151
+! 6.3.8. Subroutine UTHICK (Getting User-defined Initial Thickness) ..................................... 151
+! 6.3.9. Subroutine USTRESS (Getting User-defined Initial Stress) ....................................... 152
+! 6.3.10. Subroutine UsrFictive (Providing User-defined Fictive Temperature Relationship) ............... 152
+! 6.3.11. Subroutine UsrViscEl (Performs Viscoelastic Computation) ...................................... 153
+! 6.3.12. Subroutine usrsurf116 (Modifying SURF151 and SURF152 Film Coefficients and Bulk Temperatures) . 154
+! 6.3.13. Subroutine User116Cond (Computes the conductance coefficient for FLUID116) .................... 155
+! 6.3.14. Subroutine User116Hf (Computes the film coefficient for FLUID116) ............................. 155
+! 6.3.15. Subroutine Us_Surf_Str (Captures surface stresses) ............................................ 156
+! 6.3.16. Subroutine usflex (Computes the flexibility factor for PIPE16, PIPE17, PIPE18, and PIPE60) .... 156
+! 6.3.17. Subroutine UsrShift (Calculates pseudotime time increment) .................................... 157
+! 6.4. Routines for Customizing Material Behavior ....................................................... 157
+! 6.4.1. Subroutine usermat (Writing Your Own Material Models) .......................................... 157
+! 6.4.2. Subroutine userpl (Writing Your Own Plasticity Laws) ........................................... 160
+! 6.4.3. Subroutines usercreep and usercr (Defining Viscoplastic/Creep Material Behavior) ............... 161
+! 6.4.3.1. Creep Subroutine usercreep ................................................................... 162
+! 6.4.3.2. Creep Subroutine usercr ...................................................................... 163
+! 6.4.4. Subroutine usersw (Writing Your Own Swelling Laws) ............................................. 164
+! 6.4.5. Subroutine UserHyper (Writing Your Own Hyperelasticity Laws) ................................... 165
+! 6.4.6. Subroutine uservp (Updating Nonlinear Strain History for Materials) ............................ 166
+! 6.4.7. Subroutine userck (Checking User-Defined Material Data) ........................................ 167
+! 6.4.8. Subroutine usermc (Controlling Hygrothermal Growth) ............................................ 167
+! 6.4.9. Subroutine usrfc6 (Defining Custom Failure Criteria) ........................................... 168
+! 6.4.10. Subroutines usrfc1 through usrfc5 ............................................................. 168
+! 6.4.11. Subroutine UserVisLaw (Defining Viscosity Laws) ............................................... 168
+! 6.4.12. Supporting Function egen ...................................................................... 169
+! 6.5. Routines for Customizing Loads ................................................................... 170
+! 6.5.1. Subroutine usrefl (Changing Scalar Fields to User-Defined Values) .............................. 170
+! 6.5.2. Subroutine userpr (Changing Element Pressure Information) ...................................... 171
+! 6.5.3. Subroutine usercv (Changing Element Face Convection Surface Information) ....................... 171
+! 6.5.4. Subroutine userfx (Changing Element Face Heat Flux Surface Information) ........................ 172
+! 6.5.5. Subroutine userch (Changing Element Face Charge Density Surface Information) ................... 173
+! 6.6. Running ANSYS as a Subroutine .................................................................... 174
+! 6.7. Defining Your Own Commands ....................................................................... 174
+! 6.7.1. Function user01 ................................................................................ 175
+! 6.7.2. Function user02 (Demonstrates Offsetting Selected Nodes) ....................................... 176
+! 6.7.3. Function user03 (Demonstrates Using ANSYS Memory) .............................................. 177
+! 6.7.4. Function user04 ................................................................................ 179
+! 6.7.5. Functions user05 through user10 ................................................................ 181
+! 6.8. Supporting Subroutines ........................................................................... 181
+! 6.8.1. Function GetRForce (Getting Nodal Reaction Force values) ....................................... 181
+! 6.8.2. Function GetStackDisp (Getting Current Displacement Values) .................................... 181
+! 6.8.3. Subroutine ElResultStrt (Getting Load Data from Analysis Results) .............................. 182
+! 6.8.4. Subroutine ElResultGet (Getting Results Values at Selected Points) ............................. 182
+! 6.8.5. Subroutine ElInterp (Finding Element Coordinates) .............................................. 183
+! 6.9. Access at the Beginning and End of Various Operations ............................................ 183
+! 6.10. Creating Your Own Optimization Routine .......................................................... 184
+! 6.10.1. Linking a Custom Optimization Program to ANSYS ................................................ 185
+! 6.10.2. Subroutine userop (Defining a Custom Optimization Routine) .................................... 185
+! 6.10.3. Structuring Your Input ........................................................................ 187
+! 6.11. Memory Management Routines ...................................................................... 188
 ! 6.11.1. Using the Memory Management Routines
 
 ! 6.11.2. Function fAnsMemAlloc (Allocating Space and Returning a Pointer)
@@ -152,7 +304,7 @@
 #endif
          CHARACTER(LEN=PARMSIZE), INTENT(IN) :: ParName
          INTEGER, INTENT(IN) :: nDim
-         DOUBLE PRECISION, DIMENSION(nDim), INTENT(IN) :: subc
+         DOUBLE PRECISION, DIMENSION(*), INTENT(IN) :: subc
          INTEGER, INTENT(IN) :: lvl
 #if   ANSVER < 70
          END FUNCTION parevl
@@ -691,7 +843,6 @@ c     output arguments:  none.
          DOUBLE PRECISION, INTENT(OUT), DIMENSION(*) :: prop
          END FUNCTION mpget
       END INTERFACE
-
 
 ! 7.5.11. mpput Subroutine (Storing a Material Property Table)
 ! 7.5.12. mpdel Subroutine (Deleting a Material Property Table)
