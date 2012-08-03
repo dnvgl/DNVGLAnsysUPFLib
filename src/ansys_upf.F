@@ -10,21 +10,7 @@
 
 ! CVSID: $Id$
 
-      MODULE ansys_par
-
-#include "impcom.inc"
-#include "computer.h"
-#include "ansysdef.inc"
-#include "echprm.inc"
-#include "syspar.inc"
-#include "elempr.inc"
-#include "tblecm.inc"
-
-      INTEGER, PARAMETER :: RL_DIM  = 40
-
-      END MODULE ansys_par
-
-      MODULE ansys_fun
+      MODULE ansys_upf
 
 ! **************************************************************
 ! Functions for accessing data on the command line
@@ -1644,7 +1630,7 @@ c *** primary function:    Display ANSYS error messages
 ! 8.4.9. tran Subroutine (Transposing a matrix)
 ! 8.4.10. symeqn Subroutine (Solving Simultaneous Linear Equations)
 
-      END MODULE ansys_fun
+      END MODULE ansys_upf
 
 ! Local Variables:
 ! compile-command:"make -C .. test"
