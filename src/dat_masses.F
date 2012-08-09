@@ -11,7 +11,7 @@ C     ======================================================================
 C CVSID: $Id$
 
       SUBROUTINE dat_masses()
-      USE ansys_fun, ONLY : TrackBegin, TrackEnd, RunCommand, elmiqr
+      USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, elmiqr
 #if   ANSVER >= 70
       USE ansys_par, ONLY : CMD_MAX_LENG,
 #else

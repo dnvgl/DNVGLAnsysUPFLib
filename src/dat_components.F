@@ -10,7 +10,7 @@ c     collect components
 
       SUBROUTINE dat_components(el_data)
 
-      USE ansys_fun, ONLY : TrackBegin, TrackEnd, RunCommand, erhandler,
+      USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erhandler,
      &     elmiqr
 #if   ANSVER >= 70
       USE ansys_par, ONLY : CMD_MAX_LENG,
@@ -220,7 +220,7 @@ c###########################################################
 
       SUBROUTINE ans2bmf_cstore(comp, csub, el_data)
 
-      USE ansys_fun, ONLY : TrackBegin, TrackEnd, elmget, elmiqr,
+      USE ansys_upf, ONLY : TrackBegin, TrackEnd, elmget, elmiqr,
      &     elnext, etyget, erhandler
       USE ansys_par, ONLY : DB_NUMSELECTED, EL_DIM, EL_TYPE, ERH_NOTE,
      &     NNMAX, PARMSIZE, KYOP1
@@ -343,7 +343,7 @@ c-----------------------------------------------------------
 
       SUBROUTINE ans2bmf_elread(el_data)
 
-      USE ansys_fun, ONLY : TrackBegin, TrackEnd, elmiqr, elnext,
+      USE ansys_upf, ONLY : TrackBegin, TrackEnd, elmiqr, elnext,
      &     erhandler
       USE ansys_par, ONLY : DB_NUMSELECTED, ERH_ERROR, PARMSIZE
       USE LOCMOD, ONLY : el_offset, libname, n_elem

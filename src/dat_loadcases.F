@@ -7,7 +7,7 @@
 #endif
 
       SUBROUTINE dat_loadcases()
-      USE ansys_fun, ONLY : TrackBegin, TrackEnd, erhandler, foriqr
+      USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler, foriqr
       USE ansys_par, ONLY : DB_NUMDEFINED, ERH_NOTE, PARMSIZE
       USE LOCMOD, ONLY : libname, jobname, max_loadcases, n_nloads,
      &     n_sfiles

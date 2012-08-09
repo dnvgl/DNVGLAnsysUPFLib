@@ -1,6 +1,6 @@
 c     find out and store # of nodes
       SUBROUTINE dat_nodes()
-      USE ansys_fun, ONLY : TrackBegin, TrackEnd, ndinqr, erhandler
+      USE ansys_upf, ONLY : TrackBegin, TrackEnd, ndinqr, erhandler
       USE ansys_par, ONLY : DB_NUMDEFINED, ERH_NOTE, PARMSIZE
       USE LOCMOD, ONLY : libname, n_nodes
       IMPLICIT NONE

@@ -10,7 +10,7 @@ c get beam properties
 
       SUBROUTINE dat_beamproperties(bp_data, rl_data)
 
-      USE ansys_fun, ONLY : TrackBegin, TrackEnd, erhandler, rlget,
+      USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler, rlget,
      &     rlinqr, vzero
       USE ansys_par, ONLY : DB_NUMSELECTED, DB_SELECTED, DB_MAXDEFINED,
      &     ERH_ERROR, ERH_NOTE, PARMSIZE
@@ -277,7 +277,7 @@ c###########################################################
 
       SUBROUTINE ans2bmf_rlallsel()
 
-      USE ansys_fun, ONLY : TrackBegin, TrackEnd, rlinqr, rlsel
+      USE ansys_upf, ONLY : TrackBegin, TrackEnd, rlinqr, rlsel
       USE ansys_par, ONLY : DB_MAXDEFINED
 
       IMPLICIT NONE
@@ -305,7 +305,7 @@ c-----------------------------------------------------------
 
       SUBROUTINE ans2bmf_rlnosel()
 
-      USE ansys_fun, ONLY : TrackBegin, TrackEnd, rlinqr, rlsel
+      USE ansys_upf, ONLY : TrackBegin, TrackEnd, rlinqr, rlsel
       USE ansys_par, ONLY : DB_MAXDEFINED
 
       IMPLICIT NONE
@@ -333,7 +333,7 @@ c-----------------------------------------------------------
 
       SUBROUTINE ans2bmf_rlsle()
 
-      USE ansys_fun, ONLY : TrackBegin, TrackEnd, elmget, elnext
+      USE ansys_upf, ONLY : TrackBegin, TrackEnd, elmget, elnext
       USE ansys_par, ONLY : EL_DIM, EL_REAL, NNMAX
 
       IMPLICIT NONE

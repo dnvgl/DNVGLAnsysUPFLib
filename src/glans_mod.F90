@@ -49,7 +49,7 @@ CONTAINS
     ! reads ANSYS command string 'cmd_str'
     ! puts out double precision parameter 'dout'
 
-    USE ansys_fun, ONLY : TrackBegin, TrackEnd, RunCommand, parevl
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, parevl
 #if ANSVER >= 70
     USE ansys_par, ONLY : CMD_MAX_LENG, STRING_MAX_LENG, &
 #else
@@ -94,7 +94,7 @@ CONTAINS
   SUBROUTINE ans2bmf_get_s(cmd_str, sout)
     ! reads ANSYS command string 'cmd_str'
     ! writes a string of length 8 into 'sout'
-    USE ansys_fun, ONLY : TrackBegin, TrackEnd, RunCommand, parevl
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, parevl
 #if ANSVER >= 70
     USE ansys_par, ONLY : CMD_MAX_LENG, STRING_MAX_LENG, &
 #else
@@ -143,7 +143,7 @@ CONTAINS
 
   FUNCTION upcase(string) RESULT(upper)
     ! Convert input string to uppercase
-    USE ansys_fun, ONLY : TrackBegin, TrackEnd
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd
     IMPLICIT NONE
     CHARACTER(LEN=*), INTENT(IN) :: string
     CHARACTER(LEN=LEN(string)) :: upper
@@ -165,7 +165,7 @@ CONTAINS
 
   SUBROUTINE cmselect(mode, name)
     ! select component
-    USE ansys_fun, ONLY : TrackBegin, TrackEnd, RunCommand
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand
 #if ANSVER >= 70
    USE ansys_par, ONLY : CMD_MAX_LENG, &
 #else
@@ -240,7 +240,7 @@ CONTAINS
   END SUBROUTINE cmselect
 
   SUBROUTINE eseli(Type, Item, Comp, VMIN, VMAX, VINC, KABS)
-    USE ansys_fun, ONLY : TrackBegin, TrackEnd, RunCommand
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand
 #if ANSVER >= 70
     USE ansys_par, ONLY : CMD_MAX_LENG, &
 #else
@@ -451,7 +451,7 @@ CONTAINS
   END SUBROUTINE eseli
 
   SUBROUTINE esels(Type, Item, Comp, VMIN)
-    USE ansys_fun, ONLY : TrackBegin, TrackEnd, RunCommand, erhandler
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erhandler
 #if ANSVER >= 70
     USE ansys_par, ONLY : CMD_MAX_LENG, &
 #else
@@ -614,7 +614,7 @@ CONTAINS
   END SUBROUTINE esels
 
   SUBROUTINE nsel(Type, Item, Comp, VMIN, VMAX, VINC, KABS)
-    USE ansys_fun, ONLY : TrackBegin, TrackEnd, RunCommand, erhandler
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erhandler
 #if ANSVER >= 70
     USE ansys_par, ONLY : CMD_MAX_LENG, &
 #else
@@ -780,7 +780,7 @@ CONTAINS
 #ifdef __INTEL_COMPILER
     USE ifcore, ONLY : COMMITQQ
 #endif
-    USE ansys_fun, ONLY : wrinqr
+    USE ansys_upf, ONLY : wrinqr
     USE ansys_par, ONLY : WR_OUTPUT
 
     IMPLICIT NONE
@@ -816,7 +816,7 @@ CONTAINS
 
   FUNCTION gets(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
-    USE ansys_fun, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
 #if ANSVER >= 70
     USE ansys_par, ONLY : CMD_MAX_LENG, &
 #else
@@ -919,7 +919,7 @@ CONTAINS
 
   FUNCTION getsi(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
-    USE ansys_fun, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
 #if ANSVER >= 70
     USE ansys_par, ONLY : CMD_MAX_LENG, &
 #else
@@ -981,7 +981,7 @@ CONTAINS
 
   FUNCTION getf(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
-    USE ansys_fun, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
 #if ANSVER >= 70
     USE ansys_par, ONLY : CMD_MAX_LENG, &
 #else
@@ -1080,7 +1080,7 @@ CONTAINS
 
   FUNCTION getfs(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
-    USE ansys_fun, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
 #if ANSVER >= 70
     USE ansys_par, ONLY : CMD_MAX_LENG, &
 #else
@@ -1178,7 +1178,7 @@ CONTAINS
 
   FUNCTION getfi(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
-    USE ansys_fun, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
 #if ANSVER >= 70
     USE ansys_par, ONLY : CMD_MAX_LENG, &
 #else
@@ -1239,7 +1239,7 @@ CONTAINS
 
   FUNCTION geti(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
-    USE ansys_fun, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
 #if ANSVER >= 70
     USE ansys_par, ONLY : CMD_MAX_LENG, &
 #else
@@ -1282,7 +1282,7 @@ CONTAINS
 
   FUNCTION getis(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
-    USE ansys_fun, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
 #if ANSVER >= 70
     USE ansys_par, ONLY : CMD_MAX_LENG, &
 #else
@@ -1325,7 +1325,7 @@ CONTAINS
 
   FUNCTION getii(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
-    USE ansys_fun, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
 #if ANSVER >= 70
     USE ansys_par, ONLY : CMD_MAX_LENG, &
 #else
@@ -1368,7 +1368,7 @@ CONTAINS
 
   ! issue warnings and update message count
   SUBROUTINE message(wcode,n1,n2)
-    USE ansys_fun, ONLY : TrackBegin, TrackEnd, erhandler
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler
     USE ansys_par, ONLY : ERH_WARNING, PARMSIZE, MP_EX, MP_NUXY, MP_DENS
     USE LOCMOD, ONLY : libname
     IMPLICIT NONE

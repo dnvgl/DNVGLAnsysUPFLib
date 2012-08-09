@@ -1,7 +1,7 @@
 c     get jobname
       SUBROUTINE dat_jobname()
 
-      USE ansys_fun, ONLY : TrackBegin, TrackEnd, erhandler
+      USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler
       USE ansys_par, ONLY : ERH_NOTE, PARMSIZE, STRING_MAX_LENG
       USE glans, ONLY : ans2bmf_get_s
       USE LOCMOD, ONLY : jobname, libname
