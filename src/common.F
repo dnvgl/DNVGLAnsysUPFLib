@@ -1,26 +1,25 @@
 
-c     variables to interface with ANSYS
+!     variables to interface with ANSYS
       INTEGER ityp, ielc(IelCSZ)
 
-
-c     global information about ANSYS model
+!     global information about ANSYS model
       INTEGER n_nodes, n_nloads, n_elem, n_masses, n_mass_groups
 
-c     variables and parameters
+!     variables and parameters
 
-c     NZERO is used to compare double numbers
-c     NDIGITS is the number of significant digits
+!     NZERO is used to compare double numbers
+!     NDIGITS is the number of significant digits
       DOUBLE PRECISION NZERO, NDIGITS
       PARAMETER (NZERO = 1E-30, NDIGITS=8)
 
-c     at this point, just one structure is admitted
+!     at this point, just one structure is admitted
       INTEGER structure
       PARAMETER (structure = 1)
-c     [jobname].ascii is the file name opened as outfile
+!     [jobname].ascii is the file name opened as outfile
       CHARACTER(LEN=32) :: jobname
       INTEGER outfile, sfiles
 
-c     this block holds the component information
+!     this block holds the component information
       INTEGER el_offset, el_length, el_count
 
       INTEGER max_components
@@ -38,23 +37,23 @@ c     this block holds the component information
 
       INTEGER bp_length, bp_num_i, bp_num_j
       INTEGER bp_R, bp_A, bp_I, bp_e, bp_sc, bp_sf, bp_d, bp_rlen
-      PARAMETER (bp_R = 0, bp_A=1, bp_I=4, bp_e=7, bp_sc=13, bp_sf=15,
-     $     bp_d=17, bp_rlen=20)
+      PARAMETER (bp_R = 0, bp_A=1, bp_I=4, bp_e=7, bp_sc=13, bp_sf=15,  &
+     &     bp_d=17, bp_rlen=20)
 
       INTEGER rl_length, rl_num
 
-      COMMON / ans2bmf_ans2bmf /
-     x     ityp, ielc, n_nodes, n_nloads, n_sfiles, max_loadcases,
-     x   jobname, outfile, sfiles, n_elem, n_masses, n_mass_groups,
-     x   el_offset, el_length, el_count,
-     x     l_comp_name, comp_name, l_comp_pos, l_comp_len, comp_num,
-     x     l_comp_ansys, l_comp_csub,
-     x   bp_length, bp_num_i, bp_num_j,
-     x   rl_length, rl_num,
-     x   l_csub_gid
+      COMMON / ans2bmf_ans2bmf /                                        &
+     &     ityp, ielc, n_nodes, n_nloads, n_sfiles, max_loadcases,      &
+     &   jobname, outfile, sfiles, n_elem, n_masses, n_mass_groups,     &
+     &   el_offset, el_length, el_count,                                &
+     &     l_comp_name, comp_name, l_comp_pos, l_comp_len, comp_num,    &
+     &     l_comp_ansys, l_comp_csub,                                   &
+     &   bp_length, bp_num_i, bp_num_j,                                 &
+     &   rl_length, rl_num,                                             &
+     &   l_csub_gid
 
 #include "csubdata.inc"
 
-c Local Variables:
-c compile-command:"make -C .. test"
-c End:
+! Local Variables:
+! compile-command:"make -C .. test"
+! End:
