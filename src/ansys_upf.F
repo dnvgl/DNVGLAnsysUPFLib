@@ -10,6 +10,8 @@
 
 ! CVSID: $Id$
 
+#include "computer.h"
+
       MODULE ansys_upf
 
 ! **************************************************************
@@ -229,6 +231,7 @@
 !                                     routine
       INTERFACE
          FUNCTION fAnsMemAlloc(iLen, key, c16Label)
+         USE ansys_par
          IMPLICIT NONE
          PTRFTN :: fAnsMemAlloc
          INTEGER, INTENT(IN) :: iLen
@@ -248,6 +251,7 @@
 !     ptr   (PTRFTN,sc,inout)  - pointer will be set to zero
       INTERFACE
          SUBROUTINE fAnsMemFree(ptr)
+         USE ansys_par
          IMPLICIT NONE
          PTRFTN, INTENT(INOUT) :: ptr
          END SUBROUTINE fAnsMemFree

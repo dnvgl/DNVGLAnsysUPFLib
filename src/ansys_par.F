@@ -10,10 +10,11 @@
 
 ! CVSID: $Id$
 
+#include "computer.h"
+
       MODULE ansys_par
 
 #include "impcom.inc"
-#include "computer.h"
 #include "ansysdef.inc"
 #include "echprm.inc"
 #include "syspar.inc"
