@@ -1,54 +1,61 @@
-C     Copyright (C) 2005 by Germanischer Lloyd AG
+!     Copyright (C) 2005 by Germanischer Lloyd AG
 
-C     ======================================================================
-C     Task      collect mass information from ANSYS model
-C     ----------------------------------------------------------------------
-C     Author    Berthold Höllmann <hoel@GL-Group.com>
-C     Project   ans2bmf
-C     ======================================================================
+!     ======================================================================
+!     Task      collect mass information from ANSYS model
+!     ----------------------------------------------------------------------
+!     Author    Berthold Höllmann <hoel@GL-Group.com>
+!     Project   ans2bmf
+!     ======================================================================
 
 
-C CVSID: $Id$
+! CVSID: $Id$
 
-      SUBROUTINE dat_masses()
-      USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, elmiqr
-#if   ANSVER >= 70
-      USE ansys_par, ONLY : CMD_MAX_LENG,
+MODULE mod_dat_masses
+
+CONTAINS
+
+  SUBROUTINE dat_masses()
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, elmiqr
+#if ANSVER >= 70
+    USE ansys_par, ONLY : CMD_MAX_LENG, DB_NUMSELECTED
 #else
-      USE ansys_par, ONLY : SYS_LNG_CMDLN,
+    USE ansys_par, ONLY : SYS_LNG_CMDLN, DB_NUMSELECTED
+
 #endif
-     &     DB_NUMSELECTED
-      USE LOCMOD, ONLY : n_masses
-      IMPLICIT NONE
-C     Purpose:
-C
-C     Parameter:
-C     in/out Name          Task
-C ----------------------------------------------------------------------
-C     Created: 2007-06-01  hoel
-C ======================================================================
+    USE ans_common, ONLY : n_masses
 
-      INTEGER :: iErr
+    ! Purpose:
+    !
+    ! Parameter:
+    ! in/out Name          Task
+    ! ----------------------------------------------------------------------
+    ! Created: 2007-06-01  hoel
+    ! ======================================================================
 
-#if   ANSVER >= 70
-      CHARACTER(LEN=CMD_MAX_LENG) :: cmd
+    IMPLICIT NONE
+
+    INTEGER :: iErr
+
+#if ANSVER >= 70
+    CHARACTER(LEN=CMD_MAX_LENG) :: cmd
 #else
-      CHARACTER(LEN=SYS_LNG_CMDLN) :: cmd
+    CHARACTER(LEN=SYS_LNG_CMDLN) :: cmd
 #endif
 
-      CALL TrackBegin('dat_masses')
+    CALL TrackBegin('dat_masses')
 
-c     select all nodal mass elements
-      cmd = 'ESEL,S,ENAME,,MASS21'
-      iErr = RunCommand(LEN_TRIM(cmd), cmd)
+    ! select all nodal mass elements
+    cmd = 'ESEL,S,ENAME,,MASS21'
+    iErr = RunCommand(LEN_TRIM(cmd), cmd)
 
-      n_masses = elmiqr(0, DB_NUMSELECTED)
+    n_masses = elmiqr(0, DB_NUMSELECTED)
 
-      CALL TrackEnd('dat_masses')
+    CALL TrackEnd('dat_masses')
 
-      END
+  END SUBROUTINE dat_masses
 
+END MODULE mod_dat_masses
 
-C Local Variables:
-C compile-command: "make -C .. test"
-C End:
+! Local Variables:
+! compile-command: "make -C .. test"
+! End:

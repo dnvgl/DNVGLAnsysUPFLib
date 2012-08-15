@@ -1,34 +1,45 @@
-c     find out and store # of nodes
-      SUBROUTINE dat_nodes()
-      USE ansys_upf, ONLY : TrackBegin, TrackEnd, ndinqr, erhandler
-      USE ansys_par, ONLY : DB_NUMDEFINED, ERH_NOTE, PARMSIZE
-      USE LOCMOD, ONLY : libname, n_nodes
-      IMPLICIT NONE
-C     Purpose:
-C
-C     Parameter:
-C     in/out Name          Task
-C ----------------------------------------------------------------------
-C     Created: 2007-06-01  hoel
-C ======================================================================
+!     find out and store # of nodes
+MODULE mod_dat_nodes
 
-!     dataspace for feeding erhandler subroutine
-      DOUBLE PRECISION, DIMENSION(10) ::  derrinfo
-      CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
+CONTAINS
 
-      CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
+  SUBROUTINE dat_nodes()
 
-      CALL TrackBegin('dat_nodes')
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, ndinqr, erhandler
+    USE ansys_par, ONLY : DB_NUMDEFINED, ERH_NOTE, PARMSIZE
+    USE ans_common, ONLY : n_nodes
+    USE LOCMOD, ONLY : libname
 
-      n_nodes = ndinqr(0, DB_NUMDEFINED)
-      derrinfo(1) = n_nodes
-      CALL erhandler(fname, __LINE__, ERH_NOTE,
-     $     trim(libname)//':   nodes defined: %i', derrinfo, cerrinfo)
+    ! Purpose:
+    !
+    ! Parameter:
+    ! in/out Name          Task
+    ! ----------------------------------------------------------------------
+    ! Created: 2007-06-01  hoel
+    ! ======================================================================
 
-      CALL TrackEnd('dat_nodes')
+    ! dataspace for feeding erhandler subroutine
 
-      END
+    IMPLICIT NONE
 
-c Local Variables:
-c compile-command:"make -C .. test"
-c End:
+    DOUBLE PRECISION, DIMENSION(10) ::  derrinfo
+    CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
+
+    CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
+
+    CALL TrackBegin('dat_nodes')
+
+    n_nodes = ndinqr(0, DB_NUMDEFINED)
+    derrinfo(1) = n_nodes
+    CALL erhandler(fname, __LINE__, ERH_NOTE, &
+         trim(libname)//':   nodes defined: %i', derrinfo, cerrinfo)
+
+    CALL TrackEnd('dat_nodes')
+
+  END SUBROUTINE dat_nodes
+
+END MODULE mod_dat_nodes
+
+! Local Variables:
+! compile-command:"make -C .. test"
+! End:
