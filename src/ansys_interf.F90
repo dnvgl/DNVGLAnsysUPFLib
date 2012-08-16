@@ -10,11 +10,11 @@
 
 ! ID: $Id$
 
-MODULE ansys_interf
-
 !DEC$ NOFREEFORM
 #include "computer.h"
 !DEC$ FREEFORM
+
+MODULE ansys_interf
 
 ! Guide to Interfacing with ANSYS
 
@@ -87,6 +87,7 @@ MODULE ansys_interf
 ! deck,biniqr8
   INTERFACE
      FUNCTION biniqr8 (nblk,key)
+       IMPLICIT NONE
        INTEGER, INTENT(IN) :: nblk
        INTEGER, INTENT(IN) :: key
        INTEGER :: biniqr8
@@ -206,6 +207,7 @@ MODULE ansys_interf
 !deck,bintfo
   INTERFACE
      SUBROUTINE bintfo (title,jobnam,units,code)
+       IMPLICIT NONE
        CHARACTER(LEN=80), INTENT(IN), DIMENSION(2) :: title
        CHARACTER(LEN=8), INTENT(IN) :: jobnam
        INTEGER, INTENT(IN) :: units
@@ -240,12 +242,74 @@ MODULE ansys_interf
 !     none
 
 ! 2.1.10. Subroutine binhed (Writing the Standard ANSYS File Header)
+!deck,binhed
+  INTERFACE
+     SUBROUTINE binhed (nblk,nunit,filpos,buffer)
+       IMPLICIT NONE
+       INTEGER, INTENT(IN) :: nblk
+       INTEGER, INTENT(IN) :: nunit
+       INTEGER, INTENT(OUT) :: filpos
+       INTEGER, DIMENSION(*), INTENT(INOUT) :: buffer
+     END SUBROUTINE binhed
+  END INTERFACE
+! *** primary function: put standard header on a binary file, all
+!     permanent binary files should have this header
+! *** secondary functions: return the first data position
+! --- This routine is intended to be used in standalone programs.
+! --- This routine should not be linked into the ANSYS program.
 
-! 2.1.11. Subroutine binrd8 (Reading Data from a Buffered File)
+! *** Notice - This file contains ANSYS Confidential information ***
+
+!  input arguments:
+!     nblk (int,sc,in)         - block number of open binary file
+!                                (as defined with subroutine binset)
+!     nunit (int,sc,in)        - the unit number for this file
+!     buffer (int,ar(*),inout) - work array for paging, should be the
+!                                same array as used in binset
+!  output arguments:
+!     filpos (int,sc,out) - the position after the header
+!     buffer (int,ar(*),inout) - work array for paging
+!   **********  ANSYS standard header data description (100 words) **********
+!  loc   no. words   contents
+!   1       1        fortran unit number
+!   2       2        file format
+!                    = 0 - internal format
+!                    = 1 - external format
+!   3       1        time in compact form (ie 130619 is 13:06:19)
+!   4       1        date in compact form (ie 19981023 is 10/23/1998)
+!   5       1        units
+!                    = 0 - user defined units
+!                    = 1 - SI (MKS)
+!                    = 2 - CSG
+!                    = 3 - U.S. Customary, using feet
+!                    = 4 - U.S. Customary, using inches
+!                    = 6 - MPA
+!                    = 7 - uMKS
+!   6       1        User_Linked
+!  10       1        revision in text format ' 5.0' (inexc4)
+!  11       1        date of revision release for this version
+!  12       3        machine identifier - 3 4-character strings
+!  15       2        jobname - 2 4-character strings
+!  17       2        product name - 2 4-character strings
+!  19       1        special version label - 1 4-character string
+!  20       3        user name - 3 4-character strings
+!  23       3        machine identifier - 3 4-character strings
+!  26       1        system record size at file write
+!  27       1        maximum file length
+!  28       1        maximum record number
+!  31       8        jobname - 8 4-character strings
+!  41      20        main title - 20 4-character strings
+!  61      20        first subtitle - 20 4-character strings
+!  95       1        split point of file
+!                     NOTE: Split files are not support by binlib!
+! 97-98     2        LONGINT of file size at write
+
+!  2.1.11. Subroutine binrd8 (Reading Data from a Buffered File)
 
 ! *deck,binrd8
   INTERFACE 
      SUBROUTINE binrd8 (nblk,LongLocL,leng,ivect,kbfint,Buffer4)
+       IMPLICIT NONE
        INTEGER, INTENT(IN) :: nblk
        LONGINT, INTENT(INOUT) :: LongLocL
        INTEGER, INTENT(IN) :: leng
@@ -296,9 +360,10 @@ MODULE ansys_interf
 ! programs.
 
   INTERFACE 
-     SUBROUTINE binrd (nblk,LongLocL,leng,ivect,kbfint,Buffer4)
+     SUBROUTINE binrd (nblk,LocL,leng,ivect,kbfint,Buffer4)
+       IMPLICIT NONE
        INTEGER, INTENT(IN) :: nblk
-       INTEGER, INTENT(INOUT) :: LongLocL
+       INTEGER, INTENT(INOUT) :: LocL
        INTEGER, INTENT(IN) :: leng
        INTEGER, INTENT(OUT), DIMENSION(*) :: ivect
        INTEGER, INTENT(OUT) ::kbfint
@@ -311,12 +376,14 @@ MODULE ansys_interf
 !deck,binwrt8
   INTERFACE
      SUBROUTINE binwrt8 (nblk,LongLocL,leng,ivect,kbfint,Buffer4)
+       !DEC$ ATTRIBUTES NO_ARG_CHECK :: ivect
+       IMPLICIT NONE
        INTEGER, INTENT(IN) :: nblk
        LONGINT, INTENT(INOUT) :: LongLocL
        INTEGER, INTENT(IN) :: leng
-       INTEGER, DIMENSION(*), INTENT(IN) :: ivect
+       INTEGER, DIMENSION(leng), INTENT(IN) :: ivect
        INTEGER, INTENT(IN) :: kbfint
-       INTEGER, DIMENTION(*), INTENT(INOUT) :: Buffer4
+       INTEGER, DIMENSION(*), INTENT(INOUT) :: Buffer4
      END SUBROUTINE binwrt8
   END INTERFACE
 ! *** primary function: buffer write routine
@@ -359,24 +426,52 @@ MODULE ansys_interf
 ! versions for any new programs.
 
   INTERFACE
-     SUBROUTINE binwrt (nblk,LongLocL,leng,ivect,kbfint,Buffer4)
+     SUBROUTINE binwrt (nblk, LocL, leng, ivect, kbfint, Buffer4)
+       !DEC$ ATTRIBUTES NO_ARG_CHECK :: ivect
+       IMPLICIT NONE
        INTEGER, INTENT(IN) :: nblk
-       INTEGER, INTENT(INOUT) :: LongLocL
+       INTEGER, INTENT(INOUT) :: LocL
        INTEGER, INTENT(IN) :: leng
        INTEGER, DIMENSION(*), INTENT(IN) :: ivect
        INTEGER, INTENT(IN) :: kbfint
-       INTEGER, DIMENTION(*), INTENT(INOUT) :: Buffer4
+       INTEGER, DIMENSION(*), INTENT(INOUT) :: Buffer4
      END SUBROUTINE binwrt
   END INTERFACE
 
 ! 2.1.13. Subroutine exinc4 (Decoding an Integer String into a Character String)
+
 ! 2.1.14. Subroutine inexc4 (Coding a Character String into an Integer String)
+
+!deck,inexc4
+  INTERFACE
+     SUBROUTINE inexc4 (chin,ichext,n)
+       IMPLICIT NONE
+       CHARACTER, DIMENSION(n), INTENT(IN) :: chin
+       INTEGER, DIMENSION(n), INTENT(OUT) :: ichext
+       INTEGER, INTENT(IN) :: n
+     END SUBROUTINE inexc4
+  END INTERFACE
+! primary function: encode plain 4-character strings into externally formatted
+!                   integer versions of 4-character strings (used to convert
+!                   data from internally formatted files to data for
+!                   externally formatted files)
+!
+! *** Notice - This file contains ANSYS Confidential information ***
+!
+!  input arguments:
+!     chin      (char,ar(n),in)  - strings in character form
+!     n         (int,sc,in)      - number of strings to convert
+!
+!  output arguments:
+!     ichext    (int,ar(n),out)  - externally formatted integer form of
+!                                  4-character strings
 
 ! 2.1.15. Subroutine binclo (Closing or Deleting a Blocked Binary File)
 
 !deck,binclo
   INTERFACE
      SUBROUTINE binclo (nblk,pstat,Buffer4)
+       IMPLICIT NONE
        INTEGER, INTENT(IN) :: nblk
        CHARACTER, INTENT(IN)  :: pstat
        INTEGER, INTENT(INOUT), DIMENSION(*) :: Buffer4
