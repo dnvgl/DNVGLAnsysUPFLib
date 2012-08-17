@@ -244,13 +244,13 @@ MODULE ansys_interf
 ! 2.1.10. Subroutine binhed (Writing the Standard ANSYS File Header)
 !deck,binhed
   INTERFACE
-     SUBROUTINE binhed (nblk,nunit,filpos,buffer)
+     SUBROUTINE binhed8 (nblk,nunit,filpos,buffer)
        IMPLICIT NONE
        INTEGER, INTENT(IN) :: nblk
        INTEGER, INTENT(IN) :: nunit
-       INTEGER, INTENT(OUT) :: filpos
+       LONGINT, INTENT(OUT) :: filpos
        INTEGER, DIMENSION(*), INTENT(INOUT) :: buffer
-     END SUBROUTINE binhed
+     END SUBROUTINE binhed8
   END INTERFACE
 ! *** primary function: put standard header on a binary file, all
 !     permanent binary files should have this header
@@ -303,6 +303,15 @@ MODULE ansys_interf
 !  95       1        split point of file
 !                     NOTE: Split files are not support by binlib!
 ! 97-98     2        LONGINT of file size at write
+  INTERFACE
+     SUBROUTINE binhed (nblk,nunit,filpos,buffer)
+       IMPLICIT NONE
+       INTEGER, INTENT(IN) :: nblk
+       INTEGER, INTENT(IN) :: nunit
+       INTEGER, INTENT(OUT) :: filpos
+       INTEGER, DIMENSION(*), INTENT(INOUT) :: buffer
+     END SUBROUTINE binhed
+  END INTERFACE
 
 !  2.1.11. Subroutine binrd8 (Reading Data from a Buffered File)
 
