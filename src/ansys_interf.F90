@@ -88,9 +88,9 @@ MODULE ansys_interf
   INTERFACE
      FUNCTION biniqr8 (nblk,key)
        IMPLICIT NONE
-       INTEGER, INTENT(IN) :: nblk
+       LONGINT, INTENT(IN) :: nblk
        INTEGER, INTENT(IN) :: key
-       INTEGER :: biniqr8
+       LONGINT :: biniqr8
      END FUNCTION biniqr8
   END INTERFACE
 ! *** primary function: get data about a block i/o buffer
@@ -136,6 +136,15 @@ MODULE ansys_interf
 !  output arguments:
 !      biniqr (int,func,out)    - the returned value of biniqr is based on
 !                                     setting of nblk and key
+
+  INTERFACE
+     FUNCTION biniqr (nblk,key)
+       IMPLICIT NONE
+       INTEGER, INTENT(IN) :: nblk
+       INTEGER, INTENT(IN) :: key
+       INTEGER :: biniqr
+     END FUNCTION biniqr
+  END INTERFACE
 
 ! 2.1.8. Function binset (Opening a Blocked Binary File or Initializing Paging
 !        Space)
@@ -318,6 +327,7 @@ MODULE ansys_interf
 ! *deck,binrd8
   INTERFACE 
      SUBROUTINE binrd8 (nblk,LongLocL,leng,ivect,kbfint,Buffer4)
+       !DEC$ ATTRIBUTES NO_ARG_CHECK :: ivect
        IMPLICIT NONE
        INTEGER, INTENT(IN) :: nblk
        LONGINT, INTENT(INOUT) :: LongLocL
@@ -370,6 +380,7 @@ MODULE ansys_interf
 
   INTERFACE 
      SUBROUTINE binrd (nblk,LocL,leng,ivect,kbfint,Buffer4)
+       !DEC$ ATTRIBUTES NO_ARG_CHECK :: ivect
        IMPLICIT NONE
        INTEGER, INTENT(IN) :: nblk
        INTEGER, INTENT(INOUT) :: LocL
