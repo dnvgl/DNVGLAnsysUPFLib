@@ -131,7 +131,7 @@ ANSDVER = $(ANSMAJOR).$(ANSMINOR)
 
         # compiler flags for various architectures
         makefile.write(
-            "\ninclude ../make_inc/make_$(SYSTEM)_ans$(ANSVER).inc\n")
+            "\ninclude $(MAKE_INC_DIR)/make_$(SYSTEM)_ans$(ANSVER).inc\n")
 
         makefile.write("\ncomplete:\n")
         for ansver in self.outMatrix:
