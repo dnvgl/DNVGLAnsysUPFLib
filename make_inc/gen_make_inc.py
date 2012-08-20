@@ -193,10 +193,11 @@ class GenMakeInc(object):
         makefile.write("CC = %s\n" % self.CC.strip())
         makefile.write("FC = %s\n" % self.FC.strip())
         makefile.write("LD = %s\n" % self.LD.strip())
-        makefile.write("CPPFLAGS = %s\n" % self.CPPFLAGS.strip())
-        makefile.write("CFLAGS   = %s\n" % self.CFLAGS.strip())
-        makefile.write("FFLAGS   = %s -module $(DEST)\n" % self.FFLAGS.strip())
-        makefile.write("LDFLAGS  = %s\n" % self.LDFLAGS.strip())
+        makefile.write("CPPFLAGS += %s\n" % self.CPPFLAGS.strip())
+        makefile.write("CFLAGS   += %s\n" % self.CFLAGS.strip())
+        makefile.write("FFLAGS   += %s -module $(DEST)\n" % self.FFLAGS.strip())
+        makefile.write("FFLAGS   += $(CPPFLAGS)\n")
+        makefile.write("LDFLAGS  += %s\n" % self.LDFLAGS.strip())
         makefile.close()
 
     def clean_up(self):
