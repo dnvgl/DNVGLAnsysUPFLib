@@ -22,7 +22,7 @@ MODULE ans_common
   DOUBLE PRECISION, PARAMETER :: NDIGITS=8
 
   ! at this point, just one structure is admitted
-  INTEGER, PARAMETER :: structure=1
+  INTEGER, PARAMETER :: mainstructure=1
 
   ! [jobname].ascii is the file name opened as outfile
   CHARACTER(LEN=32) :: jobname

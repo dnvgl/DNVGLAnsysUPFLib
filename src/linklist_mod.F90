@@ -122,7 +122,7 @@ CONTAINS
   END SUBROUTINE append_ii_list
 
   FUNCTION insert_ii_list(base, item, id) RESULT(inserted)
-    USE ansys_fun, ONLY : TrackBegin, TrackEnd
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd
     IMPLICIT NONE
     ! Purpose:
     !
@@ -226,7 +226,7 @@ CONTAINS
   END SUBROUTINE append_il_list
 
   FUNCTION insert_il_list(base, item, val) RESULT(inserted)
-    USE ansys_fun, ONLY : TrackBegin, TrackEnd
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd
     IMPLICIT NONE
     ! Purpose:
     !
