@@ -20,7 +20,6 @@ CONTAINS
     USE ansys_par, ONLY : CMD_MAX_LENG, DB_NUMSELECTED
 #else
     USE ansys_par, ONLY : SYS_LNG_CMDLN, DB_NUMSELECTED
-
 #endif
     USE ans_common, ONLY : n_masses
 
