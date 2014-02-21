@@ -29,7 +29,7 @@ CONTAINS
 
     CHARACTER(LEN=2) :: ext
     CHARACTER(LEN=1) :: cl
-    CHARACTER(LEN=5) :: c5
+    CHARACTER(LEN=2) :: c2
     LOGICAL ex, eof
     INTEGER*2 l
     INTEGER s_file
@@ -79,8 +79,8 @@ CONTAINS
           OPEN(UNIT=s_file, FILE=jobname(1:len_trim(jobname)) &
                //'.s'//ext)
           DO WHILE (.NOT.eof)
-             READ(s_file,'(a)', END = 500) c5
-             IF (c5 .EQ. 'F,  ') THEN
+             READ(s_file,'(a)', END = 500) c2
+             IF (c2 .EQ. 'F,') THEN
                 n_nloads = n_nloads + 1
              END IF
           END DO
