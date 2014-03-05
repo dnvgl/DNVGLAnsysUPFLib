@@ -117,7 +117,7 @@ class GenMakeInc(object):
     def __init__(self):
         self.ansys_revn = os.environ.get("ANSYS_REVN", "90")
         self.ansys_sys = subprocess.Popen(
-            "source /ansys_inc/v%s/ansys/bin/anssh.ini ; echo $SYS" %
+            ". /ansys_inc/v%s/ansys/bin/anssh.ini ; echo $SYS" %
             (self.ansys_revn,),
             stdout=subprocess.PIPE, shell=True).communicate()[0].strip()
 
