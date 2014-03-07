@@ -28,7 +28,7 @@ import sys
 class GenMakeInc(object):
     _notSupp = (None, None, None)
     _ifc101_17 = ('INTEL_PATHLVL=17 ifort101', '-parallel')
-    _ifc101_17_64 = ('INTEL_PATHLVL=17 ifort101', '-parallel')
+    _ifc101_17_64 = ('INTEL_PATHLVL=17 ifort101')
     _ifc111_69 = ('INTEL_PATHLVL=69 ifort111', '-parallel')
     _ifc111_69_64 = ('INTEL_PATHLVL=69 ifort111', '-parallel')
     _ifc121_64 = ('ifort121', '-parallel')
