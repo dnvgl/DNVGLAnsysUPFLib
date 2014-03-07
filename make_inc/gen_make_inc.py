@@ -27,91 +27,42 @@ import sys
 
 class GenMakeInc(object):
     _notSupp = (None, None, None)
-    _ifc70 = ('false', '')  # ('ifc70', '_ifc')
-    _ifc71 = ('ifc71', '-parallel')
-    _ifc80 = ('ifort80', '-parallel')
-    _ifc81 = ('ifort81', '-parallel')
-    _ifc81_64 = ('ifort81', '-parallel')
-    _ifc91 = ('ifort91', '-parallel')
-    _ifc91_64 = ('ifort91', '-parallel')
     _ifc101_17 = ('INTEL_PATHLVL=17 ifort101', '-parallel')
     _ifc101_17_64 = ('INTEL_PATHLVL=17 ifort101', '-parallel')
     _ifc111_69 = ('INTEL_PATHLVL=69 ifort111', '-parallel')
     _ifc111_69_64 = ('INTEL_PATHLVL=69 ifort111', '-parallel')
-    _pgf52 = ('pgf90_52', '-Mextend')
-    _pgf60 = ('pgf90_60', '-Mextend')
-    _pgf61_5 = ('PGI_VERSION=61 PGI_PATHLVL=5 pgf90', '-Mextend')
+    _ifc121_64 = ('ifort121', '-parallel')
     _gcc = ('gcc', '')
-    _pgcc52 = ('pgcc_52', '')
-    _pgcc61_5 = ('PGI_VERSION=61 PGI_PATHLVL=5 pgcc_61', '')
 
     # map ANSYS version/FORTRAN compiler to be used to actual compiler
     # name
     fctable = {
-        ('70',  'LINUXIA32', 'ifc'): _notSupp,
-        # doc says 7.0, but does not work on linking anymore
-        ('71',  'LINUXIA32', 'ifc'): _ifc71,
-        ('80',  'LINUXIA32', 'ifc'): _ifc71,
-        ('81',  'LINUXIA32', 'ifc'): _ifc71,
-        ('90',  'LINOP64',   'pgf90'): _pgf52,
-        ('90',  'LINUXIA32', 'ifort'): _ifc80,
-        ('100', 'LINEM64T',  'ifort'): _ifc81_64,
-        ('100', 'LINOP64',   'pgf90'): _pgf52,
-        ('100', 'LINUXIA32', 'ifort'): _ifc81,
-        ('110', 'LINEM64T',  'ifort'): _ifc91_64,
-        ('110', 'LINIA32',   'ifort'): _ifc91,
-        ('110', 'LINOP64',   'pgf90'): _pgf61_5,
         ('120', 'LINIA32',   'ifort'): _ifc101_17,
         ('120', 'LINX64',    'ifort'): _ifc101_17_64,
         ('121', 'LINIA32',   'ifort'): _ifc101_17,
         ('121', 'LINX64',    'ifort'): _ifc101_17_64,
-        ('130', 'LINIA32',   'ifort'): _ifc111_69,
         ('130', 'LINX64',    'ifort'): _ifc111_69_64,
+        ('150', 'LINX64',    'ifort'): _ifc121_64,
         }
 
     # map ANSYS version/C compiler to be used to actual compiler name
     cctable = {
-        ('70',  'LINUXIA32', 'icc'): _notSupp,
-        ('71',  'LINUXIA32', 'icc'): _gcc,
-        ('80',  'LINUXIA32', 'icc'): _gcc,
-        ('81',  'LINUXIA32', 'icc'): _gcc,
-        ('90',  'LINOP64',   'pgcc'): _pgcc52,
-        ('90',  'LINUXIA32', 'icc'): _gcc,
-        ('100', 'LINEM64T',  'icc'): _gcc,
-        ('100', 'LINOP64',   'pgcc'): _pgcc52,
-        ('100', 'LINUXIA32', 'icc'): _gcc,
-        ('110', 'LINEM64T',  'icc'): _gcc,
-        ('110', 'LINIA32',   'icc'): _gcc,
-        ('110', 'LINOP64',   'pgcc'): _pgcc61_5,
         ('120', 'LINIA32',   'icc'): _gcc,
         ('120', 'LINX64',    'icc'): _gcc,
         ('121', 'LINIA32',   'icc'): _gcc,
         ('121', 'LINX64',    'icc'): _gcc,
-        ('130', 'LINIA32',   'icc'): _gcc,
         ('130', 'LINX64',    'icc'): _gcc,
+        ('150', 'LINX64',    'icc'): _gcc,
         }
 
     # map ANSYS version/linker to be used to actual linker name
     ldtable = {
-        ('70',  'LINUXIA32', 'ld'): (_notSupp[0], ''),
-        # doc says 7.0, but does not work on linking anymore
-        ('71',  'LINUXIA32', 'ld'): (_ifc71[0], '-Vaxlib'),
-        ('80',  'LINUXIA32', 'ld'): (_ifc71[0], '-Vaxlib'),
-        ('81',  'LINUXIA32', 'ld'): (_ifc71[0], '-Vaxlib'),
-        ('90',  'LINOP64',   'pgf90'): (_pgf52[0], ''),
-        ('90',  'LINUXIA32', 'ld'): (_ifc80[0], ''),
-        ('100', 'LINEM64T',  'ld'): (_ifc81_64[0], ''),
-        ('100', 'LINOP64',   'pgf90'): (_pgf52[0], ''),
-        ('100', 'LINUXIA32', 'ld'): (_ifc81[0], ''),
-        ('110', 'LINEM64T',  'ld'): (_ifc91_64[0], ''),
-        ('110', 'LINIA32',   'ld'): (_ifc91[0], ''),
-        ('110', 'LINOP64',   'pgf90'): (_pgf61_5[0], ''),
         ('120', 'LINIA32',   'ld'): (_ifc101_17[0], ''),
         ('120', 'LINX64',    'ld'): (_ifc101_17_64[0], ''),
         ('121', 'LINIA32',   'ld'): (_ifc101_17[0], ''),
         ('121', 'LINX64',    'ld'): (_ifc101_17_64[0], ''),
-        ('130', 'LINIA32',   'ld'): (_ifc101_17[0], ''),
-        ('130', 'LINX64',    'ld'): (_ifc101_17_64[0], ''),
+        ('130', 'LINX64',    'ld'): (_ifc111_69_64[0], ''),
+        ('150', 'LINX64',    'ld'): (_ifc121_64[0], ''),
         }
 
     def __init__(self):

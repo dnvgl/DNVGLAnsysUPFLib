@@ -27,8 +27,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    CHARACTER(LEN=2) :: ext
-    CHARACTER(LEN=1) :: cl
+    CHARACTER(LEN=5) :: ext
     CHARACTER(LEN=2) :: c2
     LOGICAL ex, eof
     INTEGER*2 l
@@ -64,20 +63,25 @@ CONTAINS
        l = l + 1
        ! create filename
        IF (l.LE.9) THEN
-          WRITE(cl,'(i1)') l
-          ext = '0'//cl
+          WRITE(ext, 10) l
+       ELSE IF (l.LE.99) THEN
+          WRITE(ext, 20) l
        ELSE
-          WRITE(ext,'(i2)') l
+          WRITE(ext, 30) l
        ENDIF
+10     FORMAT('.s0', (i1))
+20     FORMAT('.s', (i2))
+30     FORMAT('.s', (i3))
 
        ! check
-       INQUIRE(FILE=jobname(1:len_trim(jobname)) &
-            //'.s'//ext, EXIST=ex)
+       CALL erhandler(fname, __LINE__, ERH_NOTE, &
+            'ans2bmf:   checking '//trim(jobname)//trim(ext), &
+            derrinfo, cerrinfo)
+       INQUIRE(FILE=trim(jobname)//trim(ext), EXIST=ex)
        IF (ex) THEN
           ! and count all load lines on file
           eof = .FALSE.
-          OPEN(UNIT=s_file, FILE=jobname(1:len_trim(jobname)) &
-               //'.s'//ext)
+          OPEN(UNIT=s_file, FILE=trim(jobname)//trim(ext))
           DO WHILE (.NOT.eof)
              READ(s_file,'(a)', END = 500) c2
              IF (c2 .EQ. 'F,') THEN
