@@ -1,23 +1,17 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
-
-"""
-Copyright (C) 2005 by Germanischer Lloyd AG
-
-======================================================================
-Task      Generate Makefile includes from ANSYS default Makefiles for
-          shared libraries.
-----------------------------------------------------------------------
-Author Berthold Höllmann <hoel@GL-Group.com> Project PyANSYS
-======================================================================
+"""Generate Makefile includes from ANSYS default Makefiles for shared
+libraries.
 """
 
-#  CVSID: $Id: gen_make_inc.py 414 2012-08-15 13:37:21Z hoel $
-__author__ = ("2005 Germanischer Lloyd (author: $Author: hoel $) " +
-              "hoel@GL-Group.com")
-__date__ = "$Date: 2012-08-15 15:37:21 +0200 (Mi, 15. Aug 2012) $"
-__version__ = "$Revision: 414 $"[10:-1]
-__package_info__ = """ """
+from __future__ import (print_function, division, absolute_import,
+                        unicode_literals)
+
+# ID: $Id$"
+__date__ = "$Date$"[6:-1]
+__version__ = "$Revision$"[10:-1]
+__author__ = "`Berthold Höllmann <berthold.hoellmann@dnvgl.com>`__"
+__copyright__ = "Copyright © 2005, 2014 by DNV GL SE"
 
 import os
 import re
@@ -158,5 +152,7 @@ if __name__ == "__main__":
     GenMakeInc()()
 
 # Local Variables:
+# mode: python
+# ispell-local-dictionary: "english"
 # compile-command:"make -C .."
 # End:
