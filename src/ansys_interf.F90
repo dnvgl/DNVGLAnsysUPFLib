@@ -351,7 +351,7 @@ MODULE ansys_interf
 !                            less or equal to dimension given to ivect in
 !                            the calling routine). if ivect is to be used
 !                            as integers, use as is. if ivect is to be
-!                            used for double precision numbers, it must be
+!                            used for REAL(KIND=8) numbers, it must be
 !                            increased by multiplying it by INTPDP.
 !                            if negative, skip record and do not return
 !                            data(results).
@@ -368,7 +368,7 @@ MODULE ansys_interf
 !   ivect (int,ar(*),out)  - results (can be either integer or double
 !                            precision in the calling routine)
 !   kbfint (int,sc,out)    - key for type(used only for AUX2 dump)
-!                           = 0 double precision data
+!                           = 0 REAL(KIND=8) data
 !                           > 0 integer data(usually the same as leng)
 !   Buffer4 (i4,ar(*),inout) - work array for paging
 
@@ -421,13 +421,13 @@ MODULE ansys_interf
 !                            less or equal to dimension given to ivect in
 !                            the calling routine). if ivect is to be used
 !                            as integers, use as is. if ivect is to be
-!                            used for double precision numbers, it must be
+!                            used for REAL(KIND=8) numbers, it must be
 !                            increased by multiplying it by INTPDP.
 !   ivect (int,ar(*),in)   - data to be written onto the file(can be either
-!                            integer or double precision in the calling
+!                            integer or REAL(KIND=8) in the calling
 !                            routine)
 !   kbfint (int,sc,in)     - key for type(used only for AUX2 dump)
-!                           = 0 double precision data
+!                           = 0 REAL(KIND=8) data
 !                           > 0 integer data(usually the same as leng)
 !   Buffer4 (int,ar(*),inout) - work array for paging, should be the
 !                                   same array as used in binset on this

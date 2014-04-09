@@ -16,13 +16,8 @@ CONTAINS
 
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erhandler, &
          elmiqr
-#if ANSVER >= 70
-    USE ansys_par, ONLY : CMD_MAX_LENG, &
-#else
-    USE ansys_par, ONLY : SYS_LNG_CMDLN, &
-#endif
-    ERH_ERROR, ERH_FATAL, ERH_NOTE, ERH_WARNING, DB_NUMSELECTED, &
-    PARMSIZE
+    USE ansys_par, ONLY : CMD_MAX_LENG, ERH_FNAME_LEN, ERH_ERROR, ERH_FATAL, ERH_NOTE, &
+         ERH_WARNING, DB_NUMSELECTED, PARMSIZE
 
     USE glans, ONLY : cmselect, get, esel, ans2bmf_get_s, message
     USE LOCMOD, ONLY : libname
@@ -38,27 +33,23 @@ CONTAINS
 
     IMPLICIT NONE
 
-    INTEGER :: el_data(*)
+    INTEGER, DIMENSION(*) :: el_data
 
     INTEGER :: ansys_comp, an_cnum, n, m, el_b4, msglvl
     INTEGER :: res
 
-   INTEGER :: iErr
+    INTEGER :: iErr
 
-#if ANSVER >= 70
     CHARACTER(LEN=CMD_MAX_LENG) :: cmd
-#else
-    CHARACTER(LEN=SYS_LNG_CMDLN) :: cmd
-#endif
     CHARACTER(LEN=PARMSIZE) :: para
 
     LOGICAL :: flag
 
     ! dataspace for feeding erhandler subroutine
-    DOUBLE PRECISION, DIMENSION(10) ::  derrinfo
+    REAL(KIND=8), DIMENSION(10) ::  derrinfo
     CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
 
-    CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
+    CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
 
     CALL TrackBegin('dat_components')
 
@@ -78,12 +69,12 @@ CONTAINS
 
     ! loop over all components
     !  running # for sxf components created
-    comp_num=0
+    comp_num = 0
     !  running # of ANSYS components treated
-    an_cnum=0
+    an_cnum = 0
     DO n = 1, ansys_comp+1
 
-       IF (comp_num.GE.max_components-10) THEN
+       IF (comp_num.GE.max_components-csub_num) THEN
           derrinfo(1) = comp_num
           derrinfo(2) = max_components
           CALL erhandler(fname, __LINE__, ERH_ERROR, &
@@ -226,8 +217,8 @@ CONTAINS
 
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, elmget, elmiqr, &
          elnext, etyget, erhandler
-    USE ansys_par, ONLY : DB_NUMSELECTED, EL_DIM, EL_TYPE, ERH_NOTE, &
-         NNMAX, PARMSIZE, KYOP1
+    USE ansys_par, ONLY : DB_NUMSELECTED, EL_DIM, EL_TYPE, ERH_FNAME_LEN, ERH_NOTE, &
+         ERH_FATAL, NNMAX, PARMSIZE, KYOP1
     USE glans, ONLY : cmselect, esel
     USE LOCMOD, ONLY : libname
     USE ans_common, ONLY : comp_num, el_count, el_offset, ielc, &
@@ -245,8 +236,9 @@ CONTAINS
 
     IMPLICIT NONE
 
-    CHARACTER(LEN=*) :: comp
-    INTEGER :: csub, el_data(*)
+    CHARACTER(LEN=*), INTENT(IN) :: comp
+    INTEGER, INTENT(IN) :: csub
+    INTEGER, INTENT(INOUT), DIMENSION(*) :: el_data
 
     INTEGER :: sub_length
 
@@ -256,10 +248,10 @@ CONTAINS
     INTEGER, DIMENSION(NNMAX) :: nodes
 
     ! dataspace for feeding erhandler subroutine
-    DOUBLE PRECISION, DIMENSION(10) ::  derrinfo
+    REAL(KIND=8), DIMENSION(10) ::  derrinfo
     CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
 
-    CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
+    CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
 
     CALL TrackBegin('ans2bmf_cstore')
 
@@ -281,12 +273,18 @@ CONTAINS
        IF (ELID.GT.0) THEN
           stat = elmget(elid, elmdat, nodes) ! element info
           if (stat.LE.0) THEN
-             print *, 'Error should not occur 1', stat
+             derrinfo(1) = stat
+             CALL erhandler(fname, __LINE__, ERH_FATAL, &
+                  trim(libname)//':Error should not occur: "elmget" returns %d', &
+                  & derrinfo, cerrinfo)
           END IF
           type = elmdat(EL_TYPE)
           stat = etyget(type, ielc)
           if (stat.LE.0) THEN
-             print *, 'Error should not occur 2', stat
+             derrinfo(1) = stat
+             CALL erhandler(fname, __LINE__, ERH_FATAL, &
+                  trim(libname)//':Error should not occur: "etyget" returns %d', &
+                  & derrinfo, cerrinfo)
           END IF
           IF (ielc(KYOP1).NE.1) THEN
              ! deselect element without membrane property
@@ -302,12 +300,18 @@ CONTAINS
        IF (ELID.GT.0) THEN
           stat = elmget(elid, elmdat, nodes) ! element info
           if (stat.LE.0) THEN
-             print *, 'Error should not occur 3', stat
+             derrinfo(1) = stat
+             CALL erhandler(fname, __LINE__, ERH_FATAL, &
+                  trim(libname)//':Error should not occur: "elmget" returns %d', &
+                  & derrinfo, cerrinfo)
           END IF
           type = elmdat(EL_TYPE)
           stat = etyget(type, ielc)
           if (stat.LE.0) THEN
-             print *, 'Error should not occur 4', stat
+             derrinfo(1) = stat
+             CALL erhandler(fname, __LINE__, ERH_FATAL, &
+                  trim(libname)//':Error should not occur: "etyget" returns %d', &
+                  & derrinfo, cerrinfo)
           END IF
           IF (ielc(KYOP1).EQ.1) THEN
              ! deselect element with membrane property
@@ -351,7 +355,7 @@ CONTAINS
 
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, elmiqr, elnext, &
          erhandler
-    USE ansys_par, ONLY : DB_NUMSELECTED, ERH_ERROR, PARMSIZE
+    USE ansys_par, ONLY : DB_NUMSELECTED, ERH_FNAME_LEN, ERH_ERROR, PARMSIZE
     USE ans_common, ONLY : el_offset, n_elem
     USE LOCMOD, ONLY : libname
 
@@ -365,14 +369,14 @@ CONTAINS
 
     IMPLICIT NONE
 
-    INTEGER el_data(*)
-    INTEGER n, nmax, el
+    INTEGER, INTENT(INOUT), DIMENSION(*) :: el_data
+    INTEGER :: n, nmax, el
 
     ! dataspace for feeding erhandler subroutine
-    DOUBLE PRECISION, DIMENSION(10) ::  derrinfo
+    REAL(KIND=8), DIMENSION(10) ::  derrinfo
     CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
 
-    CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
+    CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
 
     CALL TrackBegin('ans2bmf_elread')
 

@@ -47,15 +47,10 @@ CONTAINS
 
   SUBROUTINE ans2bmf_get_d(cmd_str, dout)
     ! reads ANSYS command string 'cmd_str'
-    ! puts out double precision parameter 'dout'
+    ! puts out REAL(KIND=8) parameter 'dout'
 
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, parevl
-#if ANSVER >= 70
-    USE ansys_par, ONLY : CMD_MAX_LENG, STRING_MAX_LENG, &
-#else
-    USE ansys_par, ONLY : SYS_LNG_CMDLN, &
-#endif
-    & PARMSIZE
+    USE ansys_par, ONLY : CMD_MAX_LENG, STRING_MAX_LENG, PARMSIZE
     IMPLICIT NONE
     ! Purpose:
     !
@@ -65,15 +60,11 @@ CONTAINS
     ! Created: 2007-06-01  hoel
     ! ======================================================================
     CHARACTER(LEN=*) :: cmd_str
-    DOUBLE PRECISION :: dout
-    DOUBLE PRECISION, DIMENSION(3) :: subc
+    REAL(KIND=8) :: dout
+    REAL(KIND=8), DIMENSION(3) :: subc
 
-#if ANSVER >= 70
     CHARACTER(LEN=CMD_MAX_LENG) :: cmd
     CHARACTER(LEN=STRING_MAX_LENG) :: dummy
-#else
-    CHARACTER(LEN=SYS_LNG_CMDLN) :: cmd
-#endif
     CHARACTER(LEN=PARMSIZE) :: para
 
     INTEGER :: iErr
@@ -83,11 +74,8 @@ CONTAINS
     iErr = RunCommand(LEN_TRIM(cmd), cmd)
     para ='PAR_'
 
-#if   ANSVER >= 70
     CALL parevl(para, 0, subc, 2, dout, dummy, iErr)
-#else
-    dout = parevl(para, 0, subc, 2, iErr)
-#endif
+
     CALL TrackEnd("glans:ans2bmf_get_d")
   END SUBROUTINE ans2bmf_get_d
 
@@ -95,12 +83,7 @@ CONTAINS
     ! reads ANSYS command string 'cmd_str'
     ! writes a string of length 8 into 'sout'
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, parevl
-#if ANSVER >= 70
-    USE ansys_par, ONLY : CMD_MAX_LENG, STRING_MAX_LENG, &
-#else
-    USE ansys_par, ONLY : SYS_LNG_CMDLN, &
-#endif
-    & PARMSIZE
+    USE ansys_par, ONLY : CMD_MAX_LENG, STRING_MAX_LENG, PARMSIZE
     IMPLICIT NONE
     ! Purpose:
     !
@@ -111,16 +94,10 @@ CONTAINS
     ! ======================================================================
     CHARACTER(LEN=*) :: cmd_str
     CHARACTER(LEN=PARMSIZE) :: sout
-    DOUBLE PRECISION res_double
-    DOUBLE PRECISION, DIMENSION(3) :: subc
-#if ANSVER >= 70
+    REAL(KIND=8) res_double
+    REAL(KIND=8), DIMENSION(3) :: subc
     CHARACTER(LEN=CMD_MAX_LENG) :: cmd
     CHARACTER(LEN=STRING_MAX_LENG) :: dummy
-#else
-    CHARACTER(LEN=SYS_LNG_CMDLN) :: cmd
-    CHARACTER(LEN=8)      res_char8
-    EQUIVALENCE      (res_double,res_char8)
-#endif
     CHARACTER(LEN=PARMSIZE) :: para
 
     INTEGER :: iErr
@@ -130,13 +107,8 @@ CONTAINS
     cmd = '*GET,PAR_,'//cmd_str
     iErr = RunCommand(LEN_TRIM(cmd), cmd)
     para ='PAR_'
-#if ANSVER < 70
-    res_double = parevl(para, 0, subc, 2, iErr)
-    sout = res_char8
-#else
     CALL parevl(para, 0, subc, 2, res_double, dummy, iErr)
     sout = TRIM(dummy)
-#endif
 
     CALL TrackEnd("glans:ans2bmf_get_s")
   END SUBROUTINE ans2bmf_get_s
@@ -166,12 +138,7 @@ CONTAINS
   SUBROUTINE cmselect(mode, name)
     ! select component
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand
-#if ANSVER >= 70
-   USE ansys_par, ONLY : CMD_MAX_LENG, &
-#else
-   USE ansys_par, ONLY : SYS_LNG_CMDLN, &
-#endif
-   & ERH_FATAL, PARMSIZE
+    USE ansys_par, ONLY : CMD_MAX_LENG, ERH_FATAL, ERH_FNAME_LEN, PARMSIZE
     IMPLICIT NONE
     ! Purpose:
     !
@@ -198,17 +165,13 @@ CONTAINS
     CHARACTER(LEN=LEN(mode)) :: umode
     INTEGER :: iErr
 
-#if ANSVER >= 70
     CHARACTER(LEN=CMD_MAX_LENG) :: cmd
-#else
-    CHARACTER(LEN=SYS_LNG_CMDLN) :: cmd
-#endif
 
     ! dataspace for feeding erhandler subroutine
-    DOUBLE PRECISION, DIMENSION(10) ::  derrinfo
+    REAL(KIND=8), DIMENSION(10) ::  derrinfo
     CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
 
-    CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
+    CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
 
     CALL TrackBegin('glans:cmselect')
 
@@ -241,12 +204,7 @@ CONTAINS
 
   SUBROUTINE eseli(Type, Item, Comp, VMIN, VMAX, VINC, KABS)
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand
-#if ANSVER >= 70
-    USE ansys_par, ONLY : CMD_MAX_LENG, &
-#else
-    USE ansys_par, ONLY : SYS_LNG_CMDLN, &
-#endif
-    & ERH_FATAL, PARMSIZE
+    USE ansys_par, ONLY : CMD_MAX_LENG, ERH_FATAL, ERH_FNAME_LEN, PARMSIZE
     IMPLICIT NONE
     ! Purpose: select elements
     !
@@ -310,17 +268,13 @@ CONTAINS
     CHARACTER(LEN=128) :: uitem
     INTEGER :: iErr
 
-#if ANSVER >= 70
     CHARACTER(LEN=CMD_MAX_LENG) :: cmd
-#else
-    CHARACTER(LEN=SYS_LNG_CMDLN) :: cmd
-#endif
 
     ! dataspace for feeding erhandler subroutine
-    DOUBLE PRECISION, DIMENSION(10) ::  derrinfo
+    REAL(KIND=8), DIMENSION(10) ::  derrinfo
     CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
 
-    CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
+    CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
 
     CALL TrackBegin('glans:eseli')
 
@@ -452,12 +406,7 @@ CONTAINS
 
   SUBROUTINE esels(Type, Item, Comp, VMIN)
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erhandler
-#if ANSVER >= 70
-    USE ansys_par, ONLY : CMD_MAX_LENG, &
-#else
-    USE ansys_par, ONLY : SYS_LNG_CMDLN, &
-#endif
-    & ERH_FATAL, PARMSIZE, STRING_MAX_LENG
+    USE ansys_par, ONLY : CMD_MAX_LENG, ERH_FATAL, ERH_FNAME_LEN, PARMSIZE, STRING_MAX_LENG
     IMPLICIT NONE
     ! Purpose: select elements
     !
@@ -505,17 +454,13 @@ CONTAINS
     CHARACTER(LEN=STRING_MAX_LENG) :: uvmin
     INTEGER :: iErr
 
-#if ANSVER >= 70
     CHARACTER(LEN=CMD_MAX_LENG) :: cmd
-#else
-    CHARACTER(LEN=SYS_LNG_CMDLN) :: cmd
-#endif
 
     ! dataspace for feeding erhandler subroutine
-    DOUBLE PRECISION, DIMENSION(10) ::  derrinfo
+    REAL(KIND=8), DIMENSION(10) ::  derrinfo
     CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
 
-    CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
+    CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
 
     CALL TrackBegin('glans:esels')
 
@@ -615,12 +560,7 @@ CONTAINS
 
   SUBROUTINE nsel(Type, Item, Comp, VMIN, VMAX, VINC, KABS)
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erhandler
-#if ANSVER >= 70
-    USE ansys_par, ONLY : CMD_MAX_LENG, &
-#else
-    USE ansys_par, ONLY : SYS_LNG_CMDLN, &
-#endif
-    & ERH_FATAL, PARMSIZE
+    USE ansys_par, ONLY : CMD_MAX_LENG, ERH_FATAL, ERH_FNAME_LEN, PARMSIZE
     IMPLICIT NONE
     ! Purpose: select nodes
     !
@@ -676,17 +616,13 @@ CONTAINS
     CHARACTER(LEN=128) :: uitem
     INTEGER :: iErr
 
-#if ANSVER >= 70
     CHARACTER(LEN=CMD_MAX_LENG) :: cmd
-#else
-    CHARACTER(LEN=SYS_LNG_CMDLN) :: cmd
-#endif
 
     ! dataspace for feeding erhandler subroutine
-    DOUBLE PRECISION, DIMENSION(10) ::  derrinfo
+    REAL(KIND=8), DIMENSION(10) ::  derrinfo
     CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
 
-    CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
+    CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
 
     CALL TrackBegin('glans:nsel')
 
@@ -817,12 +753,8 @@ CONTAINS
   FUNCTION gets(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
-#if ANSVER >= 70
-    USE ansys_par, ONLY : CMD_MAX_LENG, &
-#else
-    USE ansys_par, ONLY : SYS_LNG_CMDLN, &
-#endif
-    & ER_NUMWARNING, ER_NUMERROR, PARMSIZE, STRING_MAX_LENG
+    USE ansys_par, ONLY : CMD_MAX_LENG, ER_NUMWARNING, ER_NUMERROR, PARMSIZE, &
+         & STRING_MAX_LENG
     IMPLICIT NONE
     ! Purpose:
     !
@@ -846,17 +778,10 @@ CONTAINS
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: IT2NUM
 
-#if ANSVER >= 70
     CHARACTER(LEN=CMD_MAX_LENG) :: cmd
-    DOUBLE PRECISION :: Dummy
-#else
-    CHARACTER(LEN=SYS_LNG_CMDLN) :: cmd
-    CHARACTER(LEN=8) :: res_char8
-    DOUBLE PRECISION :: res_double
-    EQUIVALENCE      (res_double, res_char8)
-#endif
+    REAL(KIND=8) :: Dummy
     CHARACTER(LEN=PARMSIZE) :: para
-    DOUBLE PRECISION, DIMENSION(3) :: subc
+    REAL(KIND=8), DIMENSION(3) :: subc
 
     INTEGER :: iErr
 
@@ -876,17 +801,17 @@ CONTAINS
     IF (PRESENT(IT1NUM)) THEN
        WRITE(cmd,100) TRIM(cmd), TRIM(IT1NUM)
     ELSE
-       WRITE(cmd,100) TRIM(cmd), ''
+       WRITE(cmd,102) TRIM(cmd)
     END IF
     IF (PRESENT(Item2)) THEN
        WRITE(cmd,100) TRIM(cmd), TRIM(Item2)
     ELSE
-       WRITE(cmd,100) TRIM(cmd), ''
+       WRITE(cmd,102) TRIM(cmd)
     END IF
     IF (PRESENT(IT2NUM)) THEN
        WRITE(cmd,100) TRIM(cmd), TRIM(IT2NUM)
     ELSE
-       WRITE(cmd,100) TRIM(cmd), ''
+       WRITE(cmd,102) TRIM(cmd)
     END IF
     !WRITE(wrinqr(WR_OUTPUT),*) 'cmd: ', TRIM(cmd)
     iErr = RunCommand(LEN_TRIM(cmd), TRIM(cmd))
@@ -899,12 +824,7 @@ CONTAINS
     END IF
 
     para ='PAR_'
-#if ANSVER >= 70
     CALL parevl(para, 0, subc, 2, dummy, value, iErr)
-#else
-    res_double = parevl(para, 0, subc, 2, iErr)
-    value = TRIM(res_char8)
-#endif
 
     numwrn = erinqr(ER_NUMWARNING) - numwrn
     numerr = erinqr(ER_NUMERROR) - numerr
@@ -912,6 +832,7 @@ CONTAINS
 
 100 FORMAT(A,',',A)
 101 FORMAT(A,',',I)
+102 FORMAT(A,',')
 
     CALL TrackEnd('glans:gets')
 
@@ -920,12 +841,8 @@ CONTAINS
   FUNCTION getsi(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
-#if ANSVER >= 70
-    USE ansys_par, ONLY : CMD_MAX_LENG, &
-#else
-    USE ansys_par, ONLY : SYS_LNG_CMDLN, &
-#endif
-    & ER_NUMWARNING, ER_NUMERROR, ERH_FATAL, PARMSIZE, STRING_MAX_LENG
+    USE ansys_par, ONLY : CMD_MAX_LENG, ER_NUMWARNING, ER_NUMERROR, &
+         & ERH_FATAL, ERH_FNAME_LEN, PARMSIZE, STRING_MAX_LENG
     IMPLICIT NONE
     ! Purpose:
     !
@@ -953,10 +870,10 @@ CONTAINS
     INTEGER :: numerr
 
     ! dataspace for feeding erhandler subroutine
-    DOUBLE PRECISION, DIMENSION(10) ::  derrinfo
+    REAL(KIND=8), DIMENSION(10) ::  derrinfo
     CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
 
-    CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
+    CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
 
     CALL TrackBegin('glans:getsi')
 
@@ -982,12 +899,8 @@ CONTAINS
   FUNCTION getf(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
-#if ANSVER >= 70
-    USE ansys_par, ONLY : CMD_MAX_LENG, &
-#else
-    USE ansys_par, ONLY : SYS_LNG_CMDLN, &
-#endif
-    & ER_NUMWARNING, ER_NUMERROR, PARMSIZE, STRING_MAX_LENG
+    USE ansys_par, ONLY : CMD_MAX_LENG, ER_NUMWARNING, ER_NUMERROR, PARMSIZE, &
+         & STRING_MAX_LENG
     IMPLICIT NONE
     ! Purpose:
     !
@@ -1003,7 +916,7 @@ CONTAINS
     ! Created: 2007-05-29  hoel
     ! ======================================================================
     LOGICAL :: flag
-    DOUBLE PRECISION, INTENT(OUT) :: value
+    REAL(KIND=8), INTENT(OUT) :: value
     CHARACTER(LEN=4), INTENT(IN) :: Entity
     INTEGER, INTENT(IN) :: ENTNUM
     CHARACTER(LEN=8), INTENT(IN) :: Item1
@@ -1011,14 +924,10 @@ CONTAINS
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: IT2NUM
 
-#if ANSVER >= 70
     CHARACTER(LEN=CMD_MAX_LENG) :: cmd
     CHARACTER(LEN=STRING_MAX_LENG) :: dummy
-#else
-    CHARACTER(LEN=SYS_LNG_CMDLN) :: cmd
-#endif
     CHARACTER(LEN=PARMSIZE) :: para
-    DOUBLE PRECISION, DIMENSION(3) :: subc
+    REAL(KIND=8), DIMENSION(3) :: subc
 
     INTEGER :: iErr
 
@@ -1061,11 +970,7 @@ CONTAINS
     END IF
 
     para ='PAR_'
-#if ANSVER >= 70
     CALL parevl(para, 0, subc, 2, value, dummy, iErr)
-#else
-    value = parevl(para, 0, subc, 2, iErr)
-#endif
 
     numwrn = erinqr(ER_NUMWARNING) - numwrn
     numerr = erinqr(ER_NUMERROR) - numerr
@@ -1081,12 +986,8 @@ CONTAINS
   FUNCTION getfs(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
-#if ANSVER >= 70
-    USE ansys_par, ONLY : CMD_MAX_LENG, &
-#else
-    USE ansys_par, ONLY : SYS_LNG_CMDLN, &
-#endif
-    & ER_NUMWARNING, ER_NUMERROR, PARMSIZE, STRING_MAX_LENG
+    USE ansys_par, ONLY : CMD_MAX_LENG, ER_NUMWARNING, ER_NUMERROR, &
+         & PARMSIZE, STRING_MAX_LENG
     IMPLICIT NONE
     ! Purpose:
     !
@@ -1102,7 +1003,7 @@ CONTAINS
     ! Created: 2007-05-29  hoel
     ! ======================================================================
     LOGICAL :: flag
-    DOUBLE PRECISION, INTENT(OUT) :: value
+    REAL(KIND=8), INTENT(OUT) :: value
     CHARACTER(LEN=4), INTENT(IN) :: Entity
     CHARACTER(LEN=PARMSIZE), INTENT(IN) :: ENTNUM
     CHARACTER(LEN=8), INTENT(IN) :: Item1
@@ -1110,14 +1011,10 @@ CONTAINS
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: IT2NUM
 
-#if ANSVER >= 70
     CHARACTER(LEN=CMD_MAX_LENG) :: cmd
     CHARACTER(LEN=STRING_MAX_LENG) :: dummy
-#else
-    CHARACTER(LEN=SYS_LNG_CMDLN) :: cmd
-#endif
     CHARACTER(LEN=PARMSIZE) :: para
-    DOUBLE PRECISION, DIMENSION(3) :: subc
+    REAL(KIND=8), DIMENSION(3) :: subc
 
     INTEGER :: numwrn
     INTEGER :: numerr
@@ -1137,17 +1034,17 @@ CONTAINS
     IF (PRESENT(IT1NUM)) THEN
        WRITE(cmd,100) TRIM(cmd), TRIM(IT1NUM)
     ELSE
-       WRITE(cmd,100) TRIM(cmd), ''
+       WRITE(cmd,102) TRIM(cmd)
     END IF
     IF (PRESENT(Item2)) THEN
        WRITE(cmd,100) TRIM(cmd), TRIM(Item2)
     ELSE
-       WRITE(cmd,100) TRIM(cmd), ''
+       WRITE(cmd,102) TRIM(cmd)
     END IF
     IF (PRESENT(IT2NUM)) THEN
        WRITE(cmd,100) TRIM(cmd), TRIM(IT2NUM)
     ELSE
-       WRITE(cmd,100) TRIM(cmd), ''
+       WRITE(cmd,102) TRIM(cmd)
     END IF
     ! WRITE(wrinqr(WR_OUTPUT),*) 'cmd: ', TRIM(cmd)
     iErr = RunCommand(LEN_TRIM(cmd), TRIM(cmd))
@@ -1160,17 +1057,14 @@ CONTAINS
     END IF
 
     para ='PAR_'
-#if ANSVER >= 70
     CALL parevl(para, 0, subc, 2, value, dummy, iErr)
-#else
-    value = parevl(para, 0, subc, 2, iErr)
-#endif
 
     numwrn = erinqr(ER_NUMWARNING) - numwrn
     numerr = erinqr(ER_NUMERROR) - numerr
     flag = (numwrn + numerr).NE.0
 
 100 FORMAT(A,',',A)
+102 FORMAT(A,',')
 
     CALL TrackEnd('glans:getfs')
 
@@ -1178,13 +1072,9 @@ CONTAINS
 
   FUNCTION getfi(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
-#if ANSVER >= 70
-    USE ansys_par, ONLY : CMD_MAX_LENG, &
-#else
-    USE ansys_par, ONLY : SYS_LNG_CMDLN, &
-#endif
-    & ER_NUMWARNING, ER_NUMERROR, ERH_FATAL, PARMSIZE, STRING_MAX_LENG
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr, wrinqr
+    USE ansys_par, ONLY : CMD_MAX_LENG, ER_NUMWARNING, ER_NUMERROR, ERH_FATAL, &
+         & ERH_FNAME_LEN, PARMSIZE, STRING_MAX_LENG, WR_OUTPUT
     IMPLICIT NONE
     ! Purpose:
     !
@@ -1200,7 +1090,7 @@ CONTAINS
     ! Created: 2007-05-29  hoel
     ! ======================================================================
     LOGICAL :: flag
-    DOUBLE PRECISION :: value
+    REAL(KIND=8) :: value
     CHARACTER(LEN=4), INTENT(IN) :: Entity
     INTEGER, INTENT(IN) :: ENTNUM
     CHARACTER(LEN=8), INTENT(IN) :: Item1
@@ -1208,30 +1098,62 @@ CONTAINS
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
     INTEGER, INTENT(IN), OPTIONAL :: IT2NUM
 
+    CHARACTER(LEN=CMD_MAX_LENG) :: cmd
+    CHARACTER(LEN=STRING_MAX_LENG) :: dummy
+    CHARACTER(LEN=PARMSIZE) :: para
+    REAL(KIND=8), DIMENSION(3) :: subc
+
+    ! dataspace for feeding erhandler subroutine
+    REAL(KIND=8), DIMENSION(10) ::  derrinfo
+    CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
+    CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
+
     INTEGER :: numwrn
     INTEGER :: numerr
 
-    ! dataspace for feeding erhandler subroutine
-    DOUBLE PRECISION, DIMENSION(10) ::  derrinfo
-    CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
-    CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
+    INTEGER :: iErr
 
     CALL TrackBegin('glans:getfi')
+
+    value = 0d0
 
     numwrn = erinqr(ER_NUMWARNING)
     numerr = erinqr(ER_NUMERROR)
 
-    CALL erhandler(fname, __LINE__, ERH_FATAL, &
-         & 'glansys: glans:getfi not implemented', &
-         & derrinfo, cerrinfo)
+    WRITE(cmd,100) '*GET,PAR_', TRIM(Entity)
+    WRITE(cmd,101) TRIM(cmd), ENTNUM
+    WRITE(cmd,100) TRIM(cmd), TRIM(Item1)
+    WRITE(cmd,101) TRIM(cmd), IT1NUM
+    IF (PRESENT(Item2)) THEN
+       WRITE(cmd,100) TRIM(cmd), TRIM(Item2)
+    ELSE
+       WRITE(cmd,102) TRIM(cmd)
+    END IF
+    IF (PRESENT(IT2NUM)) THEN
+       WRITE(cmd,101) TRIM(cmd), IT2NUM
+    ELSE
+       WRITE(cmd,102) TRIM(cmd)
+    END IF
+    WRITE(wrinqr(WR_OUTPUT),*) 'cmd: ', TRIM(cmd)
+    iErr = RunCommand(LEN_TRIM(cmd), TRIM(cmd))
 
-    value = 0d0
+    flag = ((erinqr(ER_NUMWARNING) - numwrn) + (erinqr(ER_NUMERROR) - numerr)).NE.0
+
+    IF (flag) THEN
+       CALL TrackEnd('glans:getfi')
+       RETURN
+    END IF
+
+    para ='PAR_'
+    CALL parevl(para, 0, subc, 2, value, dummy, iErr)
 
     numwrn = erinqr(ER_NUMWARNING) - numwrn
     numerr = erinqr(ER_NUMERROR) - numerr
     flag = (numwrn + numerr).NE.0
 
-    flag = .TRUE.
+100 FORMAT(A,',',A)
+101 FORMAT(A,',',I)
+102 FORMAT(A,',')
 
     CALL TrackEnd('glans:getfi')
 
@@ -1240,12 +1162,8 @@ CONTAINS
   FUNCTION geti(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
-#if ANSVER >= 70
-    USE ansys_par, ONLY : CMD_MAX_LENG, &
-#else
-    USE ansys_par, ONLY : SYS_LNG_CMDLN, &
-#endif
-    & ER_NUMWARNING, ER_NUMERROR, PARMSIZE, STRING_MAX_LENG
+    USE ansys_par, ONLY : CMD_MAX_LENG, ER_NUMWARNING, ER_NUMERROR, &
+         & PARMSIZE, STRING_MAX_LENG
     IMPLICIT NONE
     ! Purpose:
     !
@@ -1269,7 +1187,7 @@ CONTAINS
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: IT2NUM
 
-    DOUBLE PRECISION :: fvalue
+    REAL(KIND=8) :: fvalue
 
     CALL TrackBegin('glans:geti')
 
@@ -1283,12 +1201,8 @@ CONTAINS
   FUNCTION getis(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
-#if ANSVER >= 70
-    USE ansys_par, ONLY : CMD_MAX_LENG, &
-#else
-    USE ansys_par, ONLY : SYS_LNG_CMDLN, &
-#endif
-    & ER_NUMWARNING, ER_NUMERROR, PARMSIZE, STRING_MAX_LENG
+    USE ansys_par, ONLY : CMD_MAX_LENG, ER_NUMWARNING, ER_NUMERROR, &
+         & PARMSIZE, STRING_MAX_LENG
     IMPLICIT NONE
     ! Purpose:
     !
@@ -1312,7 +1226,7 @@ CONTAINS
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: IT2NUM
 
-    DOUBLE PRECISION :: fvalue
+    REAL(KIND=8) :: fvalue
 
     CALL TrackBegin('glans:getis')
 
@@ -1326,12 +1240,8 @@ CONTAINS
   FUNCTION getii(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
-#if ANSVER >= 70
-    USE ansys_par, ONLY : CMD_MAX_LENG, &
-#else
-    USE ansys_par, ONLY : SYS_LNG_CMDLN, &
-#endif
-    & ER_NUMWARNING, ER_NUMERROR, PARMSIZE, STRING_MAX_LENG
+    USE ansys_par, ONLY : CMD_MAX_LENG, ER_NUMWARNING, ER_NUMERROR, &
+         & PARMSIZE, STRING_MAX_LENG
     IMPLICIT NONE
     ! Purpose:
     !
@@ -1355,7 +1265,7 @@ CONTAINS
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
     INTEGER, INTENT(IN), OPTIONAL :: IT2NUM
 
-    DOUBLE PRECISION :: fvalue
+    REAL(KIND=8) :: fvalue
 
     CALL TrackBegin('glans:getii')
 
@@ -1369,7 +1279,7 @@ CONTAINS
   ! issue warnings and update message count
   SUBROUTINE message(wcode,n1,n2)
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler
-    USE ansys_par, ONLY : ERH_WARNING, PARMSIZE, MP_EX, MP_NUXY, MP_DENS
+    USE ansys_par, ONLY : ERH_WARNING, ERH_FNAME_LEN, PARMSIZE, MP_EX, MP_NUXY, MP_DENS
     USE LOCMOD, ONLY : libname
     IMPLICIT NONE
     ! Purpose:
@@ -1383,9 +1293,9 @@ CONTAINS
     INTEGER n1,n2
 
     ! dataspace for feeding erhandler subroutine
-    DOUBLE PRECISION, DIMENSION(10) ::  derrinfo
+    REAL(KIND=8), DIMENSION(10) ::  derrinfo
     CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
-    CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
+    CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
     CHARACTER(LEN=1024) :: msg
 
     CALL TrackBegin('glans:message')

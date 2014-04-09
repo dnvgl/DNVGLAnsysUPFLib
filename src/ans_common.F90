@@ -18,8 +18,8 @@ MODULE ans_common
 
   ! NZERO is used to compare double numbers
   ! NDIGITS is the number of significant digits
-  DOUBLE PRECISION, PARAMETER :: NZERO=1E-30
-  DOUBLE PRECISION, PARAMETER :: NDIGITS=8
+  REAL(KIND=8), PARAMETER :: NZERO=1E-30
+  REAL(KIND=8), PARAMETER :: NDIGITS=8
 
   ! at this point, just one structure is admitted
   INTEGER, PARAMETER :: mainstructure=1
@@ -36,10 +36,10 @@ MODULE ans_common
 
   INTEGER, PARAMETER :: max_components=1024
   CHARACTER(LEN=16), DIMENSION(max_components) :: l_comp_name
-  CHARACTER(LEN=PARMSIZE), DIMENSION(max_components) :: comp_name
+  CHARACTER(LEN=STRING_MAX_LENG), DIMENSION(max_components) :: comp_name = " "
   INTEGER, DIMENSION(max_components) :: l_comp_pos
   INTEGER, DIMENSION(max_components) :: l_comp_len
-  CHARACTER(LEN=PARMSIZE), DIMENSION(max_components) :: l_comp_ansys
+  CHARACTER(LEN=STRING_MAX_LENG), DIMENSION(max_components) :: l_comp_ansys
   INTEGER, DIMENSION(max_components) :: l_comp_csub
   INTEGER, DIMENSION(max_components) :: l_csub_gid
   INTEGER :: comp_num
@@ -48,21 +48,130 @@ MODULE ans_common
   INTEGER :: max_loadcases
 
   INTEGER :: bp_length
-  INTEGER :: bp_num_i
-  INTEGER :: bp_num_j
-  INTEGER, PARAMETER :: bp_R=0
-  INTEGER, PARAMETER :: bp_A=1
-  INTEGER, PARAMETER :: bp_I=4
-  INTEGER, PARAMETER :: bp_e=7
-  INTEGER, PARAMETER :: bp_sc=13
-  INTEGER, PARAMETER :: bp_sf=15
-  INTEGER, PARAMETER :: bp_d=17
-  INTEGER, PARAMETER :: bp_rlen=20
 
-  INTEGER :: rl_length
-  INTEGER :: rl_num
+  TYPE :: bp_values
+
+     CHARACTER(LEN=16) :: name = ""
+     REAL(KIND=8), DIMENSION(3) :: A = 0d0
+     REAL(KIND=8), DIMENSION(3) :: I = 0d0
+     REAL(KIND=8), DIMENSION(6) :: e = 0d0
+     REAL(KIND=8), DIMENSION(2) :: sc = 0d0
+     REAL(KIND=8), DIMENSION(3) :: d = 0d0
+     REAL(KIND=8) :: Iyz = 0d0
+
+  END TYPE bp_values
+
+  INTERFACE OPERATOR(.EQ.)
+     MODULE PROCEDURE bp_values_equal
+  END INTERFACE
+
+  INTERFACE OPERATOR(.NE.)
+     MODULE PROCEDURE bp_values_not_equal
+  END INTERFACE
+
+  INTERFACE ASSIGNMENT(=)
+     MODULE PROCEDURE bp_values_assign
+  END INTERFACE
+
+  TYPE :: bp_loc
+     INTEGER :: r = 999, i = 999, j = 999
+  END TYPE bp_loc
+
+  INTERFACE ASSIGNMENT(=)
+     MODULE PROCEDURE bp_loc_assign
+  END INTERFACE
+
+  TYPE :: bp_type
+
+     INTEGER :: num = 0, rnum = 0, snum = 0
+     ! beam property entries
+     TYPE(bp_values), DIMENSION(:), ALLOCATABLE :: data
+     ! Mapping real const. number to beam property entry
+     TYPE(bp_loc), DIMENSION(:), ALLOCATABLE :: r_bp_map
+     ! Mapping section number to beam property entry
+     TYPE(bp_loc), DIMENSION(:), ALLOCATABLE :: se_bp_map
+
+  END TYPE bp_type
+
 
   LOGICAL :: batch
+
+CONTAINS
+
+  FUNCTION bp_values_equal(a, b)
+    IMPLICIT NONE
+    TYPE(bp_values), INTENT(IN) :: a, b
+    LOGICAL :: bp_values_equal
+
+    bp_values_equal = ( &
+         (a%name == b%name) .AND. ALL(a%A == b%A) .AND. &
+         ALL(a%I == b%I) .AND. ALL(a%e == b%e) .AND. &
+         ALL(a%sc == b%sc) .AND. ALL(a%d == b%d) .AND. &
+         (a%Iyz == b%Iyz))
+    RETURN
+  END FUNCTION bp_values_equal
+
+  FUNCTION bp_values_not_equal(a, b)
+    IMPLICIT NONE
+    TYPE(bp_values), INTENT(IN) :: a, b
+    LOGICAL :: bp_values_not_equal
+
+    bp_values_not_equal = .NOT. (a == b)
+    RETURN
+  END FUNCTION bp_values_not_equal
+
+  SUBROUTINE bp_values_assign(a, b)
+    IMPLICIT NONE
+    TYPE(bp_values), INTENT(OUT) :: a
+    TYPE(bp_values), INTENT(IN) :: b
+
+    a%name(:) = b%name(:)
+    a%A(:) = b%A(:)
+    a%I(:) = b%I(:)
+    a%e(:) = b%e(:)
+    a%sc(:) = b%sc(:)
+    a%d(:) = b%d(:)
+    a%Iyz = b%Iyz
+  END SUBROUTINE bp_values_assign
+
+  SUBROUTINE bp_loc_assign(a, b)
+    IMPLICIT NONE
+    TYPE(bp_loc), INTENT(OUT) :: a
+    TYPE(bp_loc), INTENT(IN) :: b
+
+    a%r = b%r
+    a%i = b%i
+    a%j = b%j
+  END SUBROUTINE bp_loc_assign
+
+  FUNCTION allocate_bp_space(bp, rnum, snum)
+    IMPLICIT NONE
+    LOGICAL :: allocate_bp_space
+
+    TYPE(bp_type), INTENT(INOUT) :: bp
+    INTEGER, INTENT(IN) :: rnum, snum
+
+    allocate_bp_space = .True.
+
+    ALLOCATE(bp%data((2*rnum) + snum + 2))
+    ALLOCATE(bp%r_bp_map(rnum))
+    ALLOCATE(bp%se_bp_map(snum))
+
+    allocate_bp_space = .False.
+
+    RETURN
+
+  END FUNCTION allocate_bp_space
+
+  SUBROUTINE deallocate_bp_space(bp)
+    IMPLICIT NONE
+    TYPE(bp_type), INTENT(INOUT) :: bp
+
+    bp%num = 0
+    DEALLOCATE(bp%data)
+    DEALLOCATE(bp%r_bp_map)
+    DEALLOCATE(bp%se_bp_map)
+  END SUBROUTINE deallocate_bp_space
 
 END MODULE ans_common
 

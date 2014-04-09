@@ -30,8 +30,8 @@ MODULE linklist_mod
   END TYPE il_list
 
   TYPE :: dd_list
-     DOUBLE PRECISION :: value1 = 0d0
-     DOUBLE PRECISION :: value2 = 0d0
+     REAL(KIND=8) :: value1 = 0d0
+     REAL(KIND=8) :: value2 = 0d0
      TYPE(dd_list), POINTER :: next => NULL()
   END TYPE dd_list
 

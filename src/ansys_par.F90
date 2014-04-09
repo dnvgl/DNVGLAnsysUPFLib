@@ -24,6 +24,9 @@ MODULE ansys_par
 
   INTEGER, PARAMETER :: RL_DIM  = 40
 
+  ! Max. len. for erhandler fname length
+  INTEGER, PARAMETER :: ERH_FNAME_LEN = 40
+
 END MODULE ansys_par
 
 ! Local Variables:

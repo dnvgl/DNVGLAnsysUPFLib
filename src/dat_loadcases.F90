@@ -13,7 +13,7 @@ CONTAINS
   SUBROUTINE dat_loadcases()
 
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler, foriqr
-    USE ansys_par, ONLY : DB_NUMDEFINED, ERH_NOTE, PARMSIZE
+    USE ansys_par, ONLY : DB_NUMDEFINED, ERH_FNAME_LEN, ERH_NOTE, PARMSIZE
     USE ans_common
     USE LOCMOD, ONLY : libname
 
@@ -34,10 +34,10 @@ CONTAINS
     INTEGER s_file
 
     ! dataspace for feeding erhandler subroutine
-    DOUBLE PRECISION, DIMENSION(10) ::  derrinfo
+    REAL(KIND=8), DIMENSION(10) ::  derrinfo
     CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
 
-    CHARACTER(LEN=40), PARAMETER :: fname=__FILE__
+    CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
 
     CALL TrackBegin('dat_loadcases')
 

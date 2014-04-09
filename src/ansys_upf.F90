@@ -24,11 +24,11 @@ MODULE ansys_upf
        INTEGER, INTENT(IN) :: iField
      END FUNCTION intinfun
   END INTERFACE
-  ! double precision function dpinfun(iField) - gets double precision
+  ! REAL(KIND=8) function dpinfun(iField) - gets REAL(KIND=8)
   INTERFACE
      FUNCTION dpinfun(iField)
        IMPLICIT NONE
-       DOUBLE PRECISION :: dpinfun
+       REAL(KIND=8) :: dpinfun
        INTEGER, INTENT(IN) :: iField
      END FUNCTION dpinfun
   END INTERFACE
@@ -61,6 +61,30 @@ MODULE ansys_upf
 
   ! 6.2. Supporting Subroutines for Element Creation
   ! 6.2.1. Subroutine nminfo (Returning Element Reference Names)
+
+  ! *** primary function: set element reference names
+  ! *** secondary functions: none
+  ! -------- to get name back, use nameiq
+  !
+  ! *** Notice - This file contains ANSYS Confidential information ***
+  !
+  ! input arguments:
+  ! variable (typ,siz,intent) description
+  ! ielc (int,ar(*),inout) - element characteristic vector
+  ! rname (chr,sc,in) - 8 character reference name
+  !
+  ! output arguments:
+  ! variable (typ,siz,intent) description
+  ! ielc (int,ar(*),inout) - element characteristic vector with
+  ! element name encoded
+  INTERFACE
+     SUBROUTINE nminfo (ielc, rname)
+       IMPLICIT NONE
+       INTEGER, INTENT(INOUT) :: ielc
+       CHARACTER, DIMENSION(8), INTENT(IN) :: rname
+     END SUBROUTINE nminfo
+  END INTERFACE
+
   ! 6.2.2. Subroutine svgidx (Fetching the Index for Saved Variables)
   ! 6.2.3. Subroutine svrget (Fetching Saved Variable Data for an Element)
   ! 6.2.4. Subroutine svrput (Writing an Element's Saved Variable Set)
@@ -86,7 +110,7 @@ MODULE ansys_upf
        IMPLICIT NONE
        INTEGER, INTENT(IN) :: mat
        INTEGER, INTENT(IN) :: numitm
-       DOUBLE PRECISION, INTENT(OUT), DIMENSION(numitm) :: tbprop
+       REAL(KIND=8), INTENT(OUT), DIMENSION(numitm) :: tbprop
      END SUBROUTINE tbuser
   END INTERFACE
 
@@ -137,7 +161,7 @@ MODULE ansys_upf
        INTEGER :: nlget
        INTEGER, INTENT(IN) :: mat
        INTEGER, INTENT(IN) :: iprop
-       DOUBLE PRECISION, INTENT(OUT), DIMENSION(*) :: prop
+       REAL(KIND=8), INTENT(OUT), DIMENSION(*) :: prop
      END FUNCTION nlget
   END INTERFACE
 
@@ -282,29 +306,18 @@ MODULE ansys_upf
   !                                     0=ok,  1=error,  2=error but TINY is used
   !                                      -2, output is string in chValue
   INTERFACE
-#if   ANSVER < 70
-     FUNCTION parevl(ParName, nDim, subc, lvl, kerr)
-#else
      SUBROUTINE parevl(ParName, nDim, subc, lvl, dpValue, chValue, &
           kerr)
-#endif
        USE ansys_par, ONLY : STRING_MAX_LENG, PARMSIZE
        IMPLICIT NONE
-#if ANSVER < 70
-       DOUBLE PRECISION :: parevl
-#endif
        CHARACTER(LEN=PARMSIZE), INTENT(IN) :: ParName
        INTEGER, INTENT(IN) :: nDim
-       DOUBLE PRECISION, DIMENSION(*), INTENT(IN) :: subc
+       REAL(KIND=8), DIMENSION(*), INTENT(IN) :: subc
        INTEGER, INTENT(IN) :: lvl
-#if ANSVER < 70
-     END FUNCTION parevl
-#else
-       DOUBLE PRECISION, INTENT(OUT) :: dpValue
+       REAL(KIND=8), INTENT(OUT) :: dpValue
        CHARACTER(LEN=STRING_MAX_LENG), INTENT(OUT) :: chValue
        INTEGER, INTENT(OUT) :: kerr
      END SUBROUTINE parevl
-#endif
   END INTERFACE
 
   ! 6.12.3. Subroutine pardef (Adding a Parameter)
@@ -492,7 +505,7 @@ MODULE ansys_upf
      SUBROUTINE getnod(node, v, kerr, kcrot)
        IMPLICIT NONE
        INTEGER, INTENT(IN) :: node
-       DOUBLE PRECISION, INTENT(OUT), DIMENSION(6) :: v
+       REAL(KIND=8), INTENT(OUT), DIMENSION(6) :: v
        INTEGER, INTENT(INOUT) :: kerr
        INTEGER, INTENT(IN) :: kcrot
      END SUBROUTINE getnod
@@ -514,7 +527,7 @@ MODULE ansys_upf
      SUBROUTINE putnod(node, vctn, kcrot)
        IMPLICIT NONE
        INTEGER, INTENT(IN) :: node
-       DOUBLE PRECISION, INTENT(IN), DIMENSION(6) :: vctn
+       REAL(KIND=8), INTENT(IN), DIMENSION(6) :: vctn
        INTEGER, INTENT(IN) :: kcrot
      END SUBROUTINE putnod
   END INTERFACE
@@ -536,7 +549,7 @@ MODULE ansys_upf
        IMPLICIT NONE
        INTEGER :: ndgall
        INTEGER, INTENT(IN) :: node
-       DOUBLE PRECISION, INTENT(OUT), DIMENSION(6) :: xyz
+       REAL(KIND=8), INTENT(OUT), DIMENSION(6) :: xyz
      END FUNCTION ndgall
   END INTERFACE
 
@@ -572,7 +585,7 @@ MODULE ansys_upf
   !                 = 17 - pointer to start of index
   !                 = 18 - return type of file.
   !                     elmiqr = 0 - integer
-  !                             = 1 - double precision
+  !                             = 1 - REAL(KIND=8)
   !                             = 2 - real
   !                             = 3 - complex
   !                             = 4 - character*8
@@ -828,8 +841,8 @@ MODULE ansys_upf
        INTEGER :: mpget
        INTEGER, INTENT(IN) :: mat
        INTEGER, INTENT(IN) :: iprop
-       DOUBLE PRECISION, INTENT(OUT), DIMENSION(*) :: temp
-       DOUBLE PRECISION, INTENT(OUT), DIMENSION(*) :: prop
+       REAL(KIND=8), INTENT(OUT), DIMENSION(*) :: temp
+       REAL(KIND=8), INTENT(OUT), DIMENSION(*) :: prop
      END FUNCTION mpget
   END INTERFACE
 
@@ -881,7 +894,7 @@ MODULE ansys_upf
        IMPLICIT NONE
        INTEGER :: rlget
        INTEGER, INTENT(IN) :: nreal
-       DOUBLE PRECISION, INTENT(OUT), DIMENSION(RL_DIM) :: rtable
+       REAL(KIND=8), INTENT(OUT), DIMENSION(RL_DIM) :: rtable
      END FUNCTION rlget
   END INTERFACE
 
@@ -890,7 +903,7 @@ MODULE ansys_upf
        IMPLICIT NONE
        INTEGER, INTENT(IN) :: i
        INTEGER, INTENT(IN) :: nreal
-       DOUBLE PRECISION, INTENT(IN), DIMENSION(nreal) :: rtable
+       REAL(KIND=8), INTENT(IN), DIMENSION(nreal) :: rtable
      END SUBROUTINE rlput
   END INTERFACE
 
@@ -991,7 +1004,7 @@ MODULE ansys_upf
        IMPLICIT NONE
        INTEGER :: csyget
        INTEGER, INTENT(IN) :: ncsy
-       DOUBLE PRECISION, INTENT(OUT), DIMENSION(18) :: csydpx
+       REAL(KIND=8), INTENT(OUT), DIMENSION(18) :: csydpx
        INTEGER, INTENT(INOUT), DIMENSION(6) :: csyinx
      END FUNCTION csyget
   END INTERFACE
@@ -1063,7 +1076,7 @@ MODULE ansys_upf
        INTEGER :: disget
        INTEGER, INTENT(IN) :: inode
        INTEGER, INTENT(IN) :: idf
-       DOUBLE PRECISION, DIMENSION(4), INTENT(OUT) :: value
+       REAL(KIND=8), DIMENSION(4), INTENT(OUT) :: value
      END FUNCTION disget
   END INTERFACE
 
@@ -1117,7 +1130,7 @@ MODULE ansys_upf
        INTEGER :: forget
        INTEGER, INTENT(IN) :: inode
        INTEGER, INTENT(IN) :: idf
-       DOUBLE PRECISION, INTENT(OUT), DIMENSION(4) :: value
+       REAL(KIND=8), INTENT(OUT), DIMENSION(4) :: value
      END FUNCTION forget
   END INTERFACE
 
@@ -1208,7 +1221,7 @@ MODULE ansys_upf
        INTEGER :: eprget
        INTEGER, INTENT(IN) :: elem
        INTEGER, INTENT(IN) :: iface
-       DOUBLE PRECISION, INTENT(OUT), DIMENSION(*) :: value
+       REAL(KIND=8), INTENT(OUT), DIMENSION(*) :: value
      END FUNCTION eprget
   END INTERFACE
 
@@ -1321,7 +1334,7 @@ MODULE ansys_upf
   ! 8. Subroutines for Users' Convenience
   ! 8.1. Input and Output Abbreviations
   ! 8.2. General Subroutines
-  ! 8.2.1. dptoch Subroutine (Retrieve Eight Characters From a Double Precision Variable)
+  ! 8.2.1. dptoch Subroutine (Retrieve Eight Characters From a REAL(KIND=8) Variable)
 
   ! 8.2.2. wrinqr Function (Obtain Information About Output)
   !     wrinqr Function (Obtain Information About Output)
@@ -1527,7 +1540,7 @@ MODULE ansys_upf
   !                                  of %i %g %c %/ for formating (same as
   !                                  lngerr)
   !     dperr    (dp,ar(*),in)     - vector of data to display. contains both
-  !                                  integer and double precision data.
+  !                                  integer and REAL(KIND=8) data.
   !                                  (same as lngerr)
   !                                    if filein='ErrorMessageProbe', dperr
   !                                    contains the unpacked message and lngstrng
@@ -1538,11 +1551,12 @@ MODULE ansys_upf
   INTERFACE
      SUBROUTINE erhandler(filein, msgid, msglvl, lngstrng, &
           dperr, cherr)
-       CHARACTER(LEN=40), INTENT(IN) :: filein
+       USE ansys_par, ONLY : ERH_FNAME_LEN
+       CHARACTER(LEN=ERH_FNAME_LEN), INTENT(IN) :: filein
        INTEGER, INTENT(IN) :: msgid
        INTEGER, INTENT(IN) :: msglvl
        CHARACTER(LEN=*), INTENT(IN) :: lngstrng
-       DOUBLE PRECISION, INTENT(IN), DIMENSION(*) :: dperr
+       REAL(KIND=8), INTENT(IN), DIMENSION(*) :: dperr
        CHARACTER(LEN=32), INTENT(IN), DIMENSION(*) :: cherr
      END SUBROUTINE erhandler
   END INTERFACE
@@ -1554,7 +1568,7 @@ MODULE ansys_upf
   ! 8.3.1. vdot Function (Computing the Dot Product of Two Vectors)
   ! 8.3.2. vsum Function (Summing Vector Components)
   ! 8.3.3. vmax Function (Retrieving the Maximum Vector Value at a Given Location)
-  ! 8.3.4. lastv Function (Retrieving the Position of the Last Nonzero Term in a Double Precision Vector)
+  ! 8.3.4. lastv Function (Retrieving the Position of the Last Nonzero Term in a REAL(KIND=8) Vector)
 
   ! 8.3.5. izero Function (Setting an Integer Vector to Zero)
 
@@ -1579,7 +1593,7 @@ MODULE ansys_upf
   INTERFACE
      SUBROUTINE vzero (v,n)
        IMPLICIT NONE
-       DOUBLE PRECISION, INTENT(OUT), DIMENSION(n) :: v
+       REAL(KIND=8), INTENT(OUT), DIMENSION(n) :: v
        INTEGER, INTENT(IN) :: n
      END SUBROUTINE vzero
   END INTERFACE
@@ -1614,7 +1628,7 @@ MODULE ansys_upf
      FUNCTION ndgxyz(node, xyz)
        INTEGER :: ndgxyz
        INTEGER, INTENT(IN) :: node
-       DOUBLE PRECISION, INTENT(OUT), DIMENSION(3) :: xyz
+       REAL(KIND=8), INTENT(OUT), DIMENSION(3) :: xyz
      END FUNCTION ndgxyz
   END INTERFACE
 

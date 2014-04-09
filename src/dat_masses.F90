@@ -16,11 +16,7 @@ CONTAINS
 
   SUBROUTINE dat_masses()
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, elmiqr
-#if ANSVER >= 70
     USE ansys_par, ONLY : CMD_MAX_LENG, DB_NUMSELECTED
-#else
-    USE ansys_par, ONLY : SYS_LNG_CMDLN, DB_NUMSELECTED
-#endif
     USE ans_common, ONLY : n_masses
 
     ! Purpose:
@@ -35,11 +31,7 @@ CONTAINS
 
     INTEGER :: iErr
 
-#if ANSVER >= 70
     CHARACTER(LEN=CMD_MAX_LENG) :: cmd
-#else
-    CHARACTER(LEN=SYS_LNG_CMDLN) :: cmd
-#endif
 
     CALL TrackBegin('dat_masses')
 
