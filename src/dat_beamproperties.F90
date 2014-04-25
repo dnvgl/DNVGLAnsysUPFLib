@@ -10,6 +10,17 @@
 
 MODULE mod_dat_beamproperties
 
+  USE ansys_par, ONLY : PARMSIZE, ERH_FNAME_LEN
+
+  PRIVATE
+
+  ! dataspace for feeding erhandler subroutine
+  REAL(KIND=8), DIMENSION(10) ::  derrinfo
+  CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
+  CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
+
+  PUBLIC :: dat_beamproperties, ans2bmf_rlnosel, ans2bmf_rlsle
+
 CONTAINS
 
   SUBROUTINE dat_beamproperties(bp)
@@ -32,7 +43,7 @@ CONTAINS
   SUBROUTINE dat_beamproperties_sec(bp)
 
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler
-    USE ansys_par, ONLY : PARMSIZE, ERH_FNAME_LEN, ERH_FATAL, STRING_MAX_LENG
+    USE ansys_par, ONLY : ERH_FATAL, STRING_MAX_LENG
     USE ans_common
     USE glans
     USE LOCMOD, ONLY : libname
@@ -64,11 +75,6 @@ CONTAINS
     REAL(KIND=8) :: t_y_1, t_y_2, t_z_1, t_z_2
 
     REAL(KIND=8) :: yI, zI, yJ, zJ, yK, zK, yL, zL
-
-    ! dataspace for feeding erhandler subroutine
-    REAL(KIND=8), DIMENSION(10) ::  derrinfo
-    CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
-    CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
 
     CALL TrackBegin("dat_beamp_sec")
 
@@ -111,96 +117,15 @@ CONTAINS
           t_z_1 = 0d0
           t_z_2 = 0d0
 
-          IF (get(name, 'SECP', n, 'NAME     ')) THEN
-             CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                  TRIM(libname)//': Determining section NAME for section %i failed.', &
-                  derrinfo, cerrinfo)
-          END IF
-          IF (get(area, 'SECP', n, 'PROP     ', 'AREA    ')) THEN
-             CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                  TRIM(libname)//': Determining section AREA for section %i failed.', &
-                  derrinfo, cerrinfo)
-          END IF
-          IF (get(iyy, 'SECP', n, 'PROP     ', 'IYY     ')) THEN
-             CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                  TRIM(libname)//': Determining section IYY for section %i failed.', &
-                  derrinfo, cerrinfo)
-          END IF
-          IF (get(iyz, 'SECP', n, 'PROP     ', 'IYZ     ')) THEN
-             CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                  TRIM(libname)//': Determining section IYZ for section %i failed.', &
-                  derrinfo, cerrinfo)
-          END IF
-          IF (get(izz, 'SECP', n, 'PROP     ', 'IZZ     ')) THEN
-             CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                  TRIM(libname)//': Determining section IZZ for section %i failed.', &
-                  derrinfo, cerrinfo)
-          END IF
-          IF (get(warp_val, 'SECP', n, 'PROP     ', 'WARP    ')) THEN
-             CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                  TRIM(libname)//': Determining section WARP for section %i failed.', &
-                  derrinfo, cerrinfo)
-          END IF
-          IF (get(tors, 'SECP', n, 'PROP     ', 'TORS    ')) THEN
-             CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                  TRIM(libname)//': Determining section TORS for section %i failed.', &
-                  derrinfo, cerrinfo)
-          END IF
-          IF (get(cgy, 'SECP', n, 'PROP     ', 'CGY     ')) THEN
-             CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                  TRIM(libname)//': Determining section CGY for section %i failed.', &
-                  derrinfo, cerrinfo)
-          END IF
-          IF (get(cgz, 'SECP', n, 'PROP     ', 'CGZ     ')) THEN
-             CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                  TRIM(libname)//': Determining section CGZ for section %i failed.', &
-                  derrinfo, cerrinfo)
-          END IF
-          IF (get(shcy, 'SECP', n, 'PROP     ', 'SHCY    ')) THEN
-             CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                  TRIM(libname)//': Determining section SHCY for section %i failed.', &
-                  derrinfo, cerrinfo)
-          END IF
-          IF (get(shcz, 'SECP', n, 'PROP     ', 'SHCZ    ')) THEN
-             CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                  TRIM(libname)//': Determining section SHCZ for section %i failed.', &
-                  derrinfo, cerrinfo)
-          END IF
-          IF (get(scyy, 'SECP', n, 'PROP     ', 'SCYY    ')) THEN
-             CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                  TRIM(libname)//': Determining section SCYY for section %i failed.', &
-                  derrinfo, cerrinfo)
-          END IF
-          IF (get(scyz, 'SECP', n, 'PROP     ', 'SCYZ    ')) THEN
-             CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                  TRIM(libname)//': Determining section SCYZ for section %i failed.', &
-                  derrinfo, cerrinfo)
-          END IF
-          IF (get(sczz, 'SECP', n, 'PROP     ', 'SCZZ    ')) THEN
-             CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                  TRIM(libname)//': Determining section SCZZ for section %i failed.', &
-                  derrinfo, cerrinfo)
-          END IF
-          IF (get(offset, 'SECP', n, 'PROP     ', 'OFFSET  ')) THEN
-             CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                  TRIM(libname)//': Determining section OFFSET for section %i failed.', &
-                  derrinfo, cerrinfo)
-          END IF
-          IF (get(offy, 'SECP', n, 'PROP     ', 'OFFY    ')) THEN
-             CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                  TRIM(libname)//': Determining section OFFY for section %i failed.', &
-                  derrinfo, cerrinfo)
-          END IF
-          IF (get(offz, 'SECP', n, 'PROP     ', 'OFFZ    ')) THEN
-             CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                  TRIM(libname)//': Determining section OFFZ for section %i failed.', &
-                  derrinfo, cerrinfo)
-          END IF
+          CALL get_t_beam_common(n, name, area, iyy, iyz, izz, warp_val, tors, &
+               cgy, cgz, shcy, shcz, scyy, scyz, sczz, offset, offy, offz)
 
           bp%data(bp%num)%name(:) = name(1:16)
-          bp%data(bp%num)%A(:) = (/ area, sczz * area, scyy * area /)
+          bp%data(bp%num)%A(:) = (/ area, area * scyy, area * sczz /)
 
           bp%data(bp%num)%i(:) = (/ tors, izz, iyy /)
+
+          bp%data(bp%num)%iyz = iyz
 
           IF (get(sec_subtype, 'SECP', n, 'SUBTYPE ')) THEN
              CALL erhandler(fname, __LINE__, ERH_FATAL, &
@@ -209,76 +134,31 @@ CONTAINS
           END IF
 
           IF (sec_subtype == 'RECT') THEN
-             IF (get(t_y_2, 'SECP', n, 'DATA    ', 1)) THEN
-                CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                     TRIM(libname)//': Determining section "DATA,1" for section %i failed.', &
-                     derrinfo, cerrinfo)
-             END IF
-             IF (get(t_z_2, 'SECP', n, 'DATA    ', 2)) THEN
-                CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                     TRIM(libname)//': Determining section "DATA,2" for section %i failed.', &
-                     derrinfo, cerrinfo)
-             END IF
-             t_y_2 = t_y_2 / 2d0
-             t_y_1 = -t_y_2
-             t_z_2 = t_z_2 / 2d0
-             t_z_1 = -t_z_2
-
-          ELSE if (sec_subtype == 'QUAD') THEN
-
-             IF (get(yI, 'SECP', n, 'DATA    ', 1)) THEN
-                CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                     TRIM(libname)//': Determining section "DATA,1" for section %i failed.', &
-                     derrinfo, cerrinfo)
-             END IF
-
-             IF (get(zI, 'SECP', n, 'DATA    ', 2)) THEN
-                CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                     TRIM(libname)//': Determining section "DATA,2" for section %i failed.', &
-                     derrinfo, cerrinfo)
-             END IF
-
-             IF (get(yJ, 'SECP', n, 'DATA    ', 3)) THEN
-                CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                     TRIM(libname)//': Determining section "DATA,3" for section %i failed.', &
-                     derrinfo, cerrinfo)
-             END IF
-
-             IF (get(zJ, 'SECP', n, 'DATA    ', 4)) THEN
-                CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                     TRIM(libname)//': Determining section "DATA,4" for section %i failed.', &
-                     derrinfo, cerrinfo)
-             END IF
-
-             IF (get(yK, 'SECP', n, 'DATA    ', 5)) THEN
-                CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                     TRIM(libname)//': Determining section "DATA,5" for section %i failed.', &
-                     derrinfo, cerrinfo)
-             END IF
-
-             IF (get(zK, 'SECP', n, 'DATA    ', 6)) THEN
-                CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                     TRIM(libname)//': Determining section "DATA,6" for section %i failed.', &
-                     derrinfo, cerrinfo)
-             END IF
-
-             IF (get(yL, 'SECP', n, 'DATA    ', 7)) THEN
-                CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                     TRIM(libname)//': Determining section "DATA,7" for section %i failed.', &
-                     derrinfo, cerrinfo)
-             END IF
-
-             IF (get(zL, 'SECP', n, 'DATA    ', 8)) THEN
-                CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                     TRIM(libname)//': Determining section "DATA,8" for section %i failed.', &
-                     derrinfo, cerrinfo)
-             END IF
-
-             t_y_1 = MAX(yI, yL)
-             t_y_2 = MAX(yJ, yK)
-             t_z_1 = MAX(zI, zJ)
-             t_z_2 = MAX(zK, zL)
-
+             CALL get_t_beam_rect(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+          ELSE IF (sec_subtype == 'QUAD') THEN
+             CALL get_t_beam_quad(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+          ELSE IF (sec_subtype == 'CSOL') THEN
+             CALL get_t_beam_csolid(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+          ELSE IF (sec_subtype == 'CTUB') THEN
+             CALL get_t_beam_ctube(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+          ELSE IF (sec_subtype == 'CHAN') THEN
+             CALL get_t_beam_chan(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+          ELSE IF (sec_subtype == 'I') THEN
+             CALL get_t_beam_i(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+          ELSE IF (sec_subtype == 'Z') THEN
+             CALL get_t_beam_z(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+          ELSE IF (sec_subtype == 'L') THEN
+             CALL get_t_beam_l(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+          ELSE IF (sec_subtype == 'T') THEN
+             CALL get_t_beam_t(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+          ELSE IF (sec_subtype == 'HATS') THEN
+             CALL get_t_beam_hats(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+          ELSE IF (sec_subtype == 'HREC') THEN
+             CALL get_t_beam_hrec(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+          ELSE IF (sec_subtype == 'ASEC') THEN
+             CALL get_t_beam_asec(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+          ELSE IF (sec_subtype == 'MESH') THEN
+             CALL get_t_beam_mesh(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
           ELSE
              cerrinfo(1) = sec_subtype
              CALL erhandler(fname, __LINE__, ERH_FATAL, &
@@ -286,13 +166,20 @@ CONTAINS
                   derrinfo, cerrinfo)
           END IF
 
+          ! t_y_1 = ABS(t_y_1 - cgy)
+          ! t_y_2 = ABS(t_y_2 - cgy)
+          ! t_z_1 = ABS(t_z_1 - cgz)
+          ! t_z_2 = ABS(t_z_2 - cgz)
 
-          bp%data(bp%num)%e(:) = (/ &
-               tors / min(abs(t_y_1) + abs(t_y_2), abs(t_z_1) + abs(t_z_2)), &
-               tors / max(abs(t_y_1) + abs(t_y_2), abs(t_z_1) + abs(t_z_2)), &
-               t_y_1, t_y_2, t_z_1, t_z_2 /)
+          IF (MIN(ABS(t_y_2) + ABS(t_y_2), ABS(t_z_1) + ABS(t_z_2)) .NE. 0d0) THEN
+             bp%data(bp%num)%e(1) = tors / MIN(ABS(t_y_2) + ABS(t_y_2), ABS(t_z_1) + ABS(t_z_2))
+          END IF
+         IF (MAX(ABS(t_y_1) + ABS(t_y_2), ABS(t_z_1) + ABS(t_z_2)) .NE. 0d0) THEN
+             bp%data(bp%num)%e(2) = tors / MAX(ABS(t_y_1) + ABS(t_y_2), ABS(t_z_1) + ABS(t_z_2))
+          END IF
+          bp%data(bp%num)%e(3:6) = (/ t_y_1, t_y_2, t_z_1, t_z_2 /)
 
-          bp%data(bp%num)%iyz = iyz
+          bp%data(bp%num)%d(:) = (/ 0d0, offy - cgy, -offz - cgz /)
 
        END IF
 
@@ -307,9 +194,10 @@ CONTAINS
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler, rlget, &
          rlinqr, vzero
     USE ansys_par, ONLY : DB_NUMSELECTED, DB_SELECTED, DB_MAXDEFINED, &
-         ERH_FNAME_LEN, ERH_ERROR, ERH_NOTE, PARMSIZE
+         ERH_ERROR, ERH_NOTE
     USE glans
     USE ans_common
+    USE gl_math
     USE LOCMOD, ONLY : libname
 
     ! Purpose:
@@ -333,10 +221,8 @@ CONTAINS
 
     TYPE(bp_values) :: i_vals, j_vals
 
-    ! dataspace for feeding erhandler subroutine
-    REAL(KIND=8), DIMENSION(10) ::  derrinfo
-    CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
-    CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
+    REAL(KIND=8) :: Iyy, Izz, Iyz
+    REAL(KIND=8) :: theta
 
 #ifdef DEBUG
 100 FORMAT (A, ':', I3, ':dat_beamproperties_rc')
@@ -369,29 +255,6 @@ CONTAINS
        ! test if real constant set is selected (i.e. if it belongs to a
        ! BEAM44 element)
        IF (rlinqr(n, DB_SELECTED).EQ.1) THEN
-
-          ! ! check for overflow
-          ! IF (bp_num_i.GT.rnum) THEN
-          !    derrinfo(1) = rnum
-          !    derrinfo(2) = bp_num_i
-          !    CALL erhandler(fname, __LINE__, ERH_ERROR, &
-          !         TRIM(libname)//': ERROR: %i  beam properties allocated. '// &
-          !         'Pos. %i accessed. This is greater or too close '// &
-          !         'to maximum.', &
-          !         derrinfo, cerrinfo)
-          !    CALL anserr(4, 'Beam Prop. Overflow', 0.0, ' ')
-          ! END IF
-          ! IF (rl_num.ge.rnum) THEN
-          !    derrinfo(1) = rnum
-          !    derrinfo(2) = rl_num
-          !    CALL erhandler(fname, __LINE__, ERH_ERROR, &
-          !         TRIM(libname)//': ERROR: %i conversion table places av.. '// &
-          !         'Pos. %i accessed. This is greater or too close '// &
-          !         'to maximum.', &
-          !         derrinfo, cerrinfo)
-          !    CALL anserr(4, 'Conv.table Overflow', 0.0, ' ')
-          ! END IF
-
           ! read real constant set from ANSYS and convert BEAM44 properties in
           ! beam properties
           CALL vzero(rtable, 40)
@@ -401,11 +264,11 @@ CONTAINS
           j_vals%e(:) =  0.0
 
 
-          i_vals%A(1) =  rtable( 1)              !       AREA1
-          i_vals%I(2) =  rtable( 2)              !       IZ1
-          i_vals%I(3) =  rtable( 3)              !       IY1
-          i_vals%e(5) = -rtable( 4)              ! -TKZB1 = ey2, i
-          i_vals%e(3) = -rtable( 5)              ! -TKYB1 = ez1, i
+          i_vals%A(1) = rtable( 1)               !       AREA1
+          i_vals%I(2) = rtable( 2)               !       IZ1
+          i_vals%I(3) = rtable( 3)               !       IY1
+          i_vals%e(5) = rtable( 4)               !  TKZB1 = ey2, i
+          i_vals%e(3) = rtable( 5)               !  TKYB1 = ez1, i
           IF (rtable( 6).EQ.0d0) THEN
              i_vals%I(1) = rtable(2) + rtable(3) !       IX1
           ELSE
@@ -431,28 +294,28 @@ CONTAINS
           END IF
 
           IF (rtable(10).EQ.0d0) THEN
-             j_vals%e(5) = -rtable( 4)           !     - TKZB2
+             j_vals%e(5) = rtable( 4)            !       TKZB2
           ELSE
-             j_vals%e(5) = -rtable(10)           !     - TKZB2
+             j_vals%e(5) = rtable(10)            !       TKZB2
           END IF
           IF (rtable(11).EQ.0d0) THEN
-             j_vals%e(3) = -rtable( 5)           !     - TKYB2
+             j_vals%e(3) = rtable( 5)            !       TKYB2
           ELSE
-             j_vals%e(3) = -rtable(11)           !     - TKYB2
+             j_vals%e(3) = rtable(11)            !       TKYB2
           END IF
           IF (rtable(12).EQ.0d0) THEN
-             j_vals%I(1) = i_vals%I(1)     !     IX2
+             j_vals%I(1) = i_vals%I(1)           !       IX2
           ELSE
              j_vals%I(1) =  rtable(12)           !       IX2
           END IF
 
-          i_vals%d(1) =  rtable(13)               !       DX1
-          i_vals%d(2) =  rtable(14)               !       DY1
-          i_vals%d(3) =  rtable(15)               !       DZ1
+          i_vals%d(1) = rtable(13)               !       DX1
+          i_vals%d(2) = -rtable(14)               !       DY1
+          i_vals%d(3) = rtable(15)               !       DZ1
 
-          j_vals%d(1) =  rtable(16)               !       DX2
-          j_vals%d(2) =  rtable(17)               !       DY2
-          j_vals%d(3) =  rtable(18)               !       DZ2
+          j_vals%d(1) = rtable(16)               !       DX2
+          j_vals%d(2) = -rtable(17)               !       DY2
+          j_vals%d(3) = rtable(18)               !       DZ2
 
           IF (rtable(20) .NE. 0d0) THEN
              i_vals%A(2) = i_vals%A(1)/rtable(20)!      A1/SHEARY
@@ -484,15 +347,36 @@ CONTAINS
           ! --- not used ---         rtable(29)              !       TSF1
           ! --- not used ---         rtable(30)              !       TSF2
 
-          i_vals%sc(:) =  0.0
-          j_vals%sc(:) =  0.0
+          theta = deg2rad(rtable(53))
+
+          Iyy = 5d-1 * (i_vals%I(2) + i_vals%I(3)) + 5d-1 * ( i_vals%I(2) - i_vals%I(3)) * COS(2d0 * theta)
+          Izz = 5d-1 * (i_vals%I(2) + i_vals%I(3)) - 5d-1 * ( i_vals%I(2) - i_vals%I(3)) * COS(2d0 * theta)
+          Iyz = 5d-1 * (i_vals%I(2) - i_vals%I(3)) * SIN(2d0 * theta)
+
+          i_vals%I(2) = Iyy
+          i_vals%I(3) = Izz
+          i_vals%Iyz = Iyz
+
+          Iyy = 5d-1 * (j_vals%I(2) + j_vals%I(3)) + 5d-1 * (j_vals%I(2) - j_vals%I(3)) * COS(2d0 * theta)
+          Izz = 5d-1 * (j_vals%I(2) + j_vals%I(3)) - 5d-1 * (j_vals%I(2) - j_vals%I(3)) * COS(2d0 * theta)
+          Iyz = 5d-1 * (j_vals%I(2) - j_vals%I(3)) * SIN(2d0 * theta)
+
+          j_vals%I(2) = Iyy
+          j_vals%I(3) = Izz
+          j_vals%Iyz = Iyz
+
+          i_vals%theta = 0d0
+          j_vals%theta = 0d0
+
+          i_vals%sc(:) =  0d0
+          j_vals%sc(:) =  0d0
 
           t_min = MIN( &
-               i_vals%e(4) - i_vals%e(3), &
-               i_vals%e(6) - i_vals%e(5))
+               i_vals%e(4) + i_vals%e(3), &
+               i_vals%e(6) + i_vals%e(5))
           t_max = MAX( &
-                i_vals%e(4)-i_vals%e(3), &
-                i_vals%e(6)-i_vals%e(5))
+               i_vals%e(4) + i_vals%e(3), &
+               i_vals%e(6) + i_vals%e(5))
           IF (t_min.NE.0d0) THEN
              i_vals%e(1) = i_vals%I(1) / t_min
           END IF
@@ -501,11 +385,11 @@ CONTAINS
           END IF
 
           t_min = MIN( &
-               j_vals%e(4)-j_vals%e(3), &
-               j_vals%e(6)-j_vals%e(5))
+               j_vals%e(4) + j_vals%e(3), &
+               j_vals%e(6) + j_vals%e(5))
           t_max = MAX( &
-               j_vals%e(4)-j_vals%e(3), &
-               j_vals%e(6)-j_vals%e(5))
+               j_vals%e(4) + j_vals%e(3), &
+               j_vals%e(6) + j_vals%e(5))
           IF (t_min.NE.0d0) THEN
              j_vals%e(1) = j_vals%I(1) / t_min
           ELSE
@@ -632,6 +516,529 @@ CONTAINS
     CALL TrackEnd('ans2bmf_rlsle')
 
   END SUBROUTINE ans2bmf_rlsle
+
+  SUBROUTINE get_t_beam_common(n, name, area, iyy, iyz, izz, warp_val, tors, cgy, cgz, &
+       shcy, shcz, scyy, scyz, sczz, offset, offy, offz)
+
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler
+    USE ansys_par, ONLY : ERH_FATAL
+    USE ans_common
+    USE glans
+    USE LOCMOD, ONLY : libname
+
+    IMPLICIT NONE
+
+    INTEGER, INTENT(IN) :: n
+    CHARACTER(LEN=*), INTENT(OUT) :: name
+    ! cross area
+    REAL(KIND=8), INTENT(OUT) :: area
+    ! moments of interna
+    REAL(KIND=8), INTENT(OUT) :: iyy, iyz, izz, tors
+    ! warping factor
+    REAL(KIND=8), INTENT(OUT) :: warp_val
+    ! rel. loc. of centre of gravity
+    REAL(KIND=8), INTENT(OUT) :: cgy, cgz
+    ! rel. loc. of shear center
+    REAL(KIND=8), INTENT(OUT) :: shcy, shcz
+    ! Shear correction factors
+    REAL(KIND=8), INTENT(OUT) :: scyy, scyz, sczz
+    ! offset location: 1 = Centroid; 2 = Shear Center; 3 = Origin; 0 = User Defined
+    INTEGER, INTENT(OUT) :: offset
+    ! Section offset in the Y- and Z-direction.
+    REAL(KIND=8), INTENT(OUT) :: offy, offz
+
+    CALL TrackBegin("get_t_beam_common")
+
+    IF (get(name, 'SECP', n, 'NAME     ')) THEN
+       CALL erhandler(fname, __LINE__, ERH_FATAL, &
+            TRIM(libname)//': Determining section NAME for section %i failed.', &
+            derrinfo, cerrinfo)
+    END IF
+    IF (get(area, 'SECP', n, 'PROP     ', 'AREA    ')) THEN
+       CALL erhandler(fname, __LINE__, ERH_FATAL, &
+            TRIM(libname)//': Determining section AREA for section %i failed.', &
+            derrinfo, cerrinfo)
+    END IF
+    IF (get(iyy, 'SECP', n, 'PROP     ', 'IYY     ')) THEN
+       CALL erhandler(fname, __LINE__, ERH_FATAL, &
+            TRIM(libname)//': Determining section IYY for section %i failed.', &
+            derrinfo, cerrinfo)
+    END IF
+    IF (get(iyz, 'SECP', n, 'PROP     ', 'IYZ     ')) THEN
+       CALL erhandler(fname, __LINE__, ERH_FATAL, &
+            TRIM(libname)//': Determining section IYZ for section %i failed.', &
+            derrinfo, cerrinfo)
+    END IF
+    IF (get(izz, 'SECP', n, 'PROP     ', 'IZZ     ')) THEN
+       CALL erhandler(fname, __LINE__, ERH_FATAL, &
+            TRIM(libname)//': Determining section IZZ for section %i failed.', &
+            derrinfo, cerrinfo)
+    END IF
+    IF (get(warp_val, 'SECP', n, 'PROP     ', 'WARP    ')) THEN
+       CALL erhandler(fname, __LINE__, ERH_FATAL, &
+            TRIM(libname)//': Determining section WARP for section %i failed.', &
+            derrinfo, cerrinfo)
+    END IF
+    IF (get(tors, 'SECP', n, 'PROP     ', 'TORS    ')) THEN
+       CALL erhandler(fname, __LINE__, ERH_FATAL, &
+            TRIM(libname)//': Determining section TORS for section %i failed.', &
+            derrinfo, cerrinfo)
+    END IF
+    IF (get(cgy, 'SECP', n, 'PROP     ', 'CGY     ')) THEN
+       CALL erhandler(fname, __LINE__, ERH_FATAL, &
+            TRIM(libname)//': Determining section CGY for section %i failed.', &
+            derrinfo, cerrinfo)
+    END IF
+    IF (get(cgz, 'SECP', n, 'PROP     ', 'CGZ     ')) THEN
+       CALL erhandler(fname, __LINE__, ERH_FATAL, &
+            TRIM(libname)//': Determining section CGZ for section %i failed.', &
+            derrinfo, cerrinfo)
+    END IF
+    IF (get(shcy, 'SECP', n, 'PROP     ', 'SHCY    ')) THEN
+       CALL erhandler(fname, __LINE__, ERH_FATAL, &
+            TRIM(libname)//': Determining section SHCY for section %i failed.', &
+            derrinfo, cerrinfo)
+    END IF
+    IF (get(shcz, 'SECP', n, 'PROP     ', 'SHCZ    ')) THEN
+       CALL erhandler(fname, __LINE__, ERH_FATAL, &
+            TRIM(libname)//': Determining section SHCZ for section %i failed.', &
+            derrinfo, cerrinfo)
+    END IF
+    IF (get(scyy, 'SECP', n, 'PROP     ', 'SCYY    ')) THEN
+       CALL erhandler(fname, __LINE__, ERH_FATAL, &
+            TRIM(libname)//': Determining section SCYY for section %i failed.', &
+            derrinfo, cerrinfo)
+    END IF
+    IF (get(scyz, 'SECP', n, 'PROP     ', 'SCYZ    ')) THEN
+       CALL erhandler(fname, __LINE__, ERH_FATAL, &
+            TRIM(libname)//': Determining section SCYZ for section %i failed.', &
+            derrinfo, cerrinfo)
+    END IF
+    IF (get(sczz, 'SECP', n, 'PROP     ', 'SCZZ    ')) THEN
+       CALL erhandler(fname, __LINE__, ERH_FATAL, &
+            TRIM(libname)//': Determining section SCZZ for section %i failed.', &
+            derrinfo, cerrinfo)
+    END IF
+    IF (get(offset, 'SECP', n, 'PROP     ', 'OFFSET  ')) THEN
+       CALL erhandler(fname, __LINE__, ERH_FATAL, &
+            TRIM(libname)//': Determining section OFFSET for section %i failed.', &
+            derrinfo, cerrinfo)
+    END IF
+    IF (get(offy, 'SECP', n, 'PROP     ', 'OFFY    ')) THEN
+       CALL erhandler(fname, __LINE__, ERH_FATAL, &
+            TRIM(libname)//': Determining section OFFY for section %i failed.', &
+            derrinfo, cerrinfo)
+    END IF
+    IF (get(offz, 'SECP', n, 'PROP     ', 'OFFZ    ')) THEN
+       CALL erhandler(fname, __LINE__, ERH_FATAL, &
+            TRIM(libname)//': Determining section OFFZ for section %i failed.', &
+            derrinfo, cerrinfo)
+    END IF
+
+    CALL TrackEnd("get_t_beam_common")
+
+  END SUBROUTINE get_t_beam_common
+
+  SUBROUTINE get_t_beam_rect(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler
+    USE ansys_par, ONLY : ERH_FATAL
+    USE glans
+    USE LOCMOD, ONLY : libname
+
+    IMPLICIT NONE
+
+    REAL(KIND=8), INTENT(OUT) :: t_y_1, t_y_2, t_z_1, t_z_2
+    REAL(KIND=8), INTENT(IN) :: cgy, cgz
+    INTEGER, INTENT(IN) :: n
+
+    CALL TrackBegin("get_t_beam_rect")
+
+    IF (get(t_y_2, 'SECP', n, 'DATA    ', 1)) THEN
+       CALL erhandler(fname, __LINE__, ERH_FATAL, &
+            TRIM(libname)//': Determining section "DATA,1" for section %i failed.', &
+            derrinfo, cerrinfo)
+    END IF
+    IF (get(t_z_2, 'SECP', n, 'DATA    ', 2)) THEN
+       CALL erhandler(fname, __LINE__, ERH_FATAL, &
+            TRIM(libname)//': Determining section "DATA,2" for section %i failed.', &
+            derrinfo, cerrinfo)
+    END IF
+    t_y_2 = t_y_2 / 2d0 - cgy
+    t_y_1 = t_y_2
+    t_z_2 = t_z_2 / 2d0 - cgz
+    t_z_1 = t_z_2
+
+    CALL TrackEnd("get_t_beam_rect")
+
+  END SUBROUTINE get_t_beam_rect
+
+  SUBROUTINE get_t_beam_quad(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler
+    USE ansys_par, ONLY : ERH_FATAL
+    USE glans
+    USE LOCMOD, ONLY : libname
+
+    IMPLICIT NONE
+
+    REAL(KIND=8), INTENT(OUT) :: t_y_1, t_y_2, t_z_1, t_z_2
+    REAL(KIND=8), INTENT(IN) :: cgy, cgz
+    INTEGER, INTENT(IN) :: n
+
+    REAL(KIND=8) :: yI, yJ, yK, yL
+    REAL(KIND=8) :: zI, zJ, zK, zL
+
+    CALL TrackBegin("get_t_beam_quad")
+
+    IF (get(yI, 'SECP', n, 'DATA    ', 1)) THEN
+       CALL erhandler(fname, __LINE__, ERH_FATAL, &
+            TRIM(libname)//': Determining section "DATA,1" for section %i failed.', &
+            derrinfo, cerrinfo)
+    END IF
+
+    IF (get(zI, 'SECP', n, 'DATA    ', 2)) THEN
+       CALL erhandler(fname, __LINE__, ERH_FATAL, &
+            TRIM(libname)//': Determining section "DATA,2" for section %i failed.', &
+            derrinfo, cerrinfo)
+    END IF
+
+    IF (get(yJ, 'SECP', n, 'DATA    ', 3)) THEN
+       CALL erhandler(fname, __LINE__, ERH_FATAL, &
+            TRIM(libname)//': Determining section "DATA,3" for section %i failed.', &
+            derrinfo, cerrinfo)
+    END IF
+
+    IF (get(zJ, 'SECP', n, 'DATA    ', 4)) THEN
+       CALL erhandler(fname, __LINE__, ERH_FATAL, &
+            TRIM(libname)//': Determining section "DATA,4" for section %i failed.', &
+            derrinfo, cerrinfo)
+    END IF
+
+    IF (get(yK, 'SECP', n, 'DATA    ', 5)) THEN
+       CALL erhandler(fname, __LINE__, ERH_FATAL, &
+            TRIM(libname)//': Determining section "DATA,5" for section %i failed.', &
+            derrinfo, cerrinfo)
+    END IF
+
+    IF (get(zK, 'SECP', n, 'DATA    ', 6)) THEN
+       CALL erhandler(fname, __LINE__, ERH_FATAL, &
+            TRIM(libname)//': Determining section "DATA,6" for section %i failed.', &
+            derrinfo, cerrinfo)
+    END IF
+
+    IF (get(yL, 'SECP', n, 'DATA    ', 7)) THEN
+       CALL erhandler(fname, __LINE__, ERH_FATAL, &
+            TRIM(libname)//': Determining section "DATA,7" for section %i failed.', &
+            derrinfo, cerrinfo)
+    END IF
+
+    IF (get(zL, 'SECP', n, 'DATA    ', 8)) THEN
+       CALL erhandler(fname, __LINE__, ERH_FATAL, &
+            TRIM(libname)//': Determining section "DATA,8" for section %i failed.', &
+            derrinfo, cerrinfo)
+    END IF
+
+    t_y_1 = ABS(MIN(yI, yL) - cgy)
+    t_y_2 = ABS(MAX(yJ, yK) - cgy)
+    t_z_1 = ABS(MIN(zI, zJ) - cgz)
+    t_z_2 = ABS(MAX(zK, zL) - cgz)
+
+    CALL TrackEnd("get_t_beam_quad")
+
+  END SUBROUTINE get_t_beam_quad
+
+  SUBROUTINE get_t_beam_csolid(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler
+    USE ansys_par, ONLY : ERH_FATAL
+    USE glans
+    USE LOCMOD, ONLY : libname
+
+    IMPLICIT NONE
+
+    REAL(KIND=8), INTENT(OUT) :: t_y_1, t_y_2, t_z_1, t_z_2
+    REAL(KIND=8), INTENT(IN) :: cgy, cgz
+    INTEGER, INTENT(IN) :: n
+
+    CALL TrackBegin("get_t_beam_csolid")
+
+    IF (get(t_y_2, 'SECP', n, 'DATA    ', 1)) THEN
+       CALL erhandler(fname, __LINE__, ERH_FATAL, &
+            TRIM(libname)//': Determining section "DATA,8" for section %i failed.', &
+            derrinfo, cerrinfo)
+    END IF
+
+    t_y_1 = t_y_2
+    t_z_1 = t_y_2
+    t_z_2 = t_y_2
+
+    CALL TrackEnd("get_t_beam_csolid")
+
+  END SUBROUTINE get_t_beam_csolid
+
+  SUBROUTINE get_t_beam_ctube(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler
+    USE ansys_par, ONLY : ERH_FATAL
+    USE glans
+    USE LOCMOD, ONLY : libname
+
+    IMPLICIT NONE
+
+    REAL(KIND=8), INTENT(OUT) :: t_y_1, t_y_2, t_z_1, t_z_2
+    REAL(KIND=8), INTENT(IN) :: cgy, cgz
+    INTEGER, INTENT(IN) :: n
+
+    CALL TrackBegin("get_t_beam_ctube")
+
+    IF (get(t_y_2, 'SECP', n, 'DATA    ', 2)) THEN
+       CALL erhandler(fname, __LINE__, ERH_FATAL, &
+            TRIM(libname)//': Determining section "DATA,2" for section %i failed.', &
+            derrinfo, cerrinfo)
+    END IF
+
+    t_y_1 = t_y_2
+    t_z_1 = t_y_2
+    t_z_2 = t_y_2
+
+    CALL TrackEnd("get_t_beam_ctube")
+
+  END SUBROUTINE get_t_beam_ctube
+
+  SUBROUTINE get_t_beam_chan(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler
+    USE ansys_par, ONLY : ERH_FATAL
+    USE glans
+    USE LOCMOD, ONLY : libname
+
+    IMPLICIT NONE
+
+    REAL(KIND=8), INTENT(OUT) :: t_y_1, t_y_2, t_z_1, t_z_2
+    REAL(KIND=8), INTENT(IN) :: cgy, cgz
+    INTEGER, INTENT(IN) :: n
+
+    REAL(KIND=8) :: W1, W2, W3
+
+    CALL TrackBegin("get_t_beam_chan")
+
+    t_y_1 = 0d0
+    t_y_2 = 0d0
+    t_z_1 = 0d0
+    t_z_2 = 0d0
+
+!     IF (get(W1, 'SECP', n, 'DATA    ', 1)) THEN
+!        CALL erhandler(fname, __LINE__, ERH_FATAL, &
+!             TRIM(libname)//': Determining section "DATA,1" for section %i failed.', &
+!             derrinfo, cerrinfo)
+!     END IF
+
+!     IF (get(W2, 'SECP', n, 'DATA    ', 2)) THEN
+!        CALL erhandler(fname, __LINE__, ERH_FATAL, &
+!             TRIM(libname)//': Determining section "DATA,2" for section %i failed.', &
+!             derrinfo, cerrinfo)
+!     END IF
+
+!     IF (get(W3, 'SECP', n, 'DATA    ', 3)) THEN
+!        CALL erhandler(fname, __LINE__, ERH_FATAL, &
+!             TRIM(libname)//': Determining section "DATA,3" for section %i failed.', &
+!             derrinfo, cerrinfo)
+!     END IF
+
+! ! structure|id|name|A              | A             | A             | I             | I             | I             | e             | e             | e             | e             | e             | e             | shear_center  | shear_center  | description|geometry|Iyz
+! ! 1        | 5|    | 1.09500000E-04| 4.13425961E-05| 3.90054501E-05| 9.15190000E-12| 4.31420000E-08| 1.89860000E-07| 1.32044900E-10| 8.37894255E-11|-2.35220000E-02| 4.57870000E-02|-5.64540000E-02| 5.27710000E-02| 0.00000000E+00| 0.00000000E+00| 0          | 0      | 0.00000000E+00
+! ! 1        | 5|    | 1.09500000E-04| 4.07510757E-05| 3.95980963E-05| 9.15191962E-12| 4.63288680E-08| 1.86673794E-07| 1.83038392E-10| 9.15191962E-11| 0.00000000E+00| 5.00000000E-02| 0.00000000E+00| 1.00000000E-01| 0.00000000E+00| 0.00000000E+00| 0          | 0      | 0.00000000E+00
+
+!     t_y_1 = MAX(W1, W2)
+!     t_y_2 = 0d0
+!     t_z_1 = W3
+!     t_z_2 = 0d0
+
+    CALL TrackEnd("get_t_beam_chan")
+
+  END SUBROUTINE get_t_beam_chan
+
+  SUBROUTINE get_t_beam_i(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler
+    USE ansys_par, ONLY : ERH_FATAL
+    USE glans
+    USE LOCMOD, ONLY : libname
+
+    IMPLICIT NONE
+
+    REAL(KIND=8), INTENT(OUT) :: t_y_1, t_y_2, t_z_1, t_z_2
+    REAL(KIND=8), INTENT(IN) :: cgy, cgz
+    INTEGER, INTENT(IN) :: n
+
+    CALL TrackBegin("get_t_beam_i")
+
+    t_y_1 = 0d0
+    t_y_2 = 0d0
+    t_z_1 = 0d0
+    t_z_2 = 0d0
+
+    CALL TrackEnd("get_t_beam_i")
+
+  END SUBROUTINE get_t_beam_i
+
+  SUBROUTINE get_t_beam_z(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler
+    USE ansys_par, ONLY : ERH_FATAL
+    USE glans
+    USE LOCMOD, ONLY : libname
+
+    IMPLICIT NONE
+
+    REAL(KIND=8), INTENT(OUT) :: t_y_1, t_y_2, t_z_1, t_z_2
+    REAL(KIND=8), INTENT(IN) :: cgy, cgz
+    INTEGER, INTENT(IN) :: n
+
+    CALL TrackBegin("get_t_beam_z")
+
+    t_y_1 = 0d0
+    t_y_2 = 0d0
+    t_z_1 = 0d0
+    t_z_2 = 0d0
+
+    CALL TrackEnd("get_t_beam_z")
+
+  END SUBROUTINE get_t_beam_z
+
+  SUBROUTINE get_t_beam_l(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler
+    USE ansys_par, ONLY : ERH_FATAL
+    USE glans
+    USE LOCMOD, ONLY : libname
+
+    IMPLICIT NONE
+
+    REAL(KIND=8), INTENT(OUT) :: t_y_1, t_y_2, t_z_1, t_z_2
+    REAL(KIND=8), INTENT(IN) :: cgy, cgz
+    INTEGER, INTENT(IN) :: n
+
+    CALL TrackBegin("get_t_beam_l")
+
+    t_y_1 = 0d0
+    t_y_2 = 0d0
+    t_z_1 = 0d0
+    t_z_2 = 0d0
+
+    CALL TrackEnd("get_t_beam_l")
+
+  END SUBROUTINE get_t_beam_l
+
+  SUBROUTINE get_t_beam_t(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler
+    USE ansys_par, ONLY : ERH_FATAL
+    USE glans
+    USE LOCMOD, ONLY : libname
+
+    IMPLICIT NONE
+
+    REAL(KIND=8), INTENT(OUT) :: t_y_1, t_y_2, t_z_1, t_z_2
+    REAL(KIND=8), INTENT(IN) :: cgy, cgz
+    INTEGER, INTENT(IN) :: n
+
+    CALL TrackBegin("get_t_beam_t")
+
+    t_y_1 = 0d0
+    t_y_2 = 0d0
+    t_z_1 = 0d0
+    t_z_2 = 0d0
+
+    CALL TrackEnd("get_t_beam_t")
+
+  END SUBROUTINE get_t_beam_t
+
+  SUBROUTINE get_t_beam_hats(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler
+    USE ansys_par, ONLY : ERH_FATAL
+    USE glans
+    USE LOCMOD, ONLY : libname
+
+    IMPLICIT NONE
+
+    REAL(KIND=8), INTENT(OUT) :: t_y_1, t_y_2, t_z_1, t_z_2
+    REAL(KIND=8), INTENT(IN) :: cgy, cgz
+    INTEGER, INTENT(IN) :: n
+
+    CALL TrackBegin("get_t_beam_hats")
+
+    t_y_1 = 0d0
+    t_y_2 = 0d0
+    t_z_1 = 0d0
+    t_z_2 = 0d0
+
+    CALL TrackEnd("get_t_beam_hats")
+
+  END SUBROUTINE get_t_beam_hats
+
+  SUBROUTINE get_t_beam_hrec(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler
+    USE ansys_par, ONLY : ERH_FATAL
+    USE glans
+    USE LOCMOD, ONLY : libname
+
+    IMPLICIT NONE
+
+    REAL(KIND=8), INTENT(OUT) :: t_y_1, t_y_2, t_z_1, t_z_2
+    REAL(KIND=8), INTENT(IN) :: cgy, cgz
+    INTEGER, INTENT(IN) :: n
+
+    CALL TrackBegin("get_t_beam_hrec")
+
+    t_y_1 = 0d0
+    t_y_2 = 0d0
+    t_z_1 = 0d0
+    t_z_2 = 0d0
+
+    CALL TrackEnd("get_t_beam_hrec")
+
+  END SUBROUTINE get_t_beam_hrec
+
+  SUBROUTINE get_t_beam_asec(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler
+    USE ansys_par, ONLY : ERH_FATAL
+    USE glans
+    USE LOCMOD, ONLY : libname
+
+    IMPLICIT NONE
+
+    REAL(KIND=8), INTENT(OUT) :: t_y_1, t_y_2, t_z_1, t_z_2
+    REAL(KIND=8), INTENT(IN) :: cgy, cgz
+    INTEGER, INTENT(IN) :: n
+
+    CALL TrackBegin("get_t_beam_asec")
+
+    t_y_1 = 0d0
+    t_y_2 = 0d0
+    t_z_1 = 0d0
+    t_z_2 = 0d0
+
+    CALL TrackEnd("get_t_beam_asec")
+
+  END SUBROUTINE get_t_beam_asec
+
+  SUBROUTINE get_t_beam_mesh(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler
+    USE ansys_par, ONLY : ERH_FATAL
+    USE glans
+    USE LOCMOD, ONLY : libname
+
+    IMPLICIT NONE
+
+    REAL(KIND=8), INTENT(OUT) :: t_y_1, t_y_2, t_z_1, t_z_2
+    REAL(KIND=8), INTENT(IN) :: cgy, cgz
+    INTEGER, INTENT(IN) :: n
+
+    CALL TrackBegin("get_t_beam_mesh")
+
+    t_y_1 = 0d0
+    t_y_2 = 0d0
+    t_z_1 = 0d0
+    t_z_2 = 0d0
+
+    CALL TrackEnd("get_t_beam_mesh")
+
+  END SUBROUTINE get_t_beam_mesh
 
 END MODULE mod_dat_beamproperties
 

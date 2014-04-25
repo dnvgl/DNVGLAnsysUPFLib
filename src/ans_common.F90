@@ -58,6 +58,7 @@ MODULE ans_common
      REAL(KIND=8), DIMENSION(2) :: sc = 0d0
      REAL(KIND=8), DIMENSION(3) :: d = 0d0
      REAL(KIND=8) :: Iyz = 0d0
+     REAL(KIND=8) :: theta = 0d0
 
   END TYPE bp_values
 
@@ -107,7 +108,7 @@ CONTAINS
          (a%name == b%name) .AND. ALL(a%A == b%A) .AND. &
          ALL(a%I == b%I) .AND. ALL(a%e == b%e) .AND. &
          ALL(a%sc == b%sc) .AND. ALL(a%d == b%d) .AND. &
-         (a%Iyz == b%Iyz))
+         (a%Iyz == b%Iyz) .AND. (a%theta == b%theta))
     RETURN
   END FUNCTION bp_values_equal
 
@@ -132,6 +133,7 @@ CONTAINS
     a%sc(:) = b%sc(:)
     a%d(:) = b%d(:)
     a%Iyz = b%Iyz
+    a%theta = b%theta
   END SUBROUTINE bp_values_assign
 
   SUBROUTINE bp_loc_assign(a, b)
