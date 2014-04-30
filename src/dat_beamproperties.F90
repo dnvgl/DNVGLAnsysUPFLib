@@ -121,7 +121,7 @@ CONTAINS
                cgy, cgz, shcy, shcz, scyy, scyz, sczz, offset, offy, offz)
 
           bp%data(bp%num)%name(:) = name(1:16)
-          bp%data(bp%num)%A(:) = (/ area, area * scyy, area * sczz /)
+          bp%data(bp%num)%A(:) = (/ area, area * sczz, area * scyy /)
 
           bp%data(bp%num)%i(:) = (/ tors, izz, iyy /)
 
@@ -166,20 +166,23 @@ CONTAINS
                   derrinfo, cerrinfo)
           END IF
 
-          ! t_y_1 = ABS(t_y_1 - cgy)
-          ! t_y_2 = ABS(t_y_2 - cgy)
-          ! t_z_1 = ABS(t_z_1 - cgz)
-          ! t_z_2 = ABS(t_z_2 - cgz)
-
           IF (MIN(ABS(t_y_2) + ABS(t_y_2), ABS(t_z_1) + ABS(t_z_2)) .NE. 0d0) THEN
              bp%data(bp%num)%e(1) = tors / MIN(ABS(t_y_2) + ABS(t_y_2), ABS(t_z_1) + ABS(t_z_2))
           END IF
          IF (MAX(ABS(t_y_1) + ABS(t_y_2), ABS(t_z_1) + ABS(t_z_2)) .NE. 0d0) THEN
              bp%data(bp%num)%e(2) = tors / MAX(ABS(t_y_1) + ABS(t_y_2), ABS(t_z_1) + ABS(t_z_2))
           END IF
-          bp%data(bp%num)%e(3:6) = (/ t_y_1, t_y_2, t_z_1, t_z_2 /)
+          bp%data(bp%num)%e(3:6) = (/ -t_y_1, t_y_2, -t_z_1, t_z_2 /)
 
-          bp%data(bp%num)%d(:) = (/ 0d0, offy - cgy, -offz - cgz /)
+          IF (offset .EQ. 1) THEN ! = Centroid
+             bp%data(bp%num)%d(:) = (/ 0d0, 0d0, 0d0 /)
+          ELSE IF (offset .EQ. 2) THEN ! = Shear Center
+             bp%data(bp%num)%d(:) = (/ 0d0, -(shcy-cgy), (shcz-cgz) /)
+          ELSE IF (offset .EQ. 3) THEN ! = Origin
+             bp%data(bp%num)%d(:) = (/ 0d0, -cgy, cgz /)
+          ELSE IF (offset .EQ. 0) THEN ! = User Defined
+             bp%data(bp%num)%d(:) = (/ 0d0, offy+cgy, -(offz-cgz) /)
+          END IF
 
        END IF
 
@@ -267,8 +270,8 @@ CONTAINS
           i_vals%A(1) = rtable( 1)               !       AREA1
           i_vals%I(2) = rtable( 2)               !       IZ1
           i_vals%I(3) = rtable( 3)               !       IY1
-          i_vals%e(5) = rtable( 4)               !  TKZB1 = ey2, i
-          i_vals%e(3) = rtable( 5)               !  TKYB1 = ez1, i
+          i_vals%e(5) = -rtable( 4)              !  TKZB1 = ey2, i
+          i_vals%e(3) = -rtable( 5)              !  TKYB1 = ez1, i
           IF (rtable( 6).EQ.0d0) THEN
              i_vals%I(1) = rtable(2) + rtable(3) !       IX1
           ELSE
@@ -294,27 +297,27 @@ CONTAINS
           END IF
 
           IF (rtable(10).EQ.0d0) THEN
-             j_vals%e(5) = rtable( 4)            !       TKZB2
+             j_vals%e(5) = i_vals%e(5)           !       TKZB2
           ELSE
-             j_vals%e(5) = rtable(10)            !       TKZB2
+             j_vals%e(5) = -rtable(10)           !       TKZB2
           END IF
           IF (rtable(11).EQ.0d0) THEN
-             j_vals%e(3) = rtable( 5)            !       TKYB2
+             j_vals%e(3) = i_vals%e(3)           !       TKYB2
           ELSE
-             j_vals%e(3) = rtable(11)            !       TKYB2
+             j_vals%e(3) = -rtable(11)           !       TKYB2
           END IF
           IF (rtable(12).EQ.0d0) THEN
              j_vals%I(1) = i_vals%I(1)           !       IX2
           ELSE
-             j_vals%I(1) =  rtable(12)           !       IX2
+             j_vals%I(1) = rtable(12)            !       IX2
           END IF
 
           i_vals%d(1) = rtable(13)               !       DX1
-          i_vals%d(2) = -rtable(14)               !       DY1
+          i_vals%d(2) = -rtable(14)              !       DY1
           i_vals%d(3) = rtable(15)               !       DZ1
 
           j_vals%d(1) = rtable(16)               !       DX2
-          j_vals%d(2) = -rtable(17)               !       DY2
+          j_vals%d(2) = -rtable(17)              !       DY2
           j_vals%d(3) = rtable(18)               !       DZ2
 
           IF (rtable(20) .NE. 0d0) THEN
@@ -335,8 +338,16 @@ CONTAINS
           i_vals%e(6) =  rtable(21)              !       TKZT1
           i_vals%e(4) =  rtable(22)              !       TKYT1
 
-          j_vals%e(6) =  rtable(23)              !       TKZT2
-          j_vals%e(4) =  rtable(24)              !       TKYT2
+          IF (rtable(23) .EQ. 0d0) THEN
+             j_vals%e(6) = i_vals%e(6)           !       TKZT2
+          ELSE
+             j_vals%e(6) =  rtable(23)           !       TKZT2
+          END IF
+          IF (rtable(24) .EQ. 0d0) THEN
+             j_vals%e(4) = i_vals%e(4)           !       TKYT2
+          ELSE
+             j_vals%e(4) = rtable(24)            !       TKYT2
+          END IF
 
           ! i_vals%A(2) =  rtable(25)              !       ARESZ1
           ! i_vals%A(3) =  rtable(26)              !       ARESY1
@@ -347,36 +358,40 @@ CONTAINS
           ! --- not used ---         rtable(29)              !       TSF1
           ! --- not used ---         rtable(30)              !       TSF2
 
-          theta = deg2rad(rtable(53))
+          theta = -deg2rad(rtable(53))
 
           Iyy = 5d-1 * (i_vals%I(2) + i_vals%I(3)) + 5d-1 * ( i_vals%I(2) - i_vals%I(3)) * COS(2d0 * theta)
           Izz = 5d-1 * (i_vals%I(2) + i_vals%I(3)) - 5d-1 * ( i_vals%I(2) - i_vals%I(3)) * COS(2d0 * theta)
           Iyz = 5d-1 * (i_vals%I(2) - i_vals%I(3)) * SIN(2d0 * theta)
 
+          Iyy = i_vals%I(2)
+          Izz = i_vals%I(3)
+          Iyz = 0d0
+
           i_vals%I(2) = Iyy
           i_vals%I(3) = Izz
           i_vals%Iyz = Iyz
 
-          Iyy = 5d-1 * (j_vals%I(2) + j_vals%I(3)) + 5d-1 * (j_vals%I(2) - j_vals%I(3)) * COS(2d0 * theta)
-          Izz = 5d-1 * (j_vals%I(2) + j_vals%I(3)) - 5d-1 * (j_vals%I(2) - j_vals%I(3)) * COS(2d0 * theta)
-          Iyz = 5d-1 * (j_vals%I(2) - j_vals%I(3)) * SIN(2d0 * theta)
+          ! Iyy = 5d-1 * (j_vals%I(2) + j_vals%I(3)) + 5d-1 * (j_vals%I(2) - j_vals%I(3)) * COS(2d0 * theta)
+          ! Izz = 5d-1 * (j_vals%I(2) + j_vals%I(3)) - 5d-1 * (j_vals%I(2) - j_vals%I(3)) * COS(2d0 * theta)
+          ! !Iyz = 5d-1 * (j_vals%I(2) - j_vals%I(3)) * SIN(2d0 * theta)
 
           j_vals%I(2) = Iyy
           j_vals%I(3) = Izz
           j_vals%Iyz = Iyz
 
-          i_vals%theta = 0d0
-          j_vals%theta = 0d0
+          i_vals%theta = theta
+          j_vals%theta = theta
 
           i_vals%sc(:) =  0d0
           j_vals%sc(:) =  0d0
 
           t_min = MIN( &
-               i_vals%e(4) + i_vals%e(3), &
-               i_vals%e(6) + i_vals%e(5))
+               i_vals%e(4) - i_vals%e(3), &
+               i_vals%e(6) - i_vals%e(5))
           t_max = MAX( &
-               i_vals%e(4) + i_vals%e(3), &
-               i_vals%e(6) + i_vals%e(5))
+               i_vals%e(4) - i_vals%e(3), &
+               i_vals%e(6) - i_vals%e(5))
           IF (t_min.NE.0d0) THEN
              i_vals%e(1) = i_vals%I(1) / t_min
           END IF
@@ -385,11 +400,11 @@ CONTAINS
           END IF
 
           t_min = MIN( &
-               j_vals%e(4) + j_vals%e(3), &
-               j_vals%e(6) + j_vals%e(5))
+               j_vals%e(4) - j_vals%e(3), &
+               j_vals%e(6) - j_vals%e(5))
           t_max = MAX( &
-               j_vals%e(4) + j_vals%e(3), &
-               j_vals%e(6) + j_vals%e(5))
+               j_vals%e(4) - j_vals%e(3), &
+               j_vals%e(6) - j_vals%e(5))
           IF (t_min.NE.0d0) THEN
              j_vals%e(1) = j_vals%I(1) / t_min
           ELSE
@@ -824,33 +839,6 @@ CONTAINS
     t_y_2 = 0d0
     t_z_1 = 0d0
     t_z_2 = 0d0
-
-!     IF (get(W1, 'SECP', n, 'DATA    ', 1)) THEN
-!        CALL erhandler(fname, __LINE__, ERH_FATAL, &
-!             TRIM(libname)//': Determining section "DATA,1" for section %i failed.', &
-!             derrinfo, cerrinfo)
-!     END IF
-
-!     IF (get(W2, 'SECP', n, 'DATA    ', 2)) THEN
-!        CALL erhandler(fname, __LINE__, ERH_FATAL, &
-!             TRIM(libname)//': Determining section "DATA,2" for section %i failed.', &
-!             derrinfo, cerrinfo)
-!     END IF
-
-!     IF (get(W3, 'SECP', n, 'DATA    ', 3)) THEN
-!        CALL erhandler(fname, __LINE__, ERH_FATAL, &
-!             TRIM(libname)//': Determining section "DATA,3" for section %i failed.', &
-!             derrinfo, cerrinfo)
-!     END IF
-
-! ! structure|id|name|A              | A             | A             | I             | I             | I             | e             | e             | e             | e             | e             | e             | shear_center  | shear_center  | description|geometry|Iyz
-! ! 1        | 5|    | 1.09500000E-04| 4.13425961E-05| 3.90054501E-05| 9.15190000E-12| 4.31420000E-08| 1.89860000E-07| 1.32044900E-10| 8.37894255E-11|-2.35220000E-02| 4.57870000E-02|-5.64540000E-02| 5.27710000E-02| 0.00000000E+00| 0.00000000E+00| 0          | 0      | 0.00000000E+00
-! ! 1        | 5|    | 1.09500000E-04| 4.07510757E-05| 3.95980963E-05| 9.15191962E-12| 4.63288680E-08| 1.86673794E-07| 1.83038392E-10| 9.15191962E-11| 0.00000000E+00| 5.00000000E-02| 0.00000000E+00| 1.00000000E-01| 0.00000000E+00| 0.00000000E+00| 0          | 0      | 0.00000000E+00
-
-!     t_y_1 = MAX(W1, W2)
-!     t_y_2 = 0d0
-!     t_z_1 = W3
-!     t_z_2 = 0d0
 
     CALL TrackEnd("get_t_beam_chan")
 
