@@ -47,8 +47,7 @@ MODULE csubdata
 END MODULE csubdata
 
 ! Local Variables:
-! mode:f90
-! mode:flyspell
-! ispell-local-dictionary:"en"
-! compile-command:"make -C .. test"
+! mode: f90
+! ispell-local-dictionary: "english"
+! compile-command: "make -C .. test"
 ! End:

@@ -540,8 +540,7 @@ MODULE ansys_interf
 END MODULE ansys_interf
 
 ! Local Variables:
-! mode:f90
-! mode:flyspell
-! ispell-local-dictionary:"en"
-! compile-command:"make -C .."
+! mode: f90
+! ispell-local-dictionary: "english"
+! compile-command: "make -C .."
 ! End:
