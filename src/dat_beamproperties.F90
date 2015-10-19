@@ -73,7 +73,7 @@ CONTAINS
     REAL(KIND=8) :: offz             ! Section offset in the Z-direction.
 
     ! outer dimensions for cross section
-    REAL(KIND=8) :: t_y_1, t_y_2, t_z_1, t_z_2
+    REAL(KIND=8) :: t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2
 
     REAL(KIND=8) :: yI, zI, yJ, zJ, yK, zK, yL, zL
 
@@ -139,31 +139,31 @@ CONTAINS
 
           SELECT CASE(sec_subtype)
           CASE('RECT')
-             CALL get_t_beam_rect(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+             CALL get_t_beam_rect(t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
           CASE('QUAD')
-             CALL get_t_beam_quad(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+             CALL get_t_beam_quad(t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
           CASE('CSOL')
-             CALL get_t_beam_csolid(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+             CALL get_t_beam_csolid(t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
           CASE('CTUB')
-             CALL get_t_beam_ctube(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+             CALL get_t_beam_ctube(t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
           CASE('CHAN')
-             CALL get_t_beam_chan(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+             CALL get_t_beam_chan(t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
           CASE('I')
-             CALL get_t_beam_i(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+             CALL get_t_beam_i(t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
           CASE('Z')
-             CALL get_t_beam_z(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+             CALL get_t_beam_z(t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
           CASE('L')
-             CALL get_t_beam_l(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+             CALL get_t_beam_l(t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
           CASE('T')
-             CALL get_t_beam_t(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+             CALL get_t_beam_t(t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
           CASE('HATS')
-             CALL get_t_beam_hats(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+             CALL get_t_beam_hats(t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
           CASE('HREC')
-             CALL get_t_beam_hrec(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+             CALL get_t_beam_hrec(t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
           CASE('ASEC')
-             CALL get_t_beam_asec(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+             CALL get_t_beam_asec(t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
           CASE('MESH')
-             CALL get_t_beam_mesh(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+             CALL get_t_beam_mesh(t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
           CASE DEFAULT
              cerrinfo(1) = sec_subtype
              CALL erhandler(fname, __LINE__, ERH_FATAL, &
@@ -179,7 +179,13 @@ CONTAINS
              bp%data(bp%num)%e(2) = tors / MAX(ABS(t_y_1) + ABS(t_y_2), ABS(t_z_1) + ABS(t_z_2))
           END IF
 
-          bp%data(bp%num)%e(3:6) = (/ -t_y_1, t_y_2, -t_z_1, t_z_2 /)
+          IF(t_max .eq. 0.) THEN
+             bp%data(bp%num)%e(:) = (/ &
+                  0d0, 0d0, t_y_1, t_y_2, -t_z_1, t_z_2 /)
+          ELSE
+             bp%data(bp%num)%e(:) = (/ &
+                  tors/t_max, tors/t_min, t_y_1, t_y_2, -t_z_1, t_z_2 /)
+          END IF
 
           SELECT CASE(offset)
           CASE(1) ! = Centroid
@@ -662,7 +668,7 @@ CONTAINS
 
   END SUBROUTINE get_t_beam_common
 
-  SUBROUTINE get_t_beam_rect(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+  SUBROUTINE get_t_beam_rect(t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
 
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler
     USE ansys_par, ONLY : ERH_FATAL
@@ -671,7 +677,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    REAL(KIND=8), INTENT(OUT) :: t_y_1, t_y_2, t_z_1, t_z_2
+    REAL(KIND=8), INTENT(OUT) :: t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2
     REAL(KIND=8), INTENT(IN) :: cgy, cgz
     INTEGER, INTENT(IN) :: n
 
@@ -689,6 +695,8 @@ CONTAINS
             TRIM(libname)//': Determining section "DATA,2" for section %d failed.', &
             derrinfo, cerrinfo)
     END IF
+    t_max = max(t_y_1, t_z_1)
+    t_min = min(t_y_1, t_z_1)
     t_y_2 = t_y_2 / 2d0
     t_y_1 = t_y_2
     t_z_2 = t_z_2 / 2d0
@@ -698,7 +706,7 @@ CONTAINS
 
   END SUBROUTINE get_t_beam_rect
 
-  SUBROUTINE get_t_beam_quad(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+  SUBROUTINE get_t_beam_quad(t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
 
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler
     USE ansys_par, ONLY : ERH_FATAL
@@ -707,7 +715,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    REAL(KIND=8), INTENT(OUT) :: t_y_1, t_y_2, t_z_1, t_z_2
+    REAL(KIND=8), INTENT(OUT) :: t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2
     REAL(KIND=8), INTENT(IN) :: cgy, cgz
     INTEGER, INTENT(IN) :: n
 
@@ -735,6 +743,9 @@ CONTAINS
        END IF
     END DO
 
+    t_min = MIN(-y(1) + y(2), -y(4) + y(3), -z(1) + z(4), -z(2) + z(3))
+    t_max = MAX(-y(1) + y(2), -y(4) + y(3), -z(1) + z(4), -z(2) + z(3))
+
     t_y_1 = ABS(MIN(y(1), y(4)) - cgy)
     t_y_2 = ABS(MAX(y(2), y(3)) - cgy)
     t_z_1 = ABS(MIN(z(1), z(2)) - cgz)
@@ -744,7 +755,7 @@ CONTAINS
 
   END SUBROUTINE get_t_beam_quad
 
-  SUBROUTINE get_t_beam_csolid(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+  SUBROUTINE get_t_beam_csolid(t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler
     USE ansys_par, ONLY : ERH_FATAL
     USE glans
@@ -752,7 +763,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    REAL(KIND=8), INTENT(OUT) :: t_y_1, t_y_2, t_z_1, t_z_2
+    REAL(KIND=8), INTENT(OUT) :: t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2
     REAL(KIND=8), INTENT(IN) :: cgy, cgz
     INTEGER, INTENT(IN) :: n
 
@@ -766,6 +777,8 @@ CONTAINS
             derrinfo, cerrinfo)
     END IF
 
+    t_max = t_y_2 * 2.
+    t_min = t_max
     t_y_1 = t_y_2
     t_z_1 = t_y_2
     t_z_2 = t_y_2
@@ -774,7 +787,7 @@ CONTAINS
 
   END SUBROUTINE get_t_beam_csolid
 
-  SUBROUTINE get_t_beam_ctube(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+  SUBROUTINE get_t_beam_ctube(t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler
     USE ansys_par, ONLY : ERH_FATAL
     USE glans
@@ -782,13 +795,21 @@ CONTAINS
 
     IMPLICIT NONE
 
-    REAL(KIND=8), INTENT(OUT) :: t_y_1, t_y_2, t_z_1, t_z_2
+    REAL(KIND=8), INTENT(OUT) :: t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2
     REAL(KIND=8), INTENT(IN) :: cgy, cgz
+
+    REAL(KIND=8) :: r_i
     INTEGER, INTENT(IN) :: n
 
     CALL TrackBegin("get_t_beam_ctube")
 
     derrinfo(1) = n
+
+    IF (get(r_i, 'SECP', n, 'DATA    ', 1)) THEN
+       CALL erhandler(fname, __LINE__, ERH_FATAL, &
+            TRIM(libname)//': Determining section "DATA,1" for section %d failed.', &
+            derrinfo, cerrinfo)
+    END IF
 
     IF (get(t_y_2, 'SECP', n, 'DATA    ', 2)) THEN
        CALL erhandler(fname, __LINE__, ERH_FATAL, &
@@ -796,6 +817,8 @@ CONTAINS
             derrinfo, cerrinfo)
     END IF
 
+    t_max = t_y_2 - r_i
+    t_min = t_max
     t_y_1 = t_y_2
     t_z_1 = t_y_2
     t_z_2 = t_y_2
@@ -804,7 +827,7 @@ CONTAINS
 
   END SUBROUTINE get_t_beam_ctube
 
-  SUBROUTINE get_t_beam_chan(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+  SUBROUTINE get_t_beam_chan(t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler
     USE ansys_par, ONLY : ERH_FATAL
     USE glans
@@ -812,11 +835,12 @@ CONTAINS
 
     IMPLICIT NONE
 
-    REAL(KIND=8), INTENT(OUT) :: t_y_1, t_y_2, t_z_1, t_z_2
+    REAL(KIND=8), INTENT(OUT) :: t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2
     REAL(KIND=8), INTENT(IN) :: cgy, cgz
     INTEGER, INTENT(IN) :: n
 
     REAL(KIND=8), dimension(3) :: w
+    REAL(KIND=8), dimension(3) :: t
     INTEGER :: i
 
     CALL TrackBegin("get_t_beam_chan")
@@ -830,8 +854,16 @@ CONTAINS
                TRIM(libname)//': Determining section "DATA,%d" for section %d failed.', &
                derrinfo, cerrinfo)
        END IF
+       derrinfo(i) = i+3
+       IF (get(t(i), 'SECP', n, 'DATA    ', i+3)) THEN
+          CALL erhandler(fname, __LINE__, ERH_FATAL, &
+               TRIM(libname)//': Determining section "DATA,%d" for section %d failed.', &
+               derrinfo, cerrinfo)
+       END IF
     END DO
 
+    t_min = MIN(t(1), t(2), t(3))
+    t_max = MAX(t(1), t(2), t(3))
     t_y_1 = - cgy
     t_y_2 = MAX(W(1), W(2)) - cgy
     t_z_1 = - cgz
@@ -841,7 +873,7 @@ CONTAINS
 
   END SUBROUTINE get_t_beam_chan
 
-  SUBROUTINE get_t_beam_i(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+  SUBROUTINE get_t_beam_i(t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler
     USE ansys_par, ONLY : ERH_FATAL
     USE glans
@@ -849,12 +881,13 @@ CONTAINS
 
     IMPLICIT NONE
 
-    REAL(KIND=8), INTENT(OUT) :: t_y_1, t_y_2, t_z_1, t_z_2
+    REAL(KIND=8), INTENT(OUT) :: t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2
     REAL(KIND=8), INTENT(IN) :: cgy, cgz
 
     INTEGER, INTENT(IN) :: n
 
     REAL(KIND=8), DIMENSION(3) :: w
+    REAL(KIND=8), DIMENSION(3) :: t
     INTEGER :: i
 
     CALL TrackBegin("get_t_beam_i")
@@ -868,8 +901,16 @@ CONTAINS
                TRIM(libname)//': Determining section "DATA,%d" for section %d failed.', &
                derrinfo, cerrinfo)
        END IF
+       derrinfo(i) = i+3
+       IF (get(t(i), 'SECP', n, 'DATA    ', i+3)) THEN
+          CALL erhandler(fname, __LINE__, ERH_FATAL, &
+               TRIM(libname)//': Determining section "DATA,%d" for section %d failed.', &
+               derrinfo, cerrinfo)
+       END IF
     END DO
 
+    t_min = MIN(t(1), t(2), t(3))
+    t_max = MAX(t(1), t(2), t(3))
     t_y_2 = MAX(w(1), w(2)) / 2d0 - cgy
     t_y_1 = -t_y_2
     t_z_1 = - cgz
@@ -879,7 +920,7 @@ CONTAINS
 
   END SUBROUTINE get_t_beam_i
 
-  SUBROUTINE get_t_beam_z(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+  SUBROUTINE get_t_beam_z(t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler
     USE ansys_par, ONLY : ERH_FATAL
     USE glans
@@ -887,11 +928,12 @@ CONTAINS
 
     IMPLICIT NONE
 
-    REAL(KIND=8), INTENT(OUT) :: t_y_1, t_y_2, t_z_1, t_z_2
+    REAL(KIND=8), INTENT(OUT) :: t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2
     REAL(KIND=8), INTENT(IN) :: cgy, cgz
     INTEGER, INTENT(IN) :: n
 
     REAL(KIND=8), DIMENSION(3) :: w
+    REAL(KIND=8), DIMENSION(3) :: t
     INTEGER :: i
 
     CALL TrackBegin("get_t_beam_z")
@@ -905,8 +947,16 @@ CONTAINS
                TRIM(libname)//': Determining section "DATA,%d" for section %d failed.', &
                derrinfo, cerrinfo)
        END IF
+       derrinfo(i) = i+3
+       IF (get(t(i), 'SECP', n, 'DATA    ', i+3)) THEN
+          CALL erhandler(fname, __LINE__, ERH_FATAL, &
+               TRIM(libname)//': Determining section "DATA,%d" for section %d failed.', &
+               derrinfo, cerrinfo)
+       END IF
     END DO
 
+    t_min = MIN(t(1), t(2), t(3))
+    t_max = MAX(t(1), t(2), t(3))
     t_y_2 = w(2) - cgy
     t_y_1 = w(1) - cgy
     t_z_1 = - cgz
@@ -916,7 +966,7 @@ CONTAINS
 
   END SUBROUTINE get_t_beam_z
 
-  SUBROUTINE get_t_beam_l(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+  SUBROUTINE get_t_beam_l(t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler
     USE ansys_par, ONLY : ERH_FATAL
     USE glans
@@ -924,11 +974,12 @@ CONTAINS
 
     IMPLICIT NONE
 
-    REAL(KIND=8), INTENT(OUT) :: t_y_1, t_y_2, t_z_1, t_z_2
+    REAL(KIND=8), INTENT(OUT) :: t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2
     REAL(KIND=8), INTENT(IN) :: cgy, cgz
     INTEGER, INTENT(IN) :: n
 
     REAL(KIND=8), DIMENSION(2) :: w
+    REAL(KIND=8), DIMENSION(2) :: t
     INTEGER :: i
 
     CALL TrackBegin("get_t_beam_l")
@@ -942,8 +993,16 @@ CONTAINS
                TRIM(libname)//': Determining section "DATA,%d" for section %d failed.', &
                derrinfo, cerrinfo)
        END IF
+       derrinfo(i) = i+2
+       IF (get(t(i), 'SECP', n, 'DATA    ', i+2)) THEN
+          CALL erhandler(fname, __LINE__, ERH_FATAL, &
+               TRIM(libname)//': Determining section "DATA,%d" for section %d failed.', &
+               derrinfo, cerrinfo)
+       END IF
     END DO
 
+    t_min = MIN(t(1), t(2))
+    t_max = MAX(t(1), t(2))
     t_y_1 = - cgy
     t_y_2 = w(1) - cgy
     t_z_1 = - cgz
@@ -953,7 +1012,7 @@ CONTAINS
 
   END SUBROUTINE get_t_beam_l
 
-  SUBROUTINE get_t_beam_t(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+  SUBROUTINE get_t_beam_t(t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler
     USE ansys_par, ONLY : ERH_FATAL
     USE glans
@@ -961,11 +1020,12 @@ CONTAINS
 
     IMPLICIT NONE
 
-    REAL(KIND=8), INTENT(OUT) :: t_y_1, t_y_2, t_z_1, t_z_2
+    REAL(KIND=8), INTENT(OUT) :: t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2
     REAL(KIND=8), INTENT(IN) :: cgy, cgz
     INTEGER, INTENT(IN) :: n
 
     REAL(KIND=8), DIMENSION(2) :: w
+    REAL(KIND=8), DIMENSION(2) :: t
     INTEGER :: i
 
     CALL TrackBegin("get_t_beam_t")
@@ -979,8 +1039,16 @@ CONTAINS
                TRIM(libname)//': Determining section "DATA,%d" for section %d failed.', &
                derrinfo, cerrinfo)
        END IF
+       derrinfo(i) = i+2
+       IF (get(t(i), 'SECP', n, 'DATA    ', i+2)) THEN
+          CALL erhandler(fname, __LINE__, ERH_FATAL, &
+               TRIM(libname)//': Determining section "DATA,%d" for section %d failed.', &
+               derrinfo, cerrinfo)
+       END IF
     END DO
 
+    t_min = MIN(t(1), t(2))
+    t_max = MAX(t(1), t(2))
     t_y_1 = -w(1) / 2d0 - cgy
     t_y_2 = w(1) / 2d0 - cgy
     t_z_1 = - cgz
@@ -990,7 +1058,7 @@ CONTAINS
 
   END SUBROUTINE get_t_beam_t
 
-  SUBROUTINE get_t_beam_hats(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+  SUBROUTINE get_t_beam_hats(t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler
     USE ansys_par, ONLY : ERH_FATAL
     USE glans
@@ -998,11 +1066,12 @@ CONTAINS
 
     IMPLICIT NONE
 
-    REAL(KIND=8), INTENT(OUT) :: t_y_1, t_y_2, t_z_1, t_z_2
+    REAL(KIND=8), INTENT(OUT) :: t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2
     REAL(KIND=8), INTENT(IN) :: cgy, cgz
     INTEGER, INTENT(IN) :: n
 
     REAL(KIND=8), DIMENSION(4) :: w
+    REAL(KIND=8), DIMENSION(4) :: t
     INTEGER :: i
 
     CALL TrackBegin("get_t_beam_hats")
@@ -1016,8 +1085,16 @@ CONTAINS
                TRIM(libname)//': Determining section "DATA,%d" for section %d failed.', &
                derrinfo, cerrinfo)
        END IF
+       derrinfo(i) = i+4
+       IF (get(t(i), 'SECP', n, 'DATA    ', i+2)) THEN
+          CALL erhandler(fname, __LINE__, ERH_FATAL, &
+               TRIM(libname)//': Determining section "DATA,%d" for section %d failed.', &
+               derrinfo, cerrinfo)
+       END IF
     END DO
 
+    t_min = MIN(t(1), t(2), t(3), t(4))
+    t_max = MAX(t(1), t(2), t(3), t(4))
     t_y_1 = - cgy
     t_y_2 = w(1) + w(2) + w(3) - cgy
     t_z_1 = - cgz
@@ -1027,7 +1104,7 @@ CONTAINS
 
   END SUBROUTINE get_t_beam_hats
 
-  SUBROUTINE get_t_beam_hrec(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+  SUBROUTINE get_t_beam_hrec(t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler
     USE ansys_par, ONLY : ERH_FATAL
     USE glans
@@ -1035,11 +1112,12 @@ CONTAINS
 
     IMPLICIT NONE
 
-    REAL(KIND=8), INTENT(OUT) :: t_y_1, t_y_2, t_z_1, t_z_2
+    REAL(KIND=8), INTENT(OUT) :: t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2
     REAL(KIND=8), INTENT(IN) :: cgy, cgz
     INTEGER, INTENT(IN) :: n
 
     REAL(KIND=8), DIMENSION(2) :: w
+    REAL(KIND=8), DIMENSION(4) :: t
     INTEGER :: i
 
     CALL TrackBegin("get_t_beam_hrec")
@@ -1054,7 +1132,17 @@ CONTAINS
                derrinfo, cerrinfo)
        END IF
     END DO
+    DO i = 1, 4
+       derrinfo(i) = i+2
+       IF (get(t(i), 'SECP', n, 'DATA    ', i+2)) THEN
+          CALL erhandler(fname, __LINE__, ERH_FATAL, &
+               TRIM(libname)//': Determining section "DATA,%d" for section %d failed.', &
+               derrinfo, cerrinfo)
+       END IF
+    END DO
 
+    t_min = MIN(t(1), t(2), t(3), t(4))
+    t_max = MAX(t(1), t(2), t(3), t(4))
     t_y_1 =  - cgy
     t_y_2 = w(1) - cgy
     t_z_1 = - cgz
@@ -1064,7 +1152,7 @@ CONTAINS
 
   END SUBROUTINE get_t_beam_hrec
 
-  SUBROUTINE get_t_beam_asec(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+  SUBROUTINE get_t_beam_asec(t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler
     USE ansys_par, ONLY : ERH_WARNING, ERH_FATAL
     USE glans
@@ -1072,11 +1160,14 @@ CONTAINS
 
     IMPLICIT NONE
 
-    REAL(KIND=8), INTENT(OUT) :: t_y_1, t_y_2, t_z_1, t_z_2
+    REAL(KIND=8), INTENT(OUT) :: t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2
     REAL(KIND=8), INTENT(IN) :: cgy, cgz
     INTEGER, INTENT(IN) :: n
 
     CALL TrackBegin("get_t_beam_asec")
+
+    t_min = 0d0
+    t_max = 0d0
 
 #if ANSVER >= 150
     IF (get(t_y_1, 'SECP', n, 'DATA    ', 12)) THEN
@@ -1105,7 +1196,7 @@ CONTAINS
 
   END SUBROUTINE get_t_beam_asec
 
-  SUBROUTINE get_t_beam_mesh(t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
+  SUBROUTINE get_t_beam_mesh(t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2, cgy, cgz, n)
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler
     USE ansys_par, ONLY : ERH_FATAL
     USE glans
@@ -1113,12 +1204,14 @@ CONTAINS
 
     IMPLICIT NONE
 
-    REAL(KIND=8), INTENT(OUT) :: t_y_1, t_y_2, t_z_1, t_z_2
+    REAL(KIND=8), INTENT(OUT) :: t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2
     REAL(KIND=8), INTENT(IN) :: cgy, cgz
     INTEGER, INTENT(IN) :: n
 
     CALL TrackBegin("get_t_beam_mesh")
 
+    t_max = 0d0
+    t_min = 0d0
     t_y_1 = 0d0
     t_y_2 = 0d0
     t_z_1 = 0d0
