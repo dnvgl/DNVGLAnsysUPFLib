@@ -172,20 +172,14 @@ CONTAINS
                   derrinfo, cerrinfo)
           END SELECT
 
-          IF (MIN(ABS(t_y_2) + ABS(t_y_2), ABS(t_z_1) + ABS(t_z_2)) .NE. 0d0) THEN
-             bp%data(bp%num)%e(1) = tors / MIN(ABS(t_y_2) + ABS(t_y_2), ABS(t_z_1) + ABS(t_z_2))
+          IF (t_max .NE. 0d0) THEN
+             bp%data(bp%num)%e(1) = tors / t_max
           END IF
-          IF (MAX(ABS(t_y_1) + ABS(t_y_2), ABS(t_z_1) + ABS(t_z_2)) .NE. 0d0) THEN
-             bp%data(bp%num)%e(2) = tors / MAX(ABS(t_y_1) + ABS(t_y_2), ABS(t_z_1) + ABS(t_z_2))
+          IF (t_min .NE. 0d0) THEN
+             bp%data(bp%num)%e(2) = tors / t_min
           END IF
 
-          IF(t_max .eq. 0.) THEN
-             bp%data(bp%num)%e(:) = (/ &
-                  0d0, 0d0, t_y_1, t_y_2, -t_z_1, t_z_2 /)
-          ELSE
-             bp%data(bp%num)%e(:) = (/ &
-                  tors/t_max, tors/t_min, t_y_1, t_y_2, -t_z_1, t_z_2 /)
-          END IF
+          bp%data(bp%num)%e(3:6) = (/ t_y_1, t_y_2, -t_z_1, t_z_2 /)
 
           SELECT CASE(offset)
           CASE(1) ! = Centroid
@@ -1071,7 +1065,7 @@ CONTAINS
     INTEGER, INTENT(IN) :: n
 
     REAL(KIND=8), DIMENSION(4) :: w
-    REAL(KIND=8), DIMENSION(4) :: t
+    REAL(KIND=8), DIMENSION(5) :: t
     INTEGER :: i
 
     CALL TrackBegin("get_t_beam_hats")
@@ -1085,6 +1079,8 @@ CONTAINS
                TRIM(libname)//': Determining section "DATA,%d" for section %d failed.', &
                derrinfo, cerrinfo)
        END IF
+    END DO
+    DO i = 1, 5
        derrinfo(i) = i+4
        IF (get(t(i), 'SECP', n, 'DATA    ', i+2)) THEN
           CALL erhandler(fname, __LINE__, ERH_FATAL, &
@@ -1093,8 +1089,8 @@ CONTAINS
        END IF
     END DO
 
-    t_min = MIN(t(1), t(2), t(3), t(4))
-    t_max = MAX(t(1), t(2), t(3), t(4))
+    t_min = MIN(t(1), t(2), t(3), t(4), t(5))
+    t_max = MAX(t(1), t(2), t(3), t(4), t(5))
     t_y_1 = - cgy
     t_y_2 = w(1) + w(2) + w(3) - cgy
     t_z_1 = - cgz
