@@ -19,9 +19,10 @@ __date__ = "$Date: 2009-08-28 11:02:16 +0200 (Fr, 28 Aug 2009) $"
 __version__ = "$Revision: 398 $"[10:-1]
 __package_info__ = """ """
 
+# Standard libraries.
 import os
-import subprocess
 import sys
+import subprocess
 
 
 class gen_supp_inc(object):
@@ -87,7 +88,7 @@ class gen_supp_inc(object):
     def __init__(self):
         ansys_revn = os.environ.get("ANSYS_REVN", "120")
         self.system = subprocess.Popen(
-            "source /ansys_inc/v%s/ansys/bin/anssh.ini ; echo $SYS" %
+            "bash -c '. /ansys_inc/v121/ansys/bin/anssh.ini ; echo $SYS'" %
             (ansys_revn,),
             stdout=subprocess.PIPE, shell=True).communicate()[0].strip()
 
