@@ -139,8 +139,8 @@ ANSDVER = $(ANSMAJOR).$(ANSMINOR)
             formats = self.get_formats(self.outMatrix[ansver][self.system])
             if formats:
                 system = subprocess.Popen(
-                    "source /ansys_inc/v%d/ansys/bin/anssh.ini ; echo $SYS" %
-                    (ansver,),
+                    "bash -c '. /ansys_inc/v{}/ansys/bin/anssh.ini ; echo $SYS'".format(
+                        ansver),
                     stdout=subprocess.PIPE,
                     shell=True).communicate()[0].strip()
                 for format in formats:
@@ -154,8 +154,8 @@ ANSDVER = $(ANSMAJOR).$(ANSMINOR)
             formats = self.get_formats(self.outMatrix[ansver][self.system])
             if formats:
                 system = subprocess.Popen(
-                    "source /ansys_inc/v%d/ansys/bin/anssh.ini ; echo $SYS" %
-                    (ansver,),
+                    "bash -c '. /ansys_inc/v{}/ansys/bin/anssh.ini ; echo $SYS'".format(
+                        ansver),
                     stdout=subprocess.PIPE,
                     shell=True).communicate()[0].strip()
                 makefile.write(
