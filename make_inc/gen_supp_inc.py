@@ -1,28 +1,21 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
-
-"""
-Copyright (C) 2006 by Germanischer Lloyd AG
-
-======================================================================
-Task      Generate list of supported settings for actual architecture.
-----------------------------------------------------------------------
-Author    Berthold Höllmann <hoel@GL-Group.com>
-Project   ans2bmf
-======================================================================
+"""Generate list of supported settings for actual architecture.
 """
 
-#  CVSID: $Id: gen_supp_inc.py 398 2009-08-28 09:02:16Z hoel $
-__author__ = ("2006 Germanischer Lloyd (author: $Author: hoel $) " +
-              "hoel@GL-Group.com")
-__date__ = "$Date: 2009-08-28 11:02:16 +0200 (Fr, 28 Aug 2009) $"
-__version__ = "$Revision: 398 $"[10:-1]
-__package_info__ = """ """
+from __future__ import (
+    division, print_function, absolute_import, unicode_literals)
 
 # Standard libraries.
 import os
 import sys
 import subprocess
+
+# ID: $Id$
+__date__ = "$Date::                            $"[7:-1]
+__scm_version__ = "$Revision$"[10:-1]
+__author__ = "`Berthold Höllmann <berthold.hoellmann@dnvgl.com>`__"
+__copyright__ = "Copyright © 2006 by DNV GL SE"
 
 
 class gen_supp_inc(object):
@@ -41,7 +34,7 @@ class gen_supp_inc(object):
     BMF = 2
     HDF = 4
     formatmap = {
-        #None:  'NONE',
+        # None:  'NONE',
         ASCII: 'ASCII',
         BMF:   'BMF',
         HDF:   'HDF',
@@ -55,32 +48,32 @@ class gen_supp_inc(object):
         (('LINEM64T'),  (110, ASCII)),
         (('LINX64'),    (120, ASCII)),
         (('SunOS', 'sun4u'),  (None, None)),
-        )
+    )
     archs = dict(_archs)
     _outMatrix = {
-    #         L          L            L      L      L            S
-    #         i          i            i      i      i            u
-    #         n          n            n      n      n            n
-    #         u          u            u      u      u            O
-    #         x          x            x      x      x            S
-    #
-    #         i          i            x      E      X            s
-    #         6          6            8      M      6            u
-    #         8          8            6      6      4            n
-    #         6          6            _      4                   4
-    #         LINUXIA32  LINIA32      6      T                   u
-    #         <=100      >=110        4
-    #    70: (False,    (False,       False, False, False,       False, ),
-    #    71: (ASCII|BMF, False,       False, False, False,       False, ),
-    #    80: (ASCII|BMF, False,       False, False, False,       False, ),
-    #    81: (ASCII|BMF, False,       False, False, False,       False, ),
-    #    90: (ASCII|BMF, False,       ASCII, False, False,       False, ),
+        #         L          L            L      L      L            S
+        #         i          i            i      i      i            u
+        #         n          n            n      n      n            n
+        #         u          u            u      u      u            O
+        #         x          x            x      x      x            S
+        #
+        #         i          i            x      E      X            s
+        #         6          6            8      M      6            u
+        #         8          8            6      6      4            n
+        #         6          6            _      4                   4
+        #         LINUXIA32  LINIA32      6      T                   u
+        #         <=100      >=110        4
+        #    70: (False,    (False,       False, False, False,       False, ),
+        #    71: (ASCII|BMF, False,       False, False, False,       False, ),
+        #    80: (ASCII|BMF, False,       False, False, False,       False, ),
+        #    81: (ASCII|BMF, False,       False, False, False,       False, ),
+        #    90: (ASCII|BMF, False,       ASCII, False, False,       False, ),
         100: (False,     ASCII | BMF, ASCII, ASCII, False,       False, ),
         110: (False,     ASCII | BMF, ASCII, ASCII, False,       False, ),
         120: (False,     ASCII | BMF, False, False, ASCII | BMF, False, ),
         121: (False,     ASCII | BMF, False, False, ASCII | BMF, False, ),
         130: (False,     ASCII | BMF, False, False, ASCII | BMF, False, ),
-        }
+    }
     outMatrix = {}
     for key, supp in _outMatrix.iteritems():
         outMatrix[key] = dict(zip((a[0] for a in _archs), supp))
@@ -88,8 +81,8 @@ class gen_supp_inc(object):
     def __init__(self):
         ansys_revn = os.environ.get("ANSYS_REVN", "120")
         self.system = subprocess.Popen(
-            "bash -c '. /ansys_inc/v{}/ansys/bin/anssh.ini ; echo $SYS'".format(
-                ansys_revn),
+            "bash -c '. /ansys_inc/"
+            "v{}/ansys/bin/anssh.ini ; echo $SYS'".format(ansys_revn),
             stdout=subprocess.PIPE, shell=True).communicate()[0].strip()
 
     def __call__(self):
@@ -127,8 +120,8 @@ FORMAT = %s
 ANSVER = $(ANSMAJOR)$(ANSMINOR)
 ANSDVER = $(ANSMAJOR).$(ANSMINOR)
 """ % (self.archs[self.system][0] // 10,
-       self.archs[self.system][0] % 10,
-       self.formatmap[self.archs[self.system][1]]))
+            self.archs[self.system][0] % 10,
+            self.formatmap[self.archs[self.system][1]]))
 
         # compiler flags for various architectures
         makefile.write(
@@ -139,8 +132,8 @@ ANSDVER = $(ANSMAJOR).$(ANSMINOR)
             formats = self.get_formats(self.outMatrix[ansver][self.system])
             if formats:
                 system = subprocess.Popen(
-                    "bash -c '. /ansys_inc/v{}/ansys/bin/anssh.ini ; echo $SYS'".format(
-                        ansver),
+                    "bash -c '. /ansys_inc/v"
+                    "{}/ansys/bin/anssh.ini ; echo $SYS'".format(ansver),
                     stdout=subprocess.PIPE,
                     shell=True).communicate()[0].strip()
                 for format in formats:
@@ -154,14 +147,14 @@ ANSDVER = $(ANSMAJOR).$(ANSMINOR)
             formats = self.get_formats(self.outMatrix[ansver][self.system])
             if formats:
                 system = subprocess.Popen(
-                    "bash -c '. /ansys_inc/v{}/ansys/bin/anssh.ini ; echo $SYS'".format(
-                        ansver),
+                    "bash -c '. /ansys_inc/v"
+                    "{}/ansys/bin/anssh.ini ; echo $SYS'".format(ansver),
                     stdout=subprocess.PIPE,
                     shell=True).communicate()[0].strip()
                 makefile.write(
                     ("\tmake install ANSMAJOR=%d ANSMINOR=%d FORMAT=%s "
                      "SYSTEM=%s\n") %
-                     (ansver // 10, ansver % 10, formats[0], system))
+                    (ansver // 10, ansver % 10, formats[0], system))
         makefile.write("\tcd ../doc ; make install\n")
 
         makefile.close()
@@ -171,6 +164,8 @@ ANSDVER = $(ANSMAJOR).$(ANSMINOR)
 if __name__ == "__main__":
     gen_supp_inc()()
 
+
 # Local Variables:
-# compile-command:"make -C .."
+# mode: python
+# compile-command: "make -C .."
 # End:

@@ -4,8 +4,15 @@
 libraries.
 """
 
-from __future__ import (print_function, division, absolute_import,
-                        unicode_literals)
+from __future__ import (
+    division, print_function, absolute_import, unicode_literals)
+
+# Standard libraries.
+import os
+import re
+import sys
+import functools
+import subprocess
 
 # ID: $Id$"
 __date__ = "$Date$"[6:-1]
@@ -13,53 +20,57 @@ __version__ = "$Revision$"[10:-1]
 __author__ = "`Berthold Höllmann <berthold.hoellmann@dnvgl.com>`__"
 __copyright__ = "Copyright © 2005, 2014 by DNV GL SE"
 
-import os
-import re
-import subprocess
-import sys
-
 
 class GenMakeInc(object):
     _notSupp = (None, None, None)
-    _ifc101_17 = ('INTEL_PATHLVL=17 ifort101', '-parallel')
-    _ifc101_17_64 = ('INTEL_PATHLVL=17 ifort101', '')
-    _ifc111_69 = ('INTEL_PATHLVL=69 ifort111', '-parallel')
-    _ifc111_69_64 = ('INTEL_PATHLVL=69 ifort111', '-parallel')
-    _ifc121_64 = ('ifort121', '-parallel')
-    _gcc = ('gcc', '')
-
-    # map ANSYS version/FORTRAN compiler to be used to actual compiler
-    # name
-    fctable = {
-        ('120', 'LINIA32',   'ifort'): _ifc101_17,
-        ('120', 'LINX64',    'ifort'): _ifc101_17_64,
-        ('121', 'LINIA32',   'ifort'): _ifc101_17,
-        ('121', 'LINX64',    'ifort'): _ifc101_17_64,
-        ('130', 'LINX64',    'ifort'): _ifc111_69_64,
-        ('150', 'LINX64',    'ifort'): _ifc121_64,
-        }
-
-    # map ANSYS version/C compiler to be used to actual compiler name
-    cctable = {
-        ('120', 'LINIA32',   'icc'): _gcc,
-        ('120', 'LINX64',    'icc'): _gcc,
-        ('121', 'LINIA32',   'icc'): _gcc,
-        ('121', 'LINX64',    'icc'): _gcc,
-        ('130', 'LINX64',    'icc'): _gcc,
-        ('150', 'LINX64',    'icc'): _gcc,
-        }
-
-    # map ANSYS version/linker to be used to actual linker name
-    ldtable = {
-        ('120', 'LINIA32',   'ld'): (_ifc101_17[0], ''),
-        ('120', 'LINX64',    'ld'): (_ifc101_17_64[0], ''),
-        ('121', 'LINIA32',   'ld'): (_ifc101_17[0], ''),
-        ('121', 'LINX64',    'ld'): (_ifc101_17_64[0], ''),
-        ('130', 'LINX64',    'ld'): (_ifc111_69_64[0], ''),
-        ('150', 'LINX64',    'ld'): (_ifc121_64[0], ''),
-        }
 
     def __init__(self):
+        # map ANSYS version/FORTRAN compiler to be used to actual compiler
+        # name
+        self.fctable = {
+            ('120', 'LINIA32', 'ifort'): ("_ifc101_17", "-parallel"),
+            ('120', 'LINX64',  'ifort'): ("_ifc101_17_64", "-parallel"),
+            ('121', 'LINIA32', 'ifort'): ("_ifc101_17", "-parallel"),
+            ('121', 'LINX64',  'ifort'): ("_ifc101_17_64", "-parallel"),
+            ('130', 'LINX64',  'ifort'): ("_ifc111_69_64", "-parallel"),
+            ('140', 'LINX64',  'ifort'): ("_ifc111_69_64", "-parallel"),
+            ('150', 'LINX64',  'ifort'): ("_ifc121_64", "-parallel"),
+            ('161', 'LINX64',  'ifort'): ("_ifc140_64", "-parallel"),
+            ('162', 'LINX64',  'ifort'): ("_ifc140_64", "-parallel"),
+            ('170', 'LINX64',  'ifort'): ("_ifc150_64", "-parallel"),
+            ('171', 'LINX64',  'ifort'): ("_ifc150_64", "-parallel"),
+        }
+
+        # map ANSYS version/C compiler to be used to actual compiler name
+        self.cctable = {
+            ('120', 'LINIA32', 'icc'): ("gcc", ""),
+            ('120', 'LINX64',  'icc'): ("gcc", ""),
+            ('121', 'LINIA32', 'icc'): ("gcc", ""),
+            ('121', 'LINX64',  'icc'): ("gcc", ""),
+            ('130', 'LINX64',  'icc'): ("gcc", ""),
+            ('140', 'LINX64',  'icc'): ("gcc", ""),
+            ('150', 'LINX64',  'icc'): ("gcc", ""),
+            ('160', 'LINX64',  'icc'): ("gcc", ""),
+            ('161', 'LINX64',  'icc'): ("gcc", ""),
+            ('170', 'LINX64',  'icc'): ("gcc", ""),
+            ('171', 'LINX64',  'icc'): ("gcc", ""),
+        }
+
+        # map ANSYS version/linker to be used to actual linker name
+        self.ldtable = {
+            ('120', 'LINIA32', 'ld'): ("_ifc101_17", ''),
+            ('120', 'LINX64',  'ld'): ("_ifc101_17_64", ''),
+            ('121', 'LINIA32', 'ld'): ("_ifc101_17", ''),
+            ('121', 'LINX64',  'ld'): ("_ifc101_17_64", ''),
+            ('130', 'LINX64',  'ld'): ("_ifc111_69_64", ''),
+            ('140', 'LINX64',  'ld'): ("_ifc111_69_64", ''),
+            ('150', 'LINX64',  'ld'): ("_ifc121_64", ''),
+            ('161', 'LINX64',  'ld'): ("_ifc140_64", ''),
+            ('162', 'LINX64',  'ld'): ("_ifc140_64", ''),
+            ('170', 'LINX64',  'ld'): ("_ifc150_64", ''),
+            ('171', 'LINX64',  'ld'): ("_ifc150_64", ''),
+        }
+
         self.ansys_revn = os.environ.get("ANSYS_REVN", "90")
         self.ansys_sys = subprocess.Popen(
             ". /ansys_inc/v%s/ansys/bin/anssh.ini ; echo $SYS" %
@@ -79,71 +90,81 @@ class GenMakeInc(object):
                   % (self.ansys_revn,))
 
     def parse_share(self):
-        makefile = open('Makefile')
-        c_del = r"(^|\s+)-c($|\s+)"
-        ld_del = r"(^|\s+)-o dummy($|\s+)"
+        if int(self.ansys_revn) < 90:
+            fcline_re = re.compile(
+                r"FC = (?P<FC>\w+) (?P<FFLAGS>.+$)")
+        else:
+            fcline_re = re.compile(
+                r"FC = (?P<FC>\w+) \$\{debug\} \$\{ANSYS_INCPATH\} "
+                r"(?P<FFLAGS>.+$)")
+        ccline_re = re.compile(
+            r"CC = (?P<CC>\w+) \$\{debug\} \$\{ANSYS_INCPATH\} "
+            r"(?P<CFLAGS>.+$)")
+        ldline_re = re.compile(
+            r"LN = (?P<LD>\w+) (?P<LDFLAGS>.+$)")
+        c_del_re = re.compile(r"(^|\s+)-c($|\s+)")
+        ld_del_re = re.compile(r"(^|\s+)-o dummy($|\s+)")
+        with open('Makefile') as makefile:
 
-        for l in makefile:
-            h = l.split()
-            if h:
-                h = h[0]
-            if h == "PP":
-                self.CPPFLAGS += " ".join(l.split()[2:])
-            elif h == "FC":
-                if int(self.ansys_revn) < 90:
-                    fcline = re.match(
-                        r"FC = (?P<FC>\w+) (?P<FFLAGS>.+$)", l)
-                else:
-                    fcline = re.match(
-                        r"FC = (?P<FC>\w+) \$\{debug\} \$\{ANSYS_INCPATH\} "
-                        "(?P<FFLAGS>.+$)", l)
-                (self.FC, self.FFLAGS
-                 ) = self.fcfix(fcline.group("FC"))
-                self.FFLAGS += ' ' + re.sub(c_del, " ",
-                                     fcline.group("FFLAGS")).strip()
-            elif h == "CC":
-                ccline = re.match(
-                    r"CC = (?P<CC>\w+) \$\{debug\} \$\{ANSYS_INCPATH\} "
-                    "(?P<CFLAGS>.+$)", l)
-                (self.CC, self.CFLAGS) = self.ccfix(ccline.group("CC"))
-                self.CFLAGS += ' ' + re.sub(c_del, " ",
-                                            ccline.group("CFLAGS")).strip()
-            elif h == "LN":
-                ldline = re.match(
-                    r"LN = (?P<LD>\w+) (?P<LDFLAGS>.+$)", l)
-                (self.LD, self.LDFLAGS) = self.ldfix(ldline.group("LD"))
-                self.LDFLAGS += ' ' + re.sub(ld_del, " ",
-                                             ldline.group("LDFLAGS")).strip()
-            elif h == "IN":
-                self.CPPFLAGS += " " + " ".join(l.split()[2:])
+            for l in makefile:
+                h = l.split()
+                if h:
+                    h = h[0]
+                if h == "PP":
+                    self.CPPFLAGS += " ".join(l.split()[2:])
+                elif h == "FC":
+                    fcline = fcline_re.match(l)
+                    (self.FC, self.FFLAGS) = self.fcfix(fcline.group("FC"))
+                    self.FFLAGS = ' '.join((
+                        self.FFLAGS, c_del_re.sub(
+                            " ", fcline.group("FFLAGS")))).strip()
+                elif h == "CC":
+                    ccline = ccline_re.match(l)
+                    (self.CC, self.CFLAGS) = self.ccfix(ccline.group("CC"))
+                    self.CFLAGS += (' ' + c_del_re.sub(
+                        " ", ccline.group("CFLAGS"))).strip()
+                elif h == "LN":
+                    ldline = ldline_re.match(l)
+                    (self.LD, self.LDFLAGS) = self.ldfix(ldline.group("LD"))
+                    self.LDFLAGS += ' ' + ld_del_re.sub(
+                        " ", ldline.group("LDFLAGS")).strip()
+                elif h == "IN":
+                    self.CPPFLAGS += " " + " ".join(l.split()[2:])
 
         self.CPPFLAGS = self.CPPFLAGS.strip()
 
     def fcfix(self, fc):
-        return self.fctable[(self.ansys_revn, self.ansys_sys, fc)]
+        return (i.strip()
+                for i in self.fctable[(self.ansys_revn, self.ansys_sys, fc)])
 
     def ccfix(self, cc):
-        return self.cctable[(self.ansys_revn, self.ansys_sys, cc)]
+        return (i.strip()
+                for i in self.cctable[(self.ansys_revn, self.ansys_sys, cc)])
 
     def ldfix(self, ld):
-        return self.ldtable[(self.ansys_revn, self.ansys_sys, ld)]
+        return (i.strip()
+                for i in self.ldtable[(self.ansys_revn, self.ansys_sys, ld)])
 
     def gen_makefile(self):
-        makefile = open("make_%s_ans%s.inc" %
-                        (self.ansys_sys, self.ansys_revn), 'w')
-        makefile.write("""# -*- makefile -*-
-# make settings for ANSYS %s extensions on %s
-# auto generated by %s
-""" % (self.ansys_revn, self.ansys_sys, sys.argv[0]))
-        makefile.write("CC = %s\n" % self.CC.strip())
-        makefile.write("FC = %s\n" % self.FC.strip())
-        makefile.write("LD = %s\n" % self.LD.strip())
-        makefile.write("CPPFLAGS += %s\n" % self.CPPFLAGS.strip())
-        makefile.write("CFLAGS   += %s\n" % self.CFLAGS.strip())
-        makefile.write("FFLAGS   += %s -module $(DEST)\n" % self.FFLAGS.strip())
-        makefile.write("FFLAGS   += $(CPPFLAGS)\n")
-        makefile.write("LDFLAGS  += %s\n" % self.LDFLAGS.strip())
-        makefile.close()
+        elems = {"argv": sys.argv[0],
+                 "b_PATH": os.path.abspath(
+                     os.path.join(
+                         os.curdir, os.path.split(__file__)[0],  "bin"))}
+        elems.update(self.__dict__)
+
+        with open("make_{ansys_sys}_ans{ansys_revn}.inc".format(**elems),
+                  'w') as makefile:
+            makefile.write("""# -*- makefile -*-
+# make settings for ANSYS {ansys_revn} extensions on {ansys_sys}
+# auto generated by {argv}
+CC = {CC}
+FC = {b_PATH}/{FC}.sh
+LD = {b_PATH}/{LD}.sh
+CPPFLAGS += {CPPFLAGS}
+CFLAGS   += {CFLAGS}
+FFLAGS   += $(CPPFLAGS) {FFLAGS} -module $(DEST)
+LDFLAGS  += {LDFLAGS}
+""".format(**elems))
 
     def clean_up(self):
         os.remove('Makefile')
@@ -153,6 +174,5 @@ if __name__ == "__main__":
 
 # Local Variables:
 # mode: python
-# ispell-local-dictionary: "english"
-# compile-command:"make -C .."
+# compile-command: "make -C .."
 # End:
