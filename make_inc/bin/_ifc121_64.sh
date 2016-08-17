@@ -13,6 +13,9 @@ version="$Revision$"
 
 if [ -d /usr/local/fitools/opt/intel/12.1 ] ; then
     IFC_BASE=/usr/local/fitools/opt/intel/12.1
+
+    INTEL_LICENSE_FILE=/usr/local/fitools/opt/intel/licenses
+    export INTEL_LICENSE_FILE
 else
     IFC_BASE=/opt/intel/composer_xe_2011_sp1.13.367
 fi
