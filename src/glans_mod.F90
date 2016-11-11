@@ -813,7 +813,7 @@ CONTAINS
     ELSE
        WRITE(cmd,102) TRIM(cmd)
     END IF
-    !WRITE(wrinqr(WR_OUTPUT),*) 'cmd: ', TRIM(cmd)
+    ! WRITE(wrinqr(WR_OUTPUT),*) 'cmd: ', TRIM(cmd)
     iErr = RunCommand(LEN_TRIM(cmd), TRIM(cmd))
 
     flag = ((erinqr(ER_NUMWARNING) - numwrn) + (erinqr(ER_NUMERROR) - numerr)).NE.0
@@ -959,7 +959,7 @@ CONTAINS
     ELSE
        WRITE(cmd,100) TRIM(cmd), ''
     END IF
-    ! write(wrinqr(WR_OUTPUT),*) 'cmd: ', trim(cmd)
+    ! WRITE(wrinqr(WR_OUTPUT),*) 'cmd: ', TRIM(cmd)
     iErr = RunCommand(LEN_TRIM(cmd), TRIM(cmd))
 
     flag = ((erinqr(ER_NUMWARNING) - numwrn) + (erinqr(ER_NUMERROR) - numerr)).NE.0
@@ -1134,7 +1134,7 @@ CONTAINS
     ELSE
        WRITE(cmd,102) TRIM(cmd)
     END IF
-    WRITE(wrinqr(WR_OUTPUT),*) 'cmd: ', TRIM(cmd)
+    ! WRITE(wrinqr(WR_OUTPUT),*) 'cmd: ', TRIM(cmd)
     iErr = RunCommand(LEN_TRIM(cmd), TRIM(cmd))
 
     flag = ((erinqr(ER_NUMWARNING) - numwrn) + (erinqr(ER_NUMERROR) - numerr)).NE.0
