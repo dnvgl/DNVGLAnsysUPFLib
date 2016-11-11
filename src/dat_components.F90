@@ -88,7 +88,7 @@ CONTAINS
        IF (n.GT.ansys_comp) THEN
 
           ! generate components for all elements not in any component
-          comp_name(n) = 'NotNamed'
+          comp_name(n) = 'NOTNAMED'
           cerrinfo(1) = trim(comp_name(n))
           CALL erhandler(fname, __LINE__, ERH_NOTE, &
                trim(libname)//': Component %s', derrinfo, cerrinfo)
@@ -96,7 +96,7 @@ CONTAINS
           DO m = 1, n-1
              CALL cmselect('U', trim(comp_name(m)))
           END DO
-          cmd = 'CM,NotNamed,ELEM'
+          cmd = 'CM,NOTNAMED,ELEM'
           iErr = RunCommand(LEN_TRIM(cmd), trim(cmd))
           an_cnum = an_cnum+1
 
