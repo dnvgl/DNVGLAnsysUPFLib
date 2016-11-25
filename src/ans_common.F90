@@ -178,5 +178,6 @@ CONTAINS
 END MODULE ans_common
 
 ! Local Variables:
-! compile-command:"make -C .. test"
+! compile-command: "make -C .. test"
+! mode: f90
 ! End:
