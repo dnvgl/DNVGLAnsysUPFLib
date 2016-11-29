@@ -22,7 +22,7 @@ fi
 
 set -e
 . $IFC_BASE/bin/compilervars.sh intel64
-ifort $@
+ifort "$@"
 
 # Local Variables:
 # mode: shell-script
