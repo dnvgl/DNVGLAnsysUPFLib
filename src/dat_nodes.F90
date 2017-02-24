@@ -5,9 +5,10 @@ CONTAINS
 
   SUBROUTINE dat_nodes()
 
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd, ndinqr, erhandler
-    USE ansys_par, ONLY : DB_NUMDEFINED, ERH_FNAME_LEN, ERH_NOTE, PARMSIZE
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, ndinqr
+    USE ansys_par, ONLY : DB_NUMDEFINED, ERH_FNAME_LEN, PARMSIZE
     USE ans_common, ONLY : n_nodes
+    USE glans
     USE LOCMOD, ONLY : libname
 
     ! Purpose:
@@ -18,12 +19,7 @@ CONTAINS
     ! Created: 2007-06-01  hoel
     ! ======================================================================
 
-    ! dataspace for feeding erhandler subroutine
-
     IMPLICIT NONE
-
-    REAL(KIND=8), DIMENSION(10) ::  derrinfo
-    CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
 
     CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
 
@@ -31,8 +27,7 @@ CONTAINS
 
     n_nodes = ndinqr(0, DB_NUMDEFINED)
     derrinfo(1) = n_nodes
-    CALL erhandler(fname, __LINE__, ERH_NOTE, &
-         trim(libname)//':   nodes defined: %i', derrinfo, cerrinfo)
+    CALL ans_note(fname, __LINE__, libname, '  nodes defined: %i')
 
     CALL TrackEnd('dat_nodes')
 

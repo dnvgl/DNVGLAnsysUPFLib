@@ -82,6 +82,31 @@ MODULE ans_common
      MODULE PROCEDURE bp_loc_assign
   END INTERFACE
 
+  INTEGER, PARAMETER :: CS_TYPE_RECT = 1
+  INTEGER, PARAMETER :: CS_TYPE_QUAD = 2
+  INTEGER, PARAMETER :: CS_TYPE_CSOLID = 3
+  INTEGER, PARAMETER :: CS_TYPE_CTUBE = 4
+  INTEGER, PARAMETER :: CS_TYPE_CHAN = 5
+  INTEGER, PARAMETER :: CS_TYPE_I = 6
+  INTEGER, PARAMETER :: CS_TYPE_Z = 7
+  INTEGER, PARAMETER :: CS_TYPE_L = 8
+  INTEGER, PARAMETER :: CS_TYPE_T = 9
+  INTEGER, PARAMETER :: CS_TYPE_HATS = 10
+  INTEGER, PARAMETER :: CS_TYPE_HREC = 11
+  INTEGER, PARAMETER :: CS_TYPE_ASEC = 12
+  INTEGER, PARAMETER :: CS_TYPE_MESH = 13
+  INTEGER, PARAMETER :: CS_TYPE_NOT_VALID = 666
+
+  TYPE :: cross_section_info
+     ! outer dimensions for cross section
+     REAL(KIND=8) :: t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2
+     REAL(KIND=8) :: web_height = 0.
+     REAL(KIND=8) :: web_thickness = 0.
+     REAL(KIND=8) :: flange_width = 0.
+     REAL(KIND=8) :: flange_thickness = 0.
+     INTEGER :: type_code = CS_TYPE_NOT_VALID
+  END TYPE cross_section_info
+
   TYPE :: bp_type
 
      INTEGER :: num = 0, rnum = 0, snum = 0
@@ -91,6 +116,8 @@ MODULE ans_common
      TYPE(bp_loc), DIMENSION(:), ALLOCATABLE :: r_bp_map
      ! Mapping section number to beam property entry
      TYPE(bp_loc), DIMENSION(:), ALLOCATABLE :: se_bp_map
+     ! Information on supported cross section descriptions
+     TYPE(cross_section_info), DIMENSION(:), ALLOCATABLE :: cs_info
 
   END TYPE bp_type
 
@@ -149,20 +176,16 @@ CONTAINS
   FUNCTION allocate_bp_space(bp, rnum, snum)
     IMPLICIT NONE
     LOGICAL :: allocate_bp_space
-
     TYPE(bp_type), INTENT(INOUT) :: bp
     INTEGER, INTENT(IN) :: rnum, snum
 
     allocate_bp_space = .True.
-
     ALLOCATE(bp%data((2*rnum) + snum + 2))
     ALLOCATE(bp%r_bp_map(rnum))
     ALLOCATE(bp%se_bp_map(snum))
-
+    ALLOCATE(bp%cs_info(snum))
     allocate_bp_space = .False.
-
     RETURN
-
   END FUNCTION allocate_bp_space
 
   SUBROUTINE deallocate_bp_space(bp)
@@ -173,6 +196,7 @@ CONTAINS
     DEALLOCATE(bp%data)
     DEALLOCATE(bp%r_bp_map)
     DEALLOCATE(bp%se_bp_map)
+    DEALLOCATE(bp%cs_info)
   END SUBROUTINE deallocate_bp_space
 
 END MODULE ans_common

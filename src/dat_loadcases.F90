@@ -12,9 +12,10 @@ CONTAINS
 
   SUBROUTINE dat_loadcases()
 
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler, foriqr
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, foriqr
     USE ansys_par, ONLY : DB_NUMDEFINED, ERH_FNAME_LEN, ERH_NOTE, PARMSIZE
     USE ans_common
+    USE glans
     USE LOCMOD, ONLY : libname
 
     ! Purpose:
@@ -32,10 +33,6 @@ CONTAINS
     LOGICAL ex, eof
     INTEGER*2 l
     INTEGER s_file
-
-    ! dataspace for feeding erhandler subroutine
-    REAL(KIND=8), DIMENSION(10) ::  derrinfo
-    CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
 
     CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
 
@@ -74,9 +71,8 @@ CONTAINS
 30     FORMAT('.s', (i3))
 
        ! check
-       CALL erhandler(fname, __LINE__, ERH_NOTE, &
-            'ans2bmf:   checking '//trim(jobname)//trim(ext), &
-            derrinfo, cerrinfo)
+       CALL ans_note(fname, __LINE__, 'ans2bmf', &
+            & '  checking '//trim(jobname)//trim(ext))
        INQUIRE(FILE=trim(jobname)//trim(ext), EXIST=ex)
        IF (ex) THEN
           ! and count all load lines on file
@@ -95,8 +91,7 @@ CONTAINS
     n_sfiles = l - 1
     max_loadcases = max_loadcases + n_sfiles
     derrinfo(1) = max_loadcases
-    CALL erhandler(fname, __LINE__, ERH_NOTE, &
-         'ans2bmf:   loadcases defined:  %i', derrinfo, cerrinfo)
+    CALL ans_note(fname, __LINE__, 'ans2bmf', '  loadcases defined:  %i')
 
     CALL TrackEnd('dat_loadcases')
 

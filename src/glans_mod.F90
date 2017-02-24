@@ -19,10 +19,20 @@
 
 MODULE glans
 
+  USE ansys_par, ONLY : PARMSIZE, ERH_FNAME_LEN, STRING_MAX_LENG, &
+       & ERH_NOTE, ERH_WARNING, ERH_ERROR, ERH_FATAL, ERH_CAUTION
+
+  PUBLIC :: ERH_FNAME_LEN
+
   PRIVATE
 
   INTERFACE get
      MODULE PROCEDURE getf, getfs, getfi, geti, getis, getii, gets, getsi
+  END INTERFACE
+
+  INTERFACE s_get
+     MODULE PROCEDURE s_getf, s_getfs, s_getfi, s_geti, s_getis, s_getii, &
+          & s_gets, s_getsi
   END INTERFACE
 
   INTERFACE esel
@@ -30,6 +40,7 @@ MODULE glans
   END INTERFACE
 
   PUBLIC :: get
+  PUBLIC :: s_get
   PUBLIC :: esel
   PUBLIC :: nsel
   PUBLIC :: cmselect
@@ -43,7 +54,67 @@ MODULE glans
   ! number of warnings issued
   INTEGER :: wcount = 0
 
+  ! dataspace for feeding erhandler subroutine
+  REAL(KIND=8), DIMENSION(10) ::  derrinfo
+  CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
+
+  CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
+
+  PUBLIC :: derrinfo, cerrinfo
+  PUBLIC :: ans_note, ans_warn, ans_error, ans_fatal, ans_caution
+
 CONTAINS
+
+  SUBROUTINE ans_note(fname, line, libname, msg)
+    IMPLICIT NONE
+    CHARACTER(LEN=ERH_FNAME_LEN), INTENT(IN) :: fname
+    INTEGER, INTENT(IN) :: line
+    CHARACTER(LEN=*), INTENT(IN) :: libname
+    CHARACTER(LEN=*), INTENT(IN) :: msg
+    CALL erhandler(fname, line, ERH_NOTE, libname // ':' // msg, &
+         derrinfo, cerrinfo)
+  END SUBROUTINE ans_note
+
+  SUBROUTINE ans_warn(fname, line, libname, msg)
+    IMPLICIT NONE
+    CHARACTER(LEN=ERH_FNAME_LEN), INTENT(IN) :: fname
+    INTEGER, INTENT(IN) :: line
+    CHARACTER(LEN=*), INTENT(IN) :: libname
+    CHARACTER(LEN=*), INTENT(IN) :: msg
+    CALL erhandler(fname, line, ERH_WARNING, msg, &
+         derrinfo, cerrinfo)
+  END SUBROUTINE ans_warn
+
+  SUBROUTINE ans_error(fname, line, libname, msg)
+    IMPLICIT NONE
+    CHARACTER(LEN=ERH_FNAME_LEN), INTENT(IN) :: fname
+    INTEGER, INTENT(IN) :: line
+    CHARACTER(LEN=*), INTENT(IN) :: libname
+    CHARACTER(LEN=*), INTENT(IN) :: msg
+    CALL erhandler(fname, line, ERH_ERROR, msg, &
+         derrinfo, cerrinfo)
+  END SUBROUTINE ans_error
+
+  SUBROUTINE ans_fatal(fname, line, libname, msg)
+    IMPLICIT NONE
+    CHARACTER(LEN=ERH_FNAME_LEN), INTENT(IN) :: fname
+    INTEGER, INTENT(IN) :: line
+    CHARACTER(LEN=*), INTENT(IN) :: libname
+    CHARACTER(LEN=*), INTENT(IN) :: msg
+    CALL erhandler(fname, line, ERH_FATAL, msg, &
+         derrinfo, cerrinfo)
+  END SUBROUTINE ans_fatal
+
+  SUBROUTINE ans_caution(fname, line, libname, msg)
+    IMPLICIT NONE
+    CHARACTER(LEN=ERH_FNAME_LEN), INTENT(IN) :: fname
+    INTEGER, INTENT(IN) :: line
+    CHARACTER(LEN=*), INTENT(IN) :: libname
+    CHARACTER(LEN=*), INTENT(IN) :: msg
+    CALL erhandler(fname, line, ERH_CAUTION, msg, &
+         derrinfo, cerrinfo)
+  END SUBROUTINE ans_caution
+
 
   SUBROUTINE ans2bmf_get_d(cmd_str, dout)
     ! reads ANSYS command string 'cmd_str'
@@ -167,25 +238,20 @@ CONTAINS
 
     CHARACTER(LEN=CMD_MAX_LENG) :: cmd
 
-    ! dataspace for feeding erhandler subroutine
-    REAL(KIND=8), DIMENSION(10) ::  derrinfo
-    CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
-
-    CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
+!    CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
 
     CALL TrackBegin('glans:cmselect')
 
     umode = upcase(mode)
 
-    IF ((umode.NE.'S').AND. &
-         & (umode.NE.'R').AND. &
-         & (umode.NE.'A').AND. &
-         & (umode.NE.'U').AND. &
-         & (umode.NE.'ALL').AND. &
+    IF ((umode.NE.'S') .AND. &
+         & (umode.NE.'R') .AND. &
+         & (umode.NE.'A') .AND. &
+         & (umode.NE.'U') .AND. &
+         & (umode.NE.'ALL') .AND. &
          & (umode.NE.'NONE')) THEN
-       CALL erhandler(fname, __LINE__, ERH_FATAL, &
-            & 'glansys: invalid mode: '//TRIM(umode)//'.', &
-            & derrinfo, cerrinfo)
+       CALL ans_fatal(fname, __LINE__, 'glansys', &
+            & 'invalid mode: '//TRIM(umode)//'.')
     END IF
 
     IF (PRESENT(name)) THEN
@@ -205,6 +271,7 @@ CONTAINS
   SUBROUTINE eseli(Type, Item, Comp, VMIN, VMAX, VINC, KABS)
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand
     USE ansys_par, ONLY : CMD_MAX_LENG, ERH_FATAL, ERH_FNAME_LEN, PARMSIZE
+
     IMPLICIT NONE
     ! Purpose: select elements
     !
@@ -270,10 +337,6 @@ CONTAINS
 
     CHARACTER(LEN=CMD_MAX_LENG) :: cmd
 
-    ! dataspace for feeding erhandler subroutine
-    REAL(KIND=8), DIMENSION(10) ::  derrinfo
-    CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
-
     CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
 
     CALL TrackBegin('glans:eseli')
@@ -287,16 +350,14 @@ CONTAINS
          & (utype.NE.'ALL').AND. &
          & (utype.NE.'NONE').AND. &
          & (utype.NE.'INVE')) THEN
-       CALL erhandler(fname, __LINE__, ERH_FATAL, &
-            & 'glansys: invalid type: '//TRIM(utype)//'.', &
-            & derrinfo, cerrinfo)
+       CALL ans_fatal(fname, __LINE__, 'glansys', &
+            & 'invalid type: '//TRIM(utype)//'.')
     END IF
 
     IF (PRESENT(Item)) THEN
        IF (LEN(item).GT.128) THEN
-          CALL erhandler(fname, __LINE__, ERH_FATAL, &
-               & 'glansys: length of value item greater then 129.', &
-               & derrinfo, cerrinfo)
+          CALL ans_fatal(fname, __LINE__, 'glansys', &
+               & 'length of value item greater then 129.')
        END IF
        uitem = upcase(item)
        IF ((uitem.NE.'ELEM').AND. &
@@ -316,9 +377,8 @@ CONTAINS
             & (uitem.NE.'SFE').AND. &
             & (uitem.NE.'BFE').AND. &
             & (uitem.NE.'PATH')) THEN
-          CALL erhandler(fname, __LINE__, ERH_FATAL, &
-               & 'glansys: invalid item: '//TRIM(uitem)//'.', &
-               & derrinfo, cerrinfo)
+          CALL ans_fatal(fname, __LINE__, 'glansys', &
+               & 'invalid item: '//TRIM(uitem)//'.')
        END IF
        IF (PRESENT(comp)) THEN
           IF ((uitem.EQ.'ELEM').AND. &
@@ -335,29 +395,24 @@ CONTAINS
                & (uitem.EQ.'PINC').AND. &
                & (uitem.EQ.'PEXC').AND. &
                & (uitem.EQ.'STRA')) THEN
-             CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                  & 'glansys: invalid input: component not allowed '// &
-                  & 'with item '//uitem//'.', &
-                  & derrinfo, cerrinfo)
+             CALL ans_fatal(fname, __LINE__, 'glansys', &
+                  & 'invalid input: component not allowed '// &
+                  & 'with item '//uitem//'.')
           ELSE IF (uitem.EQ.'SFE') THEN
-             CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                  & 'glansys: item '//uitem//' not yet supported.', &
-                  & derrinfo, cerrinfo)
+             CALL ans_fatal(fname, __LINE__, 'glansys', &
+                  & 'item '//uitem//' not yet supported.')
           ELSE IF (uitem.EQ.'BFE') THEN
-             CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                  & 'glansys: item '//uitem//' not yet supported.', &
-                  & derrinfo, cerrinfo)
+             CALL ans_fatal(fname, __LINE__, 'glansys', &
+                  & 'item '//uitem//' not yet supported.')
           ELSE IF (uitem.EQ.'PATH') THEN
-             CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                  & 'glansys: item '//uitem//' not yet supported.', &
-                  & derrinfo, cerrinfo)
+             CALL ans_fatal(fname, __LINE__, 'glansys', &
+                  & 'item '//uitem//' not yet supported.')
           END IF
        END IF
     ELSE
        IF (PRESENT(comp)) THEN
-          CALL erhandler(fname, __LINE__, ERH_FATAL, &
-               & 'glansys: invaid call: comp given, but no item.', &
-               & derrinfo, cerrinfo)
+          CALL ans_fatal(fname, __LINE__, 'glansys', &
+               & 'invaid call: comp given, but no item.')
        END IF
     END IF
 
@@ -405,8 +460,9 @@ CONTAINS
   END SUBROUTINE eseli
 
   SUBROUTINE esels(Type, Item, Comp, VMIN)
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erhandler
-    USE ansys_par, ONLY : CMD_MAX_LENG, ERH_FATAL, ERH_FNAME_LEN, PARMSIZE, STRING_MAX_LENG
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand
+    USE ansys_par, ONLY : CMD_MAX_LENG, ERH_FNAME_LEN, PARMSIZE, STRING_MAX_LENG
+
     IMPLICIT NONE
     ! Purpose: select elements
     !
@@ -456,12 +512,6 @@ CONTAINS
 
     CHARACTER(LEN=CMD_MAX_LENG) :: cmd
 
-    ! dataspace for feeding erhandler subroutine
-    REAL(KIND=8), DIMENSION(10) ::  derrinfo
-    CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
-
-    CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
-
     CALL TrackBegin('glans:esels')
 
     utype = upcase(type)
@@ -473,15 +523,13 @@ CONTAINS
          & (utype.NE.'ALL').AND. &
          & (utype.NE.'NONE').AND. &
          & (utype.NE.'INVE')) THEN
-       CALL erhandler(fname, __LINE__, ERH_FATAL, &
-            & 'glansys: invalid type: '//TRIM(utype)//'.', &
-            & derrinfo, cerrinfo)
+       CALL ans_fatal(fname, __LINE__, 'glansys', &
+            & 'invalid type: '//TRIM(utype)//'.')
     END IF
 
     IF (LEN(item).GT.STRING_MAX_LENG) THEN
-       CALL erhandler(fname, __LINE__, ERH_FATAL, &
-            & 'glansys: length of value item greater then STRING_MAX_LENG.', &
-            & derrinfo, cerrinfo)
+       CALL ans_fatal(fname, __LINE__, 'glansys', &
+            & 'length of value item greater then STRING_MAX_LENG.')
     END IF
     uitem = upcase(item)
     IF ((uitem.NE.'ELEM').AND. &
@@ -501,9 +549,8 @@ CONTAINS
          & (uitem.NE.'SFE').AND. &
          & (uitem.NE.'BFE').AND. &
          & (uitem.NE.'PATH')) THEN
-       CALL erhandler(fname, __LINE__, ERH_FATAL, &
-            & 'glansys: invalid item: '//TRIM(uitem)//'.', &
-            & derrinfo, cerrinfo)
+       CALL ans_fatal(fname, __LINE__, 'glansys', &
+            & 'invalid item: '//TRIM(uitem)//'.')
     END IF
     IF (PRESENT(comp)) THEN
        IF ((uitem.EQ.'ELEM').AND. &
@@ -520,22 +567,18 @@ CONTAINS
             & (uitem.EQ.'PINC').AND. &
             & (uitem.EQ.'PEXC').AND. &
             & (uitem.EQ.'STRA')) THEN
-          CALL erhandler(fname, __LINE__, ERH_FATAL, &
-               & 'glansys: invalid input: component not allowed '// &
-               & 'with item '//uitem//'.', &
-               & derrinfo, cerrinfo)
+          CALL ans_fatal(fname, __LINE__, 'glansys', &
+               & 'invalid input: component not allowed '// &
+               & 'with item '//uitem//'.')
        ELSE IF (uitem.EQ.'SFE') THEN
-          CALL erhandler(fname, __LINE__, ERH_FATAL, &
-               & 'glansys: item '//uitem//' not yet supported.', &
-               & derrinfo, cerrinfo)
+          CALL ans_fatal(fname, __LINE__, 'glansys', &
+               & 'item '//uitem//' not yet supported.')
        ELSE IF (uitem.EQ.'BFE') THEN
-          CALL erhandler(fname, __LINE__, ERH_FATAL, &
-               & 'glansys: item '//uitem//' not yet supported.', &
-               & derrinfo, cerrinfo)
+          CALL ans_fatal(fname, __LINE__, 'glansys', &
+               & 'item '//uitem//' not yet supported.')
        ELSE IF (uitem.EQ.'PATH') THEN
-          CALL erhandler(fname, __LINE__, ERH_FATAL, &
-               & 'glansys: item '//uitem//' not yet supported.', &
-               & derrinfo, cerrinfo)
+          CALL ans_fatal(fname, __LINE__, 'glansys', &
+               & 'item '//uitem//' not yet supported.')
        END IF
     END IF
 
@@ -559,8 +602,9 @@ CONTAINS
   END SUBROUTINE esels
 
   SUBROUTINE nsel(Type, Item, Comp, VMIN, VMAX, VINC, KABS)
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erhandler
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand
     USE ansys_par, ONLY : CMD_MAX_LENG, ERH_FATAL, ERH_FNAME_LEN, PARMSIZE
+
     IMPLICIT NONE
     ! Purpose: select nodes
     !
@@ -618,10 +662,6 @@ CONTAINS
 
     CHARACTER(LEN=CMD_MAX_LENG) :: cmd
 
-    ! dataspace for feeding erhandler subroutine
-    REAL(KIND=8), DIMENSION(10) ::  derrinfo
-    CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
-
     CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
 
     CALL TrackBegin('glans:nsel')
@@ -635,16 +675,14 @@ CONTAINS
          & (utype.NE.'ALL').AND. &
          & (utype.NE.'NONE').AND. &
          & (utype.NE.'INVE')) THEN
-       CALL erhandler(fname, __LINE__, ERH_FATAL, &
-            & 'glansys: invalid type: '//TRIM(utype)//'.', &
-            & derrinfo, cerrinfo)
+       CALL ans_fatal(fname, __LINE__, 'glansys', &
+            & 'invalid type: '//TRIM(utype)//'.')
     END IF
 
     IF (PRESENT(Item)) THEN
        IF (LEN(item).GT.128) THEN
-          CALL erhandler(fname, __LINE__, ERH_FATAL, &
-               & 'glansys: length of value item greater then 129.', &
-               & derrinfo, cerrinfo)
+          CALL ans_fatal(fname, __LINE__, 'glansys', &
+               & 'length of value item greater then 129.')
        END IF
        uitem = upcase(item)
        IF ( (uitem.NE.'NODE').AND. &
@@ -657,14 +695,12 @@ CONTAINS
             & (uitem.NE.'D').AND. &
             & (uitem.NE.'F').AND. &
             & (uitem.NE.'BF')) THEN
-          CALL erhandler(fname, __LINE__, ERH_FATAL, &
-               & 'glansys: invalid item: '//TRIM(uitem)//'.', &
-               & derrinfo, cerrinfo)
+          CALL ans_fatal(fname, __LINE__, 'glansys', &
+               & 'invalid item: '//TRIM(uitem)//'.')
        END IF
        IF (PRESENT(comp)) THEN
-          CALL erhandler(fname, __LINE__, ERH_FATAL, &
-               & 'glansys: component not yet allowed.', &
-               & derrinfo, cerrinfo)
+          CALL ans_fatal(fname, __LINE__, 'glansys', &
+               & 'component not yet allowed.')
        END IF
     END IF
 
@@ -749,6 +785,62 @@ CONTAINS
 #endif
 
   END SUBROUTINE doDebugLoc
+
+  FUNCTION s_gets(fname, libname, line, errlvl, &
+       & value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
+       & RESULT(flag)
+    IMPLICIT NONE
+    ! Purpose:
+    !
+    ! Parameter:
+    ! in/out Name          Task
+    ! in     fname         fname at calling for error reporting
+    ! in     libname       library name for error reporting
+    ! in     line          line number at calling for error reporting
+    ! in     errlvl        error level for error reporting
+    ! in     Entity
+    ! in     ENTNUM
+    ! in     Item1
+    ! in     IT1NUM
+    ! in     Item2
+    ! in     IT2NUM
+    ! ----------------------------------------------------------------------
+    ! Created: 2017-02-22  hoel
+    ! ======================================================================
+    LOGICAL :: flag
+    CHARACTER(LEN=ERH_FNAME_LEN), INTENT(IN) :: fname
+    CHARACTER(LEN=*), INTENT(IN) :: libname
+    INTEGER, INTENT(IN) :: line
+    INTEGER, INTENT(IN) :: errlvl
+    CHARACTER(LEN=STRING_MAX_LENG), INTENT(OUT) :: value
+    CHARACTER(LEN=4), INTENT(IN) :: Entity
+    INTEGER, INTENT(IN) :: ENTNUM
+    CHARACTER(LEN=8), INTENT(IN) :: Item1
+    CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: IT1NUM
+    CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
+    CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: IT2NUM
+
+    CALL TrackBegin('glans:s_gets')
+
+    derrinfo(1) = ENTNUM
+
+    IF (PRESENT(IT2NUM)) THEN
+       flag = gets(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM)
+    ELSE IF (PRESENT(Item2)) THEN
+       flag = gets(value, Entity, ENTNUM, Item1, IT1NUM, Item2)
+    ELSE IF (PRESENT(IT1NUM)) THEN
+       flag = gets(value, Entity, ENTNUM, Item1, IT1NUM)
+    ELSE
+       flag = gets(value, Entity, ENTNUM, Item1)
+    END IF
+    IF (flag) THEN
+       CALL erhandler(fname, __LINE__, errlvl, &
+               & TRIM(libname)//': Determining ' // trim(Entity) // &
+               & ', ' // Item1 // ' for ENTNUM=%d failed.', derrinfo, cerrinfo)
+    END IF
+
+    CALL TrackEnd('glans:s_gets')
+  END FUNCTION s_gets
 
   FUNCTION gets(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
@@ -838,6 +930,60 @@ CONTAINS
 
   END FUNCTION gets
 
+  FUNCTION s_getsi(fname, libname, line, errlvl, &
+       & value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
+       & RESULT(flag)
+    IMPLICIT NONE
+    ! Purpose:
+    !
+    ! Parameter:
+    ! in/out Name          Task
+    ! in     fname         fname at calling for error reporting
+    ! in     libname       library name for error reporting
+    ! in     line          line number at calling for error reporting
+    ! in     errlvl        error level for error reporting
+    ! in     Entity
+    ! in     ENTNUM
+    ! in     Item1
+    ! in     IT1NUM
+    ! in     Item2
+    ! in     IT2NUM
+    ! ----------------------------------------------------------------------
+    ! Created: 2017-02-22  hoel
+    ! ======================================================================
+    LOGICAL :: flag
+    CHARACTER(LEN=ERH_FNAME_LEN), INTENT(IN) :: fname
+    CHARACTER(LEN=*), INTENT(IN) :: libname
+    INTEGER, INTENT(IN) :: line
+    INTEGER, INTENT(IN) :: errlvl
+    CHARACTER(LEN=STRING_MAX_LENG) :: value
+    CHARACTER(LEN=4), INTENT(IN) :: Entity
+    INTEGER, INTENT(IN) :: ENTNUM
+    CHARACTER(LEN=8), INTENT(IN) :: Item1
+    INTEGER, INTENT(IN) :: IT1NUM
+    CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
+    INTEGER, INTENT(IN), OPTIONAL :: IT2NUM
+
+    CALL TrackBegin('glans:s_getsi')
+
+    derrinfo(1) = ENTNUM
+
+    IF (PRESENT(IT2NUM)) THEN
+       flag = getsi(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM)
+    ELSE IF (PRESENT(Item2)) THEN
+       flag = getsi(value, Entity, ENTNUM, Item1, IT1NUM, Item2)
+    ELSE
+       flag = getsi(value, Entity, ENTNUM, Item1, IT1NUM)
+    END IF
+    IF (flag) THEN
+       CALL erhandler(fname, __LINE__, errlvl, &
+               & TRIM(libname)//': Determining ' // trim(Entity) // &
+               & ', ' // Item1 // ' for ENTNUM=%d failed.', derrinfo, cerrinfo)
+    END IF
+
+    CALL TrackEnd('glans:s_getsi')
+  END FUNCTION s_getsi
+
   FUNCTION getsi(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
@@ -869,10 +1015,6 @@ CONTAINS
     INTEGER :: numwrn
     INTEGER :: numerr
 
-    ! dataspace for feeding erhandler subroutine
-    REAL(KIND=8), DIMENSION(10) ::  derrinfo
-    CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
-
     CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
 
     CALL TrackBegin('glans:getsi')
@@ -880,9 +1022,8 @@ CONTAINS
     numwrn = erinqr(ER_NUMWARNING)
     numerr = erinqr(ER_NUMERROR)
 
-    CALL erhandler(fname, __LINE__, ERH_FATAL, &
-         & 'glansys: glans:getsi not implemented', &
-         & derrinfo, cerrinfo)
+    CALL ans_fatal(fname, __LINE__, 'glansys', &
+         & 'glans:getsi not implemented')
 
     value = 'empty'
 
@@ -895,6 +1036,62 @@ CONTAINS
     CALL TrackEnd('glans:getsi')
 
   END FUNCTION getsi
+
+  FUNCTION s_getf(fname, libname, line, errlvl, &
+       & value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
+       & RESULT(flag)
+    IMPLICIT NONE
+    ! Purpose:
+    !
+    ! Parameter:
+    ! in/out Name          Task
+    ! in     fname         fname at calling for error reporting
+    ! in     libname       library name for error reporting
+    ! in     line          line number at calling for error reporting
+    ! in     errlvl        error level for error reporting
+    ! in     Entity
+    ! in     ENTNUM
+    ! in     Item1
+    ! in     IT1NUM
+    ! in     Item2
+    ! in     IT2NUM
+    ! ----------------------------------------------------------------------
+    ! Created: 2017-02-22  hoel
+    ! ======================================================================
+    LOGICAL :: flag
+    CHARACTER(LEN=ERH_FNAME_LEN), INTENT(IN) :: fname
+    CHARACTER(LEN=*), INTENT(IN) :: libname
+    INTEGER, INTENT(IN) :: line
+    INTEGER, INTENT(IN) :: errlvl
+    REAL(KIND=8), INTENT(OUT) :: value
+    CHARACTER(LEN=4), INTENT(IN) :: Entity
+    INTEGER, INTENT(IN) :: ENTNUM
+    CHARACTER(LEN=8), INTENT(IN) :: Item1
+    CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: IT1NUM
+    CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
+    CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: IT2NUM
+
+    CALL TrackBegin('glans:s_getf')
+
+    derrinfo(1) = ENTNUM
+
+    IF (PRESENT(IT2NUM)) THEN
+       flag = getf(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM)
+    ELSE IF (PRESENT(Item2)) THEN
+       flag = getf(value, Entity, ENTNUM, Item1, IT1NUM, Item2)
+    ELSE IF (PRESENT(IT1NUM)) THEN
+       flag = getf(value, Entity, ENTNUM, Item1, IT1NUM)
+    ELSE
+       flag = getf(value, Entity, ENTNUM, Item1)
+    END IF
+    IF (flag) THEN
+       CALL erhandler(fname, __LINE__, errlvl, &
+               & TRIM(libname)//': Determining ' // trim(Entity) // &
+               & ', ' // Item1 // ' for ENTNUM=%d failed.', derrinfo, cerrinfo)
+    END IF
+
+    CALL TrackEnd('glans:s_getf')
+  END FUNCTION s_getf
 
   FUNCTION getf(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
@@ -983,6 +1180,62 @@ CONTAINS
 
   END FUNCTION getf
 
+  FUNCTION s_getfs(fname, libname, line, errlvl, &
+       & value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
+       & RESULT(flag)
+    IMPLICIT NONE
+    ! Purpose:
+    !
+    ! Parameter:
+    ! in/out Name          Task
+    ! in     fname         fname at calling for error reporting
+    ! in     libname       library name for error reporting
+    ! in     line          line number at calling for error reporting
+    ! in     errlvl        error level for error reporting
+    ! in     Entity
+    ! in     ENTNUM
+    ! in     Item1
+    ! in     IT1NUM
+    ! in     Item2
+    ! in     IT2NUM
+    ! ----------------------------------------------------------------------
+    ! Created: 2017-02-22  hoel
+    ! ======================================================================
+    LOGICAL :: flag
+    CHARACTER(LEN=ERH_FNAME_LEN), INTENT(IN) :: fname
+    CHARACTER(LEN=*), INTENT(IN) :: libname
+    INTEGER, INTENT(IN) :: line
+    INTEGER, INTENT(IN) :: errlvl
+    REAL(KIND=8), INTENT(OUT) :: value
+    CHARACTER(LEN=4), INTENT(IN) :: Entity
+    CHARACTER(LEN=PARMSIZE), INTENT(IN) :: ENTNUM
+    CHARACTER(LEN=8), INTENT(IN) :: Item1
+    CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: IT1NUM
+    CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
+    CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: IT2NUM
+
+    CALL TrackBegin('glans:s_getfs')
+
+    cerrinfo(1) = ENTNUM
+
+    IF (PRESENT(IT2NUM)) THEN
+       flag = getfs(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM)
+    ELSE IF (PRESENT(Item2)) THEN
+       flag = getfs(value, Entity, ENTNUM, Item1, IT1NUM, Item2)
+    ELSE IF (PRESENT(IT1NUM)) THEN
+       flag = getfs(value, Entity, ENTNUM, Item1, IT1NUM)
+    ELSE
+       flag = getfs(value, Entity, ENTNUM, Item1)
+    END IF
+    IF (flag) THEN
+       CALL erhandler(fname, __LINE__, errlvl, &
+               & TRIM(libname)//': Determining ' // trim(Entity) // &
+               & ', ' // Item1 // ' for ENTNUM=%s failed.', derrinfo, cerrinfo)
+    END IF
+
+    CALL TrackEnd('glans:s_getfs')
+  END FUNCTION s_getfs
+
   FUNCTION getfs(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
@@ -1070,6 +1323,60 @@ CONTAINS
 
   END FUNCTION getfs
 
+  FUNCTION s_getfi(fname, libname, line, errlvl, &
+       & value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
+       & RESULT(flag)
+    IMPLICIT NONE
+    ! Purpose:
+    !
+    ! Parameter:
+    ! in/out Name          Task
+    ! in     fname         fname at calling for error reporting
+    ! in     libname       library name for error reporting
+    ! in     line          line number at calling for error reporting
+    ! in     errlvl        error level for error reporting
+    ! in     Entity
+    ! in     ENTNUM
+    ! in     Item1
+    ! in     IT1NUM
+    ! in     Item2
+    ! in     IT2NUM
+    ! ----------------------------------------------------------------------
+    ! Created: 2017-02-22  hoel
+    ! ======================================================================
+    LOGICAL :: flag
+    CHARACTER(LEN=ERH_FNAME_LEN), INTENT(IN) :: fname
+    CHARACTER(LEN=*), INTENT(IN) :: libname
+    INTEGER, INTENT(IN) :: line
+    INTEGER, INTENT(IN) :: errlvl
+    REAL(KIND=8) :: value
+    CHARACTER(LEN=4), INTENT(IN) :: Entity
+    INTEGER, INTENT(IN) :: ENTNUM
+    CHARACTER(LEN=8), INTENT(IN) :: Item1
+    INTEGER, INTENT(IN) :: IT1NUM
+    CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
+    INTEGER, INTENT(IN), OPTIONAL :: IT2NUM
+
+    CALL TrackBegin('glans:s_getfi')
+
+    derrinfo(1) = ENTNUM
+
+    IF (PRESENT(IT2NUM)) THEN
+       flag = getfi(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM)
+    ELSE IF (PRESENT(Item2)) THEN
+       flag = getfi(value, Entity, ENTNUM, Item1, IT1NUM, Item2)
+    ELSE
+       flag = getfi(value, Entity, ENTNUM, Item1, IT1NUM)
+    END IF
+    IF (flag) THEN
+       CALL erhandler(fname, __LINE__, errlvl, &
+               & TRIM(libname)//': Determining ' // trim(Entity) // &
+               & ', ' // Item1 // ' for ENTNUM=%d failed.', derrinfo, cerrinfo)
+    END IF
+
+    CALL TrackEnd('glans:s_getfi')
+  END FUNCTION s_getfi
+
   FUNCTION getfi(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr, wrinqr
@@ -1103,9 +1410,6 @@ CONTAINS
     CHARACTER(LEN=PARMSIZE) :: para
     REAL(KIND=8), DIMENSION(3) :: subc
 
-    ! dataspace for feeding erhandler subroutine
-    REAL(KIND=8), DIMENSION(10) ::  derrinfo
-    CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
     CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
 
     INTEGER :: numwrn
@@ -1159,6 +1463,62 @@ CONTAINS
 
   END FUNCTION getfi
 
+  FUNCTION s_geti(fname, libname, line, errlvl, &
+       & value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
+       & RESULT(flag)
+    IMPLICIT NONE
+    ! Purpose:
+    !
+    ! Parameter:
+    ! in/out Name          Task
+    ! in     fname         fname at calling for error reporting
+    ! in     libname       library name for error reporting
+    ! in     line          line number at calling for error reporting
+    ! in     errlvl        error level for error reporting
+    ! in     Entity
+    ! in     ENTNUM
+    ! in     Item1
+    ! in     IT1NUM
+    ! in     Item2
+    ! in     IT2NUM
+    ! ----------------------------------------------------------------------
+    ! Created: 2017-02-22  hoel
+    ! ======================================================================
+    LOGICAL :: flag
+    CHARACTER(LEN=ERH_FNAME_LEN), INTENT(IN) :: fname
+    CHARACTER(LEN=*), INTENT(IN) :: libname
+    INTEGER, INTENT(IN) :: line
+    INTEGER, INTENT(IN) :: errlvl
+    INTEGER, INTENT(OUT) :: value
+    CHARACTER(LEN=4), INTENT(IN) :: Entity
+    INTEGER, INTENT(IN) :: ENTNUM
+    CHARACTER(LEN=8), INTENT(IN) :: Item1
+    CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: IT1NUM
+    CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
+    CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: IT2NUM
+
+    CALL TrackBegin('glans:s_geti')
+
+    derrinfo(1) = ENTNUM
+
+    IF (PRESENT(IT2NUM)) THEN
+       flag = geti(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM)
+    ELSE IF (PRESENT(Item2)) THEN
+       flag = geti(value, Entity, ENTNUM, Item1, IT1NUM, Item2)
+    ELSE IF (PRESENT(IT1NUM)) THEN
+       flag = geti(value, Entity, ENTNUM, Item1, IT1NUM)
+    ELSE
+       flag = geti(value, Entity, ENTNUM, Item1)
+    END IF
+    IF (flag) THEN
+       CALL erhandler(fname, __LINE__, errlvl, &
+               & TRIM(libname)//': Determining ' // trim(Entity) // &
+               & ', ' // Item1 // ' for ENTNUM=%d failed.', derrinfo, cerrinfo)
+    END IF
+
+    CALL TrackEnd('glans:s_geti')
+  END FUNCTION s_geti
+
   FUNCTION geti(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
@@ -1198,6 +1558,62 @@ CONTAINS
 
   END FUNCTION geti
 
+  FUNCTION s_getis(fname, libname, line, errlvl, &
+       & value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
+       & RESULT(flag)
+    IMPLICIT NONE
+    ! Purpose:
+    !
+    ! Parameter:
+    ! in/out Name          Task
+    ! in     fname         fname at calling for error reporting
+    ! in     libname       library name for error reporting
+    ! in     line          line number at calling for error reporting
+    ! in     errlvl        error level for error reporting
+    ! in     Entity
+    ! in     ENTNUM
+    ! in     Item1
+    ! in     IT1NUM
+    ! in     Item2
+    ! in     IT2NUM
+    ! ----------------------------------------------------------------------
+    ! Created: 2017-02-22  hoel
+    ! ======================================================================
+    LOGICAL :: flag
+    CHARACTER(LEN=ERH_FNAME_LEN), INTENT(IN) :: fname
+    CHARACTER(LEN=*), INTENT(IN) :: libname
+    INTEGER, INTENT(IN) :: line
+    INTEGER, INTENT(IN) :: errlvl
+    INTEGER, INTENT(OUT) :: value
+    CHARACTER(LEN=4), INTENT(IN) :: Entity
+    CHARACTER(LEN=PARMSIZE), INTENT(IN) :: ENTNUM
+    CHARACTER(LEN=8), INTENT(IN) :: Item1
+    CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: IT1NUM
+    CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
+    CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: IT2NUM
+
+    CALL TrackBegin('glans:s_getis')
+
+    cerrinfo(1) = ENTNUM
+
+    IF (PRESENT(IT2NUM)) THEN
+       flag = getis(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM)
+    ELSE IF (PRESENT(Item2)) THEN
+       flag = getis(value, Entity, ENTNUM, Item1, IT1NUM, Item2)
+    ELSE IF (PRESENT(IT2NUM)) THEN
+       flag = getis(value, Entity, ENTNUM, Item1, IT1NUM)
+    ELSE
+       flag = getis(value, Entity, ENTNUM, Item1)
+    END IF
+    IF (flag) THEN
+       CALL erhandler(fname, __LINE__, errlvl, &
+               & TRIM(libname)//': Determining ' // trim(Entity) // &
+               & ', ' // Item1 // ' for ENTNUM=%s failed.', derrinfo, cerrinfo)
+    END IF
+
+    CALL TrackEnd('glans:s_getis')
+  END FUNCTION s_getis
+
   FUNCTION getis(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
@@ -1236,6 +1652,60 @@ CONTAINS
     CALL TrackEnd('glans:getis')
 
   END FUNCTION getis
+
+  FUNCTION s_getii(fname, libname, line, errlvl, &
+       & value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
+       & RESULT(flag)
+    IMPLICIT NONE
+    ! Purpose:
+    !
+    ! Parameter:
+    ! in/out Name          Task
+    ! in     fname         fname at calling for error reporting
+    ! in     libname       library name for error reporting
+    ! in     line          line number at calling for error reporting
+    ! in     errlvl        error level for error reporting
+    ! in     Entity
+    ! in     ENTNUM
+    ! in     Item1
+    ! in     IT1NUM
+    ! in     Item2
+    ! in     IT2NUM
+    ! ----------------------------------------------------------------------
+    ! Created: 2017-02-22  hoel
+    ! ======================================================================
+    LOGICAL :: flag
+    CHARACTER(LEN=ERH_FNAME_LEN), INTENT(IN) :: fname
+    CHARACTER(LEN=*), INTENT(IN) :: libname
+    INTEGER, INTENT(IN) :: line
+    INTEGER, INTENT(IN) :: errlvl
+    INTEGER, INTENT(OUT) :: value
+    CHARACTER(LEN=4), INTENT(IN) :: Entity
+    INTEGER, INTENT(IN) :: ENTNUM
+    CHARACTER(LEN=8), INTENT(IN) :: Item1
+    INTEGER, INTENT(IN) :: IT1NUM
+    CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
+    INTEGER, INTENT(IN), OPTIONAL :: IT2NUM
+
+    CALL TrackBegin('glans:s_getii')
+
+    derrinfo(1) = ENTNUM
+
+    IF (PRESENT(IT2NUM)) THEN
+       flag = getii(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM)
+    ELSE IF (PRESENT(Item2)) THEN
+       flag = getii(value, Entity, ENTNUM, Item1, IT1NUM, Item2)
+    ELSE
+       flag = getii(value, Entity, ENTNUM, Item1, IT1NUM)
+    END IF
+    IF (flag) THEN
+       CALL erhandler(fname, __LINE__, errlvl, &
+               & TRIM(libname)//': Determining ' // trim(Entity) // &
+               & ', ' // Item1 // ' for ENTNUM=%d failed.', derrinfo, cerrinfo)
+    END IF
+
+    CALL TrackEnd('glans:s_getii')
+  END FUNCTION s_getii
 
   FUNCTION getii(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
@@ -1292,9 +1762,6 @@ CONTAINS
     CHARACTER(LEN=4) :: wcode
     INTEGER n1,n2
 
-    ! dataspace for feeding erhandler subroutine
-    REAL(KIND=8), DIMENSION(10) ::  derrinfo
-    CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
     CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
     CHARACTER(LEN=1024) :: msg
 
@@ -1303,50 +1770,40 @@ CONTAINS
     derrinfo(1) = n1
     derrinfo(2) = n2
     IF (wcode.EQ.'comp') THEN
-       CALL erhandler(fname, __LINE__, ERH_WARNING, &
-            & TRIM(libname)//': Not all elements of component %i '// &
+       CALL ans_warn(fname, __LINE__, libname, &
+            & ': Not all elements of component %i '// &
             & 'converted !%/'// &
-            & '(Check if element types are allowed in present version)', &
-            & derrinfo, cerrinfo)
+            & '(Check if element types are allowed in present version)')
     ELSE IF (wcode.EQ.'mat ') THEN
        IF (n2.EQ.MP_EX) THEN
-          msg = TRIM(libname)//': no E-Module found in MP %i'
+          msg = 'no E-Module found in MP %i'
        ELSE IF (n2.EQ.MP_NUXY) THEN
-          msg = TRIM(libname)//': no Poisson ratio found in MP %i'
+          msg = 'no Poisson ratio found in MP %i'
        ELSE IF (n2.EQ.MP_DENS) THEN
-          msg = TRIM(libname)//': no density found in MP %i'
+          msg = 'no density found in MP %i'
        ELSE
-          msg = TRIM(libname)//': unspecified material property not found in MP %i'
+          msg = 'unspecified material property not found in MP %i'
        END IF
-       CALL erhandler(fname, __LINE__, ERH_WARNING, TRIM(msg), &
-            & derrinfo, cerrinfo)
+       CALL ans_warn(fname, __LINE__, libname, TRIM(msg))
     ELSE IF (wcode.EQ.'matE') THEN
-       CALL erhandler(fname, __LINE__, ERH_WARNING, &
-            & TRIM(libname)//': no E-Module found in MP %i', &
-            & derrinfo, cerrinfo)
+       CALL ans_warn(fname, __LINE__, libname, 'no E-Module found in MP %i')
     ELSE IF (wcode.EQ.'matP') THEN
-       CALL erhandler(fname, __LINE__, ERH_WARNING, &
-            & TRIM(libname)//': no Poisson ratio found in MP %i', &
-            & derrinfo, cerrinfo)
+       CALL ans_warn(fname, __LINE__, libname, &
+            & 'no Poisson ratio found in MP %i')
     ELSE IF (wcode.EQ.'matD') THEN
-       CALL erhandler(fname, __LINE__, ERH_WARNING, &
-            & TRIM(libname)//': no density value found in MP %i', &
-            & derrinfo, cerrinfo)
+       CALL ans_warn(fname, __LINE__, libname, &
+            & 'no density value found in MP %i')
     ELSE IF (wcode.EQ.'beam') THEN
-       CALL erhandler(fname, __LINE__, ERH_WARNING, &
-            & TRIM(libname)//': beam at nodes %i %i '// &
-            & 'does not have orientation node', &
-            derrinfo, cerrinfo)
+       CALL ans_warn(fname, __LINE__, libname, &
+            & 'beam at nodes %i %i does not have orientation node')
     ELSE IF (wcode.EQ.'pses') THEN
-       CALL erhandler(fname, __LINE__, ERH_WARNING, &
-            & TRIM(libname)//': shells with different thicknesses '// &
-            & 'not supported (el. %i). Average value taken.', &
-            & derrinfo, cerrinfo)
+       CALL ans_warn(fname, __LINE__, libname, &
+            & 'shells with different thicknesses '// &
+            & 'not supported (el. %i). Average value taken.')
     ELSE IF (wcode.EQ.'shel') THEN
-       CALL erhandler(fname, __LINE__, ERH_WARNING, &
-            & TRIM(libname)//': shells with different thicknesses '// &
-            & 'not supported (el. %i). Average value taken.', &
-            & derrinfo, cerrinfo)
+       CALL ans_warn(fname, __LINE__, libname, &
+            & 'shells with different thicknesses '// &
+            & 'not supported (el. %i). Average value taken.')
     END IF
 
     CALL TrackEnd('glans:message')

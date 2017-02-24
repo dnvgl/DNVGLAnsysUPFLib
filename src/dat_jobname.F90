@@ -6,9 +6,9 @@ CONTAINS
 
   SUBROUTINE dat_jobname()
 
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd
     USE ansys_par, ONLY : ERH_NOTE, ERH_FNAME_LEN, PARMSIZE, STRING_MAX_LENG
-    USE glans, ONLY : ans2bmf_get_s
+    USE glans
     USE ans_common, ONLY : jobname
     USE LOCMOD, ONLY : libname
 
@@ -22,10 +22,6 @@ CONTAINS
     ! ======================================================================
 
     CHARACTER(LEN=STRING_MAX_LENG) :: dummy
-
-    ! dataspace for feeding erhandler subroutine
-    REAL(KIND=8), DIMENSION(10) ::  derrinfo
-    CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
 
     CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
 
@@ -43,9 +39,7 @@ CONTAINS
     jobname(25:32) = dummy(1:8)
 
     cerrinfo(1) = jobname
-    CALL erhandler(fname, __LINE__, ERH_NOTE, &
-         trim(libname)//':   jobname: %s', &
-         derrinfo, cerrinfo)
+    CALL ans_note(fname, __LINE__, libname, '  jobname: %s')
 
     CALL TrackEnd('dat_jobname')
 

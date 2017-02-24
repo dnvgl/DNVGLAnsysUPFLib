@@ -14,12 +14,11 @@ CONTAINS
 
   SUBROUTINE dat_components(el_data)
 
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erhandler, &
-         elmiqr
-    USE ansys_par, ONLY : CMD_MAX_LENG, ERH_FNAME_LEN, ERH_ERROR, ERH_FATAL, ERH_NOTE, &
-         ERH_WARNING, DB_NUMSELECTED, PARMSIZE
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, &
+         elmiqr, erhandler
+    USE ansys_par, ONLY : CMD_MAX_LENG, ERH_FNAME_LEN, DB_NUMSELECTED, PARMSIZE
 
-    USE glans, ONLY : cmselect, get, esel, ans2bmf_get_s, message
+    USE glans
     USE LOCMOD, ONLY : libname
     USE ans_common
 
@@ -35,7 +34,7 @@ CONTAINS
 
     INTEGER, DIMENSION(*) :: el_data
 
-    INTEGER :: ansys_comp, an_cnum, n, m, el_b4, msglvl
+    INTEGER :: ansys_comp, an_cnum, n, m, el_b4
     INTEGER :: res
 
     INTEGER :: iErr
@@ -45,10 +44,6 @@ CONTAINS
 
     LOGICAL :: flag
 
-    ! dataspace for feeding erhandler subroutine
-    REAL(KIND=8), DIMENSION(10) ::  derrinfo
-    CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
-
     CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
 
     CALL TrackBegin('dat_components')
@@ -56,16 +51,12 @@ CONTAINS
     ! find number of components: -> ansys_comp
     flag = get(ansys_comp, Entity='COMP', ENTNUM=0, Item1='NCOMP   ')
     if (flag) THEN
-       CALL erhandler(fname, __LINE__, ERH_FATAL, &
-            trim(libname)// &
-            ': Could not determine number of components.', &
-            derrinfo, cerrinfo)
+       CALL ans_fatal(fname, __LINE__, libname, &
+            'Could not determine number of components.')
     END IF
 
     derrinfo(1) = ansys_comp
-    CALL erhandler(fname, __LINE__, ERH_NOTE, &
-         trim(libname)//': # of ANSYS components: %i', &
-         derrinfo, cerrinfo)
+    CALL ans_note(fname, __LINE__, libname, ' # of ANSYS components: %i')
 
     ! loop over all components
     !  running # for sxf components created
@@ -77,11 +68,9 @@ CONTAINS
        IF (comp_num.GE.max_components-csub_num) THEN
           derrinfo(1) = comp_num
           derrinfo(2) = max_components
-          CALL erhandler(fname, __LINE__, ERH_ERROR, &
-               trim(libname)//': '// &
-               'ERROR: %i components defined. Greater or '// &
-               'too close to maximal number %i', &
-               derrinfo, cerrinfo)
+          CALL ans_error(fname, __LINE__, libname, &
+               & 'ERROR: %i components defined. Greater or '// &
+               & 'too close to maximal number %i')
           CALL anserr(4,'Too many components',0.0,' ')
        END IF
 
@@ -90,8 +79,7 @@ CONTAINS
           ! generate components for all elements not in any component
           comp_name(n) = 'NOTNAMED'
           cerrinfo(1) = trim(comp_name(n))
-          CALL erhandler(fname, __LINE__, ERH_NOTE, &
-               trim(libname)//': Component %s', derrinfo, cerrinfo)
+          CALL ans_note(fname, __LINE__, libname, ': Component %s')
           CALL esel('ALL')
           DO m = 1, n-1
              CALL cmselect('U', trim(comp_name(m)))
@@ -108,37 +96,33 @@ CONTAINS
                comp_name(an_cnum+1))
 
           ! get type of component
+          cerrinfo(1) = comp_name(an_cnum+1)
           flag = get(res, 'COMP', comp_name(an_cnum+1), 'TYPE    ')
           if (flag .OR. res.EQ.0) THEN
              cerrinfo(1) = comp_name(an_cnum+1)
-             CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                  trim(libname)// &
-                  ': Could not determine type for component '// &
-                  'named %s.', &
-                  derrinfo, cerrinfo)
+             CALL ans_fatal(fname, __LINE__, libname,  &
+                  & 'Could not determine type for component named %s.')
           END IF
 
 !     check if this is a component of elements
           IF (res.GT.10) THEN
              cerrinfo(1) = comp_name(an_cnum+1)
              IF (batch) THEN
-                msglvl = ERH_FATAL
+                CALL ans_fatal(fname, __LINE__, libname, &
+                     & 'Component %s is not of type ELEM'// &
+                     & '\nElements in assemblies are not supported.')
              ELSE
-                msglvl = ERH_ERROR
+                CALL ans_error(fname, __LINE__, libname, &
+                     & 'Component %s is not of type ELEM'// &
+                     & '\nElements in assemblies are not supported.')
              END IF
-             CALL erhandler(fname, __LINE__, msglvl, &
-                  trim(libname)//': '// &
-                  'Component %s is not of type ELEM'// &
-                  '\nElements in assemblies are not supported.', &
-                  derrinfo, cerrinfo)
              an_cnum = an_cnum + 1
              GOTO 1000
           ENDIF
           IF (res.NE.2) THEN
              cerrinfo(1) = comp_name(an_cnum+1)
-             CALL erhandler(fname, __LINE__, ERH_WARNING, &
-                  trim(libname)//': Component %s is not of type ELEM', &
-                  derrinfo, cerrinfo)
+             CALL ans_warn(fname, __LINE__, libname, &
+                  & 'Component %s is not of type ELEM')
              an_cnum = an_cnum + 1
              GOTO 1000
           ENDIF
@@ -147,14 +131,10 @@ CONTAINS
           an_cnum = an_cnum+1
           CALL cmselect('S', comp_name(an_cnum))
           cerrinfo(1) = comp_name(an_cnum)
-          CALL erhandler(fname, __LINE__, ERH_NOTE, &
-               trim(libname)//': Treating ANSYS component %s', &
-               derrinfo, cerrinfo)
+          CALL ans_note(fname, __LINE__, libname, 'Treating ANSYS component %s')
           el_length = elmiqr(0, DB_NUMSELECTED)
           derrinfo(1) =  el_length
-          CALL erhandler(fname, __LINE__, ERH_NOTE, &
-               trim(libname)//':     # of elements:     %i', &
-               derrinfo, cerrinfo)
+          CALL ans_note(fname, __LINE__, libname, '    # of elements:     %i')
 
        END IF
 
@@ -166,10 +146,8 @@ CONTAINS
        ! find # of elements in component
        el_length = elmiqr(0, DB_NUMSELECTED)
        derrinfo(1) = el_length
-       CALL erhandler(fname, __LINE__, ERH_NOTE, &
-            trim(libname)//':     # of elements not in any previous '// &
-            'component: %i', &
-            derrinfo, cerrinfo)
+       CALL ans_note(fname, __LINE__, libname, &
+            & '    # of elements not in any previous component: %i')
 
        IF (el_length.GT.0) THEN
 
@@ -194,10 +172,8 @@ CONTAINS
           el_b4 = elmiqr(0, DB_NUMSELECTED)
           derrinfo(1) = el_b4
           cerrinfo(1) = comp_name(an_cnum)
-          CALL erhandler(fname, __LINE__, ERH_NOTE, &
-               trim(libname)//': '// &
-               'Component %s contains %i BEAM4 type elements', &
-               derrinfo, cerrinfo)
+          CALL ans_note(fname, __LINE__, libname, &
+               & 'Component %s contains %i BEAM4 type elements')
        END IF
 
 1000   CONTINUE
@@ -216,10 +192,10 @@ CONTAINS
   SUBROUTINE ans2bmf_cstore(comp, csub, el_data)
 
     USE ansys_upf, ONLY : TrackBegin, TrackEnd, elmget, elmiqr, &
-         elnext, etyget, erhandler
-    USE ansys_par, ONLY : DB_NUMSELECTED, EL_DIM, EL_TYPE, ERH_FNAME_LEN, ERH_NOTE, &
-         ERH_FATAL, NNMAX, PARMSIZE, KYOP1
-    USE glans, ONLY : cmselect, esel
+         elnext, etyget
+    USE ansys_par, ONLY : DB_NUMSELECTED, EL_DIM, EL_TYPE, ERH_FNAME_LEN, &
+         & NNMAX, PARMSIZE, KYOP1
+    USE glans
     USE LOCMOD, ONLY : libname
     USE ans_common, ONLY : comp_num, el_count, el_offset, ielc, &
          l_comp_ansys, l_comp_csub, l_csub_ename, l_comp_len, &
@@ -247,10 +223,6 @@ CONTAINS
     INTEGER, DIMENSION(EL_DIM) :: elmdat
     INTEGER, DIMENSION(NNMAX) :: nodes
 
-    ! dataspace for feeding erhandler subroutine
-    REAL(KIND=8), DIMENSION(10) ::  derrinfo
-    CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
-
     CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
 
     CALL TrackBegin('ans2bmf_cstore')
@@ -274,17 +246,15 @@ CONTAINS
           stat = elmget(elid, elmdat, nodes) ! element info
           if (stat.LE.0) THEN
              derrinfo(1) = stat
-             CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                  trim(libname)//':Error should not occur: "elmget" returns %d', &
-                  & derrinfo, cerrinfo)
+             CALL ans_fatal(fname, __LINE__, libname, &
+                  & ':Error should not occur: "elmget" returns %d')
           END IF
           type = elmdat(EL_TYPE)
           stat = etyget(type, ielc)
           if (stat.LE.0) THEN
              derrinfo(1) = stat
-             CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                  trim(libname)//':Error should not occur: "etyget" returns %d', &
-                  & derrinfo, cerrinfo)
+             CALL ans_fatal(fname, __LINE__, libname, &
+                  & 'Error should not occur: "etyget" returns %d')
           END IF
           IF (ielc(KYOP1).NE.1) THEN
              ! deselect element without membrane property
@@ -301,17 +271,15 @@ CONTAINS
           stat = elmget(elid, elmdat, nodes) ! element info
           if (stat.LE.0) THEN
              derrinfo(1) = stat
-             CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                  trim(libname)//':Error should not occur: "elmget" returns %d', &
-                  & derrinfo, cerrinfo)
+             CALL ans_fatal(fname, __LINE__, libname, &
+                  'Error should not occur: "elmget" returns %d')
           END IF
           type = elmdat(EL_TYPE)
           stat = etyget(type, ielc)
           if (stat.LE.0) THEN
              derrinfo(1) = stat
-             CALL erhandler(fname, __LINE__, ERH_FATAL, &
-                  trim(libname)//':Error should not occur: "etyget" returns %d', &
-                  & derrinfo, cerrinfo)
+             CALL ans_fatal(fname, __LINE__, libname, &
+                  & 'Error should not occur: "etyget" returns %d')
           END IF
           IF (ielc(KYOP1).EQ.1) THEN
              ! deselect element with membrane property
@@ -336,13 +304,11 @@ CONTAINS
        CALL ans2bmf_elread(el_data)
 
        derrinfo(1) = comp_num
-       derrinfo(2) = l_comp_len(comp_num)
+       call ans_note(fname, __LINE__, libname, '  comp - num  %i')
+       derrinfo(1) = l_comp_len(comp_num)
+       call ans_note(fname, __LINE__, libname, '       - name %s')
        cerrinfo(1) = l_comp_name(comp_num)
-       CALL erhandler(fname, __LINE__, ERH_NOTE, &
-            trim(libname)//':   comp - num  %i%/'// &
-            trim(libname)//':        - name %s%/'// &
-            trim(libname)//':        - len  %i', &
-            derrinfo, cerrinfo)
+       call ans_note(fname, __LINE__, libname, '       - len  %i')
     END IF
 
     CALL TrackEnd('ans2bmf_cstore')
@@ -353,10 +319,10 @@ CONTAINS
 
   SUBROUTINE ans2bmf_elread(el_data)
 
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd, elmiqr, elnext, &
-         erhandler
-    USE ansys_par, ONLY : DB_NUMSELECTED, ERH_FNAME_LEN, ERH_ERROR, PARMSIZE
+    USE ansys_upf, ONLY : TrackBegin, TrackEnd, elmiqr, elnext
+    USE ansys_par, ONLY : DB_NUMSELECTED, ERH_FNAME_LEN, PARMSIZE
     USE ans_common, ONLY : el_offset, n_elem
+    use glans, ONLY : derrinfo, cerrinfo, ans_error
     USE LOCMOD, ONLY : libname
 
     ! Purpose:
@@ -372,10 +338,6 @@ CONTAINS
     INTEGER, INTENT(INOUT), DIMENSION(*) :: el_data
     INTEGER :: n, nmax, el
 
-    ! dataspace for feeding erhandler subroutine
-    REAL(KIND=8), DIMENSION(10) ::  derrinfo
-    CHARACTER(LEN=PARMSIZE), DIMENSION(10) :: cerrinfo
-
     CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
 
     CALL TrackBegin('ans2bmf_elread')
@@ -385,11 +347,9 @@ CONTAINS
     IF (n_elem.LT.0) THEN
        derrinfo(1) = n_elem
        derrinfo(2) = nmax
-       CALL erhandler(fname, __LINE__, ERH_ERROR, &
-            trim(libname)//': '// &
-            'ERROR: n_elem= %i , not enough heap space '// &
-            'allocated. Still needed: %i integers.', &
-            derrinfo, cerrinfo)
+       CALL ans_error(fname, __LINE__, libname, &
+            & 'ERROR: n_elem= %i , not enough heap space '// &
+            & 'allocated. Still needed: %i integers.')
        CALL anserr(4,'Heap overflow',0.0,' ')
     END IF
 
