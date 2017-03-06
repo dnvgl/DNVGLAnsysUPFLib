@@ -88,10 +88,10 @@ CONTAINS
          & '   no. of section definitions: %d')
 
     DO n = 1, n_sect
-       err = s_get(fname, libname, __LINE__, ERH_FATAL, &
+       err = s_get(fname, libname, __LINE__, ERH_NOTE, &
             & sec_type, 'SECP', n, 'TYPE    ')
 
-       IF (sec_type.eq.'BEAM') THEN
+       IF (.NOT. err .AND. sec_type.eq.'BEAM') THEN
 
           bp%num = bp%num + 1
           bp%snum = bp%snum + 1
@@ -115,7 +115,7 @@ CONTAINS
                cgy, cgz, shcy, shcz, scyy, scyz, sczz, offset, offy, offz)
 
           bp%data(bp%num)%name(:) = name(1:16)
-          bp%data(bp%num)%A(:) = (/ area, area * sczz, area * scyy /)
+          bp%data(bp%num)%A(:) = (/ area, area * scyy, area * sczz /)
 
           bp%data(bp%num)%i(:) = (/ tors, izz, iyy /)
 
@@ -170,16 +170,17 @@ CONTAINS
              section_info%t_y_1, section_info%t_y_2, &
              -section_info%t_z_1, section_info%t_z_2 /)
 
-          SELECT CASE(offset)
-          CASE(1) ! = Centroid
-             bp%data(bp%num)%d(:) = (/ 0d0, cgy, cgz /)
-          CASE(2) ! = Shear Center
-             bp%data(bp%num)%d(:) = (/ 0d0, shcy-cgy, shcz-cgz /)
-          CASE (3) ! = Origin
-             bp%data(bp%num)%d(:) = (/ 0d0, -cgy, -cgz /)
-          CASE (0) ! = User Defined
-             bp%data(bp%num)%d(:) = (/ 0d0, - offy + cgy, - offz + cgz /)
-          END SELECT
+          ! SELECT CASE(offset)
+          ! CASE(1) ! = Centroid
+          !    bp%data(bp%num)%d(:) = (/ 0d0, cgy, cgz /)
+          ! CASE(2) ! = Shear Center
+          !    bp%data(bp%num)%d(:) = (/ 0d0, shcy-cgy, shcz-cgz /)
+          ! CASE (3) ! = Origin
+          !    bp%data(bp%num)%d(:) = (/ 0d0, -cgy, -cgz /)
+          ! CASE (0) ! = User Defined
+          !    bp%data(bp%num)%d(:) = (/ 0d0, - offy + cgy, - offz + cgz /)
+          ! END SELECT
+          bp%data(bp%num)%d(:) = (/ 0d0, cgy - offy, cgz - offz /)
 
           bp%data(bp%num)%sc(:) = (/ shcz, shcy /)
 
@@ -315,19 +316,30 @@ CONTAINS
           j_vals%d(2) = -rtable(17)              !       DY2
           j_vals%d(3) = rtable(18)               !       DZ2
 
-          IF (rtable(20) .NE. 0d0) THEN
-             i_vals%A(2) = i_vals%A(1)/rtable(20)!      A1/SHEARY
-             j_vals%A(2) = j_vals%A(1)/rtable(20)!      A2/SHEARY
+          IF (rtable(26).NE.0d0) THEN
+             i_vals%A(2) =  rtable(26)           !       ARESY1
           ELSE
-             i_vals%A(2) = 0d0
-             j_vals%A(2) = 0d0
+             i_vals%A(2) = i_vals%A(1)*rtable(20)!      A1/SHEARY
           END IF
-          IF (rtable(19) .NE. 0d0) THEN
-             i_vals%A(3) = i_vals%A(1)/rtable(19)!      A1/SHEARZ
-             j_vals%A(3) = j_vals%A(1)/rtable(19)!      A2/SHEARZ
+          IF (rtable(25).NE.0d0) THEN
+             i_vals%A(3) =  rtable(25)           !       ARESZ1
           ELSE
-             i_vals%A(3) = 0d0
-             j_vals%A(3) = 0d0
+             i_vals%A(3) = i_vals%A(1)*rtable(19)!      A1/SHEARZ
+          END IF
+
+          IF (rtable(28).NE.0d0) THEN
+             j_vals%A(2) =  rtable(28)           !       ARESY2
+          ELSE IF (rtable(26).NE.0d0) THEN
+             j_vals%A(2) =  rtable(26)           !       ARESY1
+          ELSE
+             j_vals%A(2) = j_vals%A(1)*rtable(20)!      A2/SHEARY
+          END IF
+          IF (rtable(27).NE.0d0) THEN
+             j_vals%A(3) =  rtable(27)           !       ARESZ2
+          ELSE IF (rtable(25).NE.0d0) THEN
+             j_vals%A(3) =  rtable(25)           !       ARESZ1
+          ELSE
+             j_vals%A(3) = j_vals%A(1)*rtable(19)!      A2/SHEARZ
           END IF
 
           i_vals%e(6) =  rtable(21)              !       TKZT1
@@ -343,12 +355,6 @@ CONTAINS
           ELSE
              j_vals%e(4) = rtable(24)            !       TKYT2
           END IF
-
-          ! i_vals%A(2) =  rtable(25)              !       ARESZ1
-          ! i_vals%A(3) =  rtable(26)              !       ARESY1
-
-          ! j_vals%A(2) =  rtable(27)              !       ARESZ2
-          ! j_vals%A(3) =  rtable(28)              !       ARESY2
 
           ! --- not used ---         rtable(29)              !       TSF1
           ! --- not used ---         rtable(30)              !       TSF2
@@ -378,8 +384,17 @@ CONTAINS
           i_vals%theta = theta
           j_vals%theta = theta
 
-          i_vals%sc(:) =  0d0
-          j_vals%sc(:) =  0d0
+          i_vals%sc(:) = (/ rtable(31), rtable(32) /)
+          IF (rtable(34) .NE. 0d0) THEN
+             j_vals%sc(1) = rtable(33)
+          else
+             j_vals%sc(1) = rtable(31)
+          END IF
+          IF (rtable(33) .NE. 0d0) THEN
+             j_vals%sc(2) = rtable(34)
+          ELSE
+             j_vals%sc(2) = rtable(32)
+          END IF
 
           t_min = MIN( &
                i_vals%e(4) - i_vals%e(3), i_vals%e(6) - i_vals%e(5))
