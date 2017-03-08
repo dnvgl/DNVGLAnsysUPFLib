@@ -3,6 +3,8 @@ MODULE ans_common
   USE csubdata
   USE ansys_par
 
+  USE LOCMOD, ONLY : libname
+
   ! variables to interface with ANSYS
   INTEGER :: ityp
   INTEGER :: ielc(IelCSZ)
@@ -97,18 +99,62 @@ MODULE ans_common
   INTEGER, PARAMETER :: CS_TYPE_MESH = 13
   INTEGER, PARAMETER :: CS_TYPE_NOT_VALID = 666
 
+  TYPE :: cs_mat_entry
+     INTEGER :: mat_id = 0
+     INTEGER :: cs_id = 0
+     TYPE(cs_mat_entry), POINTER :: next => null()
+  END TYPE cs_mat_entry
+
   TYPE :: cross_section_info
+     INTEGER :: id
      ! outer dimensions for cross section
      REAL(KIND=8) :: t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2
      REAL(KIND=8) :: web_height = 0.
      REAL(KIND=8) :: web_thickness = 0.
      REAL(KIND=8) :: flange_width = 0.
      REAL(KIND=8) :: flange_thickness = 0.
+     ! raw cross section data acc. to ANSYS
+     REAL(KIND=8), DIMENSION(:), ALLOCATABLE :: data
+     ! cross section type
      INTEGER :: type_code = CS_TYPE_NOT_VALID
+
+     TYPE(cs_mat_entry), POINTER :: gp_entries => null()
   END TYPE cross_section_info
 
-  TYPE :: bp_type
+  INTERFACE OPERATOR(.EQ.)
+     MODULE PROCEDURE cross_section_equal
+  END INTERFACE OPERATOR(.EQ.)
 
+  INTERFACE OPERATOR(.NE.)
+     MODULE PROCEDURE cross_section_not_equal
+  END INTERFACE OPERATOR(.NE.)
+
+  INTERFACE ASSIGNMENT(=)
+     MODULE PROCEDURE cross_section_assign
+  END INTERFACE ASSIGNMENT(=)
+
+  INTERFACE OPERATOR(.EQ.)
+     MODULE PROCEDURE cs_mat_equal
+  END INTERFACE OPERATOR(.EQ.)
+
+  INTERFACE OPERATOR(.NE.)
+     MODULE PROCEDURE cs_mat_not_equal
+  END INTERFACE OPERATOR(.NE.)
+
+  INTERFACE ASSIGNMENT(=)
+     MODULE PROCEDURE cs_mat_assign
+  END INTERFACE ASSIGNMENT(=)
+
+  INTERFACE
+     SUBROUTINE collect_sc_info()
+     END SUBROUTINE collect_sc_info
+     FUNCTION find_gp_for_cs(i_id) RESULT(o_id)
+       INTEGER, INTENT(in):: i_id
+       INTEGER :: o_id
+     END FUNCTION find_gp_for_cs
+  END INTERFACE
+
+  TYPE :: bp_type
      INTEGER :: num = 0, rnum = 0, snum = 0
      ! beam property entries
      TYPE(bp_values), DIMENSION(:), ALLOCATABLE :: data
@@ -118,11 +164,12 @@ MODULE ans_common
      TYPE(bp_loc), DIMENSION(:), ALLOCATABLE :: se_bp_map
      ! Information on supported cross section descriptions
      TYPE(cross_section_info), DIMENSION(:), ALLOCATABLE :: cs_info
-
   END TYPE bp_type
 
-
   LOGICAL :: batch
+
+  CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
+  PRIVATE :: fname
 
 CONTAINS
 
@@ -144,7 +191,7 @@ CONTAINS
     TYPE(bp_values), INTENT(IN) :: a, b
     LOGICAL :: bp_values_not_equal
 
-    bp_values_not_equal = .NOT. (a == b)
+    bp_values_not_equal = .NOT. (a .EQ. b)
     RETURN
   END FUNCTION bp_values_not_equal
 
@@ -198,6 +245,56 @@ CONTAINS
     DEALLOCATE(bp%se_bp_map)
     DEALLOCATE(bp%cs_info)
   END SUBROUTINE deallocate_bp_space
+
+  FUNCTION cross_section_equal(a, b)
+    IMPLICIT NONE
+    TYPE(cross_section_info), INTENT(IN) :: a
+    TYPE(cross_section_info), INTENT(IN) :: b
+    LOGICAL :: cross_section_equal
+    CALL ans_error(fname, __LINE__, libname, "not implemented")
+    cross_section_equal = .FALSE.
+  END FUNCTION cross_section_equal
+
+  FUNCTION cross_section_not_equal(a, b)
+    IMPLICIT NONE
+    TYPE(cross_section_info), INTENT(IN) :: a
+    TYPE(cross_section_info), INTENT(IN) :: b
+    LOGICAL :: cross_section_not_equal
+    CALL ans_error(fname, __LINE__, libname, "not implemented")
+    cross_section_not_equal = .FALSE.
+  END FUNCTION cross_section_not_equal
+
+  SUBROUTINE cross_section_assign(a, b)
+    IMPLICIT NONE
+    TYPE(cross_section_info), INTENT(OUT) :: a
+    TYPE(cross_section_info), INTENT(IN) :: b
+    CALL ans_error(fname, __LINE__, libname, "not implemented")
+  END SUBROUTINE cross_section_assign
+
+  FUNCTION cs_mat_equal(a, b)
+    IMPLICIT NONE
+    TYPE(cs_mat_entry), INTENT(IN) :: a
+    TYPE(cs_mat_entry), INTENT(IN) :: b
+    LOGICAL :: cs_mat_equal
+    CALL ans_error(fname, __LINE__, libname, "not implemented")
+    cs_mat_equal = .FALSE.
+  END FUNCTION cs_mat_equal
+
+  FUNCTION cs_mat_not_equal(a, b)
+    IMPLICIT NONE
+    TYPE(cs_mat_entry), INTENT(IN) :: a
+    TYPE(cs_mat_entry), INTENT(IN) :: b
+    LOGICAL :: cs_mat_not_equal
+    CALL ans_error(fname, __LINE__, libname, "not implemented")
+    cs_mat_not_equal = .FALSE.
+  END FUNCTION cs_mat_not_equal
+
+  SUBROUTINE cs_mat_assign(a, b)
+    IMPLICIT NONE
+    TYPE(cs_mat_entry), INTENT(OUT) :: a
+    TYPE(cs_mat_entry), INTENT(IN) :: b
+    CALL ans_error(fname, __LINE__, libname, "not implemented")
+  END SUBROUTINE cs_mat_assign
 
 END MODULE ans_common
 
