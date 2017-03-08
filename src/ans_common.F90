@@ -2,8 +2,7 @@ MODULE ans_common
 
   USE csubdata
   USE ansys_par
-
-  USE LOCMOD, ONLY : libname
+  USE glans, ONLY : ans_error
 
   ! variables to interface with ANSYS
   INTEGER :: ityp
@@ -247,6 +246,7 @@ CONTAINS
   END SUBROUTINE deallocate_bp_space
 
   FUNCTION cross_section_equal(a, b)
+    USE LOCMOD, ONLY : libname
     IMPLICIT NONE
     TYPE(cross_section_info), INTENT(IN) :: a
     TYPE(cross_section_info), INTENT(IN) :: b
@@ -256,6 +256,7 @@ CONTAINS
   END FUNCTION cross_section_equal
 
   FUNCTION cross_section_not_equal(a, b)
+    USE LOCMOD, ONLY : libname
     IMPLICIT NONE
     TYPE(cross_section_info), INTENT(IN) :: a
     TYPE(cross_section_info), INTENT(IN) :: b
@@ -265,6 +266,7 @@ CONTAINS
   END FUNCTION cross_section_not_equal
 
   SUBROUTINE cross_section_assign(a, b)
+    USE LOCMOD, ONLY : libname
     IMPLICIT NONE
     TYPE(cross_section_info), INTENT(OUT) :: a
     TYPE(cross_section_info), INTENT(IN) :: b
@@ -272,6 +274,7 @@ CONTAINS
   END SUBROUTINE cross_section_assign
 
   FUNCTION cs_mat_equal(a, b)
+    USE LOCMOD, ONLY : libname
     IMPLICIT NONE
     TYPE(cs_mat_entry), INTENT(IN) :: a
     TYPE(cs_mat_entry), INTENT(IN) :: b
@@ -281,6 +284,7 @@ CONTAINS
   END FUNCTION cs_mat_equal
 
   FUNCTION cs_mat_not_equal(a, b)
+    USE LOCMOD, ONLY : libname
     IMPLICIT NONE
     TYPE(cs_mat_entry), INTENT(IN) :: a
     TYPE(cs_mat_entry), INTENT(IN) :: b
@@ -290,6 +294,7 @@ CONTAINS
   END FUNCTION cs_mat_not_equal
 
   SUBROUTINE cs_mat_assign(a, b)
+    USE LOCMOD, ONLY : libname
     IMPLICIT NONE
     TYPE(cs_mat_entry), INTENT(OUT) :: a
     TYPE(cs_mat_entry), INTENT(IN) :: b
