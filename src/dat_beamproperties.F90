@@ -168,18 +168,8 @@ CONTAINS
 
           bp%data(bp%num)%e(3:6) = (/ &
              section_info%t_y_1, section_info%t_y_2, &
-             -section_info%t_z_1, section_info%t_z_2 /)
+             section_info%t_z_1, section_info%t_z_2 /)
 
-          ! SELECT CASE(offset)
-          ! CASE(1) ! = Centroid
-          !    bp%data(bp%num)%d(:) = (/ 0d0, cgy, cgz /)
-          ! CASE(2) ! = Shear Center
-          !    bp%data(bp%num)%d(:) = (/ 0d0, shcy-cgy, shcz-cgz /)
-          ! CASE (3) ! = Origin
-          !    bp%data(bp%num)%d(:) = (/ 0d0, -cgy, -cgz /)
-          ! CASE (0) ! = User Defined
-          !    bp%data(bp%num)%d(:) = (/ 0d0, - offy + cgy, - offz + cgz /)
-          ! END SELECT
           bp%data(bp%num)%d(:) = (/ 0d0, cgy - offy, cgz - offz /)
 
           bp%data(bp%num)%sc(:) = (/ shcz, shcy /)
@@ -605,9 +595,10 @@ CONTAINS
     IMPLICIT NONE
 
     TYPE(cross_section_info), INTENT(OUT) :: section_info
-    !REAL(KIND=8), INTENT(OUT) :: t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2
     REAL(KIND=8), INTENT(IN) :: cgy, cgz
     INTEGER, INTENT(IN) :: n
+
+    INTEGER :: i
 
     LOGICAL :: err
 
@@ -615,8 +606,14 @@ CONTAINS
 
     derrinfo(1) = n
 
-    err = s_get(fname, libname, __LINE__, ERH_FATAL, section_info%t_y_2, 'SECP', n, 'DATA    ', 1)
-    err = s_get(fname, libname, __LINE__, ERH_FATAL, section_info%t_z_2, 'SECP', n, 'DATA    ', 2)
+    ALLOCATE(section_info%data(4))
+    DO i = 1, 4
+       err = s_get(fname, libname, __LINE__, ERH_FATAL, &
+              & section_info%data(i), 'SECP', n, 'DATA    ', i)
+    END DO
+
+    section_info%t_y_2 = section_info%data(1)
+    section_info%t_z_2 = section_info%data(2)
 
     section_info%t_max = max(section_info%t_y_1, section_info%t_z_1)
     section_info%t_min = min(section_info%t_y_1, section_info%t_z_1)
@@ -645,7 +642,6 @@ CONTAINS
     IMPLICIT NONE
 
     TYPE(cross_section_info), INTENT(OUT) :: section_info
-    !REAL(KIND=8), INTENT(OUT) :: t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2
     REAL(KIND=8), INTENT(IN) :: cgy, cgz
     INTEGER, INTENT(IN) :: n
 
@@ -658,9 +654,15 @@ CONTAINS
 
     derrinfo(2) = n
 
+    ALLOCATE(section_info%data(10))
+    DO i = 1, 10
+       err = s_get(fname, libname, __LINE__, ERH_FATAL, &
+            & section_info%data(i), 'SECP', n, 'DATA    ', i)
+    END DO
+
     DO i = 1, 4
-       err = s_get(fname, libname, __LINE__, ERH_FATAL, y(i), 'SECP', n, 'DATA    ', 2*i-1)
-       err = s_get(fname, libname, __LINE__, ERH_FATAL, z(i), 'SECP', n, 'DATA    ', 2*i)
+       y(i) = section_info%data(2*i-1)
+       z(i) = section_info%data(2*i)
     END DO
 
     section_info%t_min = MIN(-y(1) + y(2), -y(4) + y(3), -z(1) + z(4), -z(2) + z(3))
@@ -687,16 +689,23 @@ CONTAINS
     IMPLICIT NONE
 
     TYPE(cross_section_info), INTENT(OUT) :: section_info
-    !REAL(KIND=8), INTENT(OUT) :: t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2
     REAL(KIND=8), INTENT(IN) :: cgy, cgz
     INTEGER, INTENT(IN) :: n
+
     LOGICAL :: err
+    INTEGER :: i
 
     CALL TrackBegin("get_t_beam_csolid")
 
     derrinfo(1) = n
 
-    err = s_get(fname, libname, __LINE__, ERH_FATAL, section_info%t_y_2, 'SECP', n, 'DATA    ', 1)
+    ALLOCATE(section_info%data(3))
+    DO i = 1, 3
+       err = s_get(fname, libname, __LINE__, ERH_FATAL, &
+              & section_info%data(i), 'SECP', n, 'DATA    ', i)
+    END DO
+
+    section_info%t_y_2 = section_info%data(1)
 
     section_info%t_max = section_info%t_y_2 * 2.
     section_info%t_min = section_info%t_max
@@ -720,19 +729,25 @@ CONTAINS
     IMPLICIT NONE
 
     TYPE(cross_section_info), INTENT(OUT) :: section_info
-    !REAL(KIND=8), INTENT(OUT) :: t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2
     REAL(KIND=8), INTENT(IN) :: cgy, cgz
+    INTEGER, INTENT(IN) :: n
 
     REAL(KIND=8) :: r_i
-    INTEGER, INTENT(IN) :: n
     LOGICAL :: err
+    INTEGER :: i
 
     CALL TrackBegin("get_t_beam_ctube")
 
     derrinfo(1) = n
 
-    err = s_get(fname, libname, __LINE__, ERH_FATAL, r_i, 'SECP', n, 'DATA    ', 1)
-    err = s_get(fname, libname, __LINE__, ERH_FATAL, section_info%t_y_2, 'SECP', n, 'DATA    ', 2)
+    ALLOCATE(section_info%data(3))
+    DO i = 1, 3
+       err = s_get(fname, libname, __LINE__, ERH_FATAL, &
+              & section_info%data(i), 'SECP', n, 'DATA    ', i)
+    END DO
+
+    r_i = section_info%data(1)
+    section_info%t_y_2 = section_info%data(2)
 
     section_info%t_max = section_info%t_y_2 - r_i
     section_info%t_min = section_info%t_max
@@ -756,7 +771,6 @@ CONTAINS
     IMPLICIT NONE
 
     TYPE(cross_section_info), INTENT(OUT) :: section_info
-    !REAL(KIND=8), INTENT(OUT) :: t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2
     REAL(KIND=8), INTENT(IN) :: cgy, cgz
     INTEGER, INTENT(IN) :: n
 
@@ -769,9 +783,15 @@ CONTAINS
 
     derrinfo(2) = n
 
+    ALLOCATE(section_info%data(6))
+    DO i = 1, 6
+       err = s_get(fname, libname, __LINE__, ERH_FATAL, &
+              & section_info%data(i), 'SECP', n, 'DATA    ', i)
+    END DO
+
     DO i = 1, 3
-       err = s_get(fname, libname, __LINE__, ERH_FATAL, w(i), 'SECP', n, 'DATA    ', i)
-       err = s_get(fname, libname, __LINE__, ERH_FATAL, t(i), 'SECP', n, 'DATA    ', i+3)
+       w(i) = section_info%data(i)
+       t(i) = section_info%data(i+3)
     END DO
 
     section_info%t_min = MIN(t(1), t(2), t(3))
@@ -797,9 +817,7 @@ CONTAINS
     IMPLICIT NONE
 
     TYPE(cross_section_info), INTENT(OUT) :: section_info
-    !REAL(KIND=8), INTENT(OUT) :: t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2
     REAL(KIND=8), INTENT(IN) :: cgy, cgz
-
     INTEGER, INTENT(IN) :: n
 
     REAL(KIND=8), DIMENSION(3) :: w
@@ -811,9 +829,15 @@ CONTAINS
 
     derrinfo(2) = n
 
+    ALLOCATE(section_info%data(6))
+    DO i = 1, 6
+       err = s_get(fname, libname, __LINE__, ERH_FATAL, &
+              & section_info%data(i), 'SECP', n, 'DATA    ', i)
+    END DO
+
     DO i = 1, 3
-       err = s_get(fname, libname, __LINE__, ERH_FATAL, w(i), 'SECP', n, 'DATA    ', i)
-       err = s_get(fname, libname, __LINE__, ERH_FATAL, t(i), 'SECP', n, 'DATA    ', i+3)
+       w(i) = section_info%data(i)
+       t(i) = section_info%data(i+3)
     END DO
 
     section_info%t_min = MIN(t(1), t(2), t(3))
@@ -839,7 +863,6 @@ CONTAINS
     IMPLICIT NONE
 
     TYPE(cross_section_info), INTENT(OUT) :: section_info
-    !REAL(KIND=8), INTENT(OUT) :: t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2
     REAL(KIND=8), INTENT(IN) :: cgy, cgz
     INTEGER, INTENT(IN) :: n
 
@@ -852,9 +875,15 @@ CONTAINS
 
     derrinfo(2) = n
 
+    ALLOCATE(section_info%data(6))
+    DO i = 1, 6
+       err = s_get(fname, libname, __LINE__, ERH_FATAL, &
+              & section_info%data(i), 'SECP', n, 'DATA    ', i)
+    END DO
+
     DO i = 1, 3
-       err = s_get(fname, libname, __LINE__, ERH_FATAL, w(i), 'SECP', n, 'DATA    ', i)
-       err = s_get(fname, libname, __LINE__, ERH_FATAL, t(i), 'SECP', n, 'DATA    ', i+3)
+       w(i) = section_info%data(i)
+       t(i) = section_info%data(i+3)
     END DO
 
     section_info%t_min = MIN(t(1), t(2), t(3))
@@ -880,7 +909,6 @@ CONTAINS
     IMPLICIT NONE
 
     TYPE(cross_section_info), INTENT(OUT) :: section_info
-    !REAL(KIND=8), INTENT(OUT) :: t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2
     REAL(KIND=8), INTENT(IN) :: cgy, cgz
     INTEGER, INTENT(IN) :: n
 
@@ -893,9 +921,15 @@ CONTAINS
 
     derrinfo(2) = n
 
+    ALLOCATE(section_info%data(4))
+    DO i = 1, 4
+       err = s_get(fname, libname, __LINE__, ERH_FATAL, &
+              & section_info%data(i), 'SECP', n, 'DATA    ', i)
+    END DO
+
     DO i = 1, 2
-       err = s_get(fname, libname, __LINE__, ERH_FATAL, w(i), 'SECP', n, 'DATA    ', i)
-       err = s_get(fname, libname, __LINE__, ERH_FATAL, t(i), 'SECP', n, 'DATA    ', i+2)
+       w(i) = section_info%data(i)
+       t(i) = section_info%data(i+2)
     END DO
 
     section_info%t_min = MIN(t(1), t(2))
@@ -926,7 +960,6 @@ CONTAINS
     IMPLICIT NONE
 
     TYPE(cross_section_info), INTENT(OUT) :: section_info
-    !REAL(KIND=8), INTENT(OUT) :: t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2
     REAL(KIND=8), INTENT(IN) :: cgy, cgz
     INTEGER, INTENT(IN) :: n
 
@@ -939,9 +972,15 @@ CONTAINS
 
     derrinfo(2) = n
 
+    ALLOCATE(section_info%data(4))
+    DO i = 1, 4
+       err = s_get(fname, libname, __LINE__, ERH_FATAL, &
+              & section_info%data(i), 'SECP', n, 'DATA    ', i)
+    END DO
+
     DO i = 1, 2
-       err = s_get(fname, libname, __LINE__, ERH_FATAL, w(i), 'SECP', n, 'DATA    ', i)
-       err = s_get(fname, libname, __LINE__, ERH_FATAL, t(i), 'SECP', n, 'DATA    ', i+2)
+       w(i) = section_info%data(i)
+       t(i) = section_info%data(i+2)
     END DO
 
     section_info%t_min = MIN(t(1), t(2))
@@ -972,7 +1011,6 @@ CONTAINS
     IMPLICIT NONE
 
     TYPE(cross_section_info), INTENT(OUT) :: section_info
-    !REAL(KIND=8), INTENT(OUT) :: t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2
     REAL(KIND=8), INTENT(IN) :: cgy, cgz
     INTEGER, INTENT(IN) :: n
 
@@ -985,11 +1023,17 @@ CONTAINS
 
     derrinfo(2) = n
 
+    ALLOCATE(section_info%data(9))
+    DO i = 1, 9
+       err = s_get(fname, libname, __LINE__, ERH_FATAL, &
+              & section_info%data(i), 'SECP', n, 'DATA    ', i)
+    END DO
+
     DO i = 1, 4
-       err = s_get(fname, libname, __LINE__, ERH_FATAL, w(i), 'SECP', n, 'DATA    ', i)
+       w(i) = section_info%data(i)
     END DO
     DO i = 1, 5
-       err = s_get(fname, libname, __LINE__, ERH_FATAL, t(i), 'SECP', n, 'DATA    ', i+2)
+       t(i) = section_info%data(i+2)
     END DO
 
     section_info%t_min = MIN(t(1), t(2), t(3), t(4), t(5))
@@ -1015,7 +1059,6 @@ CONTAINS
     IMPLICIT NONE
 
     TYPE(cross_section_info), INTENT(OUT) :: section_info
-    !REAL(KIND=8), INTENT(OUT) :: t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2
     REAL(KIND=8), INTENT(IN) :: cgy, cgz
     INTEGER, INTENT(IN) :: n
 
@@ -1028,11 +1071,17 @@ CONTAINS
 
     derrinfo(2) = n
 
+    ALLOCATE(section_info%data(6))
+    DO i = 1, 6
+       err = s_get(fname, libname, __LINE__, ERH_FATAL, &
+              & section_info%data(i), 'SECP', n, 'DATA    ', i)
+    END DO
+
     DO i = 1, 2
-       err = s_get(fname, libname, __LINE__, ERH_FATAL, w(i), 'SECP', n, 'DATA    ', i)
+       w(i) = section_info%data(i)
     END DO
     DO i = 1, 4
-       err = s_get(fname, libname, __LINE__, ERH_FATAL, t(i), 'SECP', n, 'DATA    ', i+2)
+       t(i) = section_info%data(i+2)
     END DO
 
     section_info%t_min = MIN(t(1), t(2), t(3), t(4))
@@ -1058,21 +1107,26 @@ CONTAINS
     IMPLICIT NONE
 
     TYPE(cross_section_info), INTENT(OUT) :: section_info
-    !REAL(KIND=8), INTENT(OUT) :: t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2
     REAL(KIND=8), INTENT(IN) :: cgy, cgz
     INTEGER, INTENT(IN) :: n
-#if ANSVER >= 150
+
     LOGICAL :: err
-#endif
+    INTEGER :: i
 
     CALL TrackBegin("get_t_beam_asec")
+
+    ALLOCATE(section_info%data(12))
+    DO i = 1, 12
+       err = s_get(fname, libname, __LINE__, ERH_FATAL, &
+              & section_info%data(i), 'SECP', n, 'DATA    ', i)
+    END DO
 
     section_info%t_min = 0d0
     section_info%t_max = 0d0
 
 #if ANSVER >= 150
-    err = s_get(fname, libname, __LINE__, ERH_FATAL, section_info%t_y_1, 'SECP', n, 'DATA    ', 12)
-    err = s_get(fname, libname, __LINE__, ERH_FATAL, section_info%t_z_1, 'SECP', n, 'DATA    ', 11)
+    section_info%t_y_1 = section_info%data(12)
+    section_info%t_z_1 = section_info%data(11)
     section_info%t_y_2 = section_info%t_y_1 / 2d0
     section_info%t_z_2 = section_info%t_z_1 / 2d0
     section_info%t_y_1 = - section_info%t_y_2
@@ -1100,7 +1154,6 @@ CONTAINS
     IMPLICIT NONE
 
     TYPE(cross_section_info), INTENT(OUT) :: section_info
-    !REAL(KIND=8), INTENT(OUT) :: t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2
     REAL(KIND=8), INTENT(IN) :: cgy, cgz
     INTEGER, INTENT(IN) :: n
 
