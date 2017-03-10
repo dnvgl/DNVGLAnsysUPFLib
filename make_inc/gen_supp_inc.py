@@ -18,6 +18,14 @@ __author__ = "`Berthold Höllmann <berthold.hoellmann@dnvgl.com>`__"
 __copyright__ = "Copyright © 2006 by DNV GL SE"
 
 
+def ansys_basedir(ansver):
+    dirs = ("/ansys_inc", "/opt/ansys_inc")
+    for dir in dirs:
+        res = "{}/v{}".format(dir, ansver)
+        if os.path.exists(res):
+            return res
+
+
 class gen_supp_inc(object):
     # matrix of ANSYS version/output file formats supported
     # The meaning of the value is as follows:
@@ -46,7 +54,9 @@ class gen_supp_inc(object):
         (('LINIA32'),   (120, BMF)),
         (('LINOP64'),   (110, ASCII)),
         (('LINEM64T'),  (110, ASCII)),
-        (('LINX64'),    (120, ASCII)),
+        (('LINX64'),    (120, BMF)),
+        (('LINX64'),    (150, BMF)),
+        #(('LINX64'),    (172, BMF)),
         (('SunOS', 'sun4u'),  (None, None)),
     )
     archs = dict(_archs)
@@ -73,16 +83,18 @@ class gen_supp_inc(object):
         120: (False,     ASCII | BMF, False, False, ASCII | BMF, False, ),
         121: (False,     ASCII | BMF, False, False, ASCII | BMF, False, ),
         130: (False,     ASCII | BMF, False, False, ASCII | BMF, False, ),
+        150: (False,     ASCII | BMF, False, False, ASCII | BMF, False, ),
+        172: (False,     ASCII | BMF, False, False, ASCII | BMF, False, ),
     }
     outMatrix = {}
     for key, supp in _outMatrix.iteritems():
         outMatrix[key] = dict(zip((a[0] for a in _archs), supp))
 
     def __init__(self):
-        ansys_revn = os.environ.get("ANSYS_REVN", "120")
+        ansys_revn = os.environ.get("ANSYS_REVN", "150")
         self.system = subprocess.Popen(
-            "bash -c '. /ansys_inc/"
-            "v{}/ansys/bin/anssh.ini ; echo $SYS'".format(ansys_revn),
+            "bash -c '. {}/ansys/bin/anssh.ini ; echo $SYS'".format(
+                ansys_basedir(ansys_revn)),
             stdout=subprocess.PIPE, shell=True).communicate()[0].strip()
 
     def __call__(self):
@@ -132,8 +144,8 @@ ANSDVER = $(ANSMAJOR).$(ANSMINOR)
             formats = self.get_formats(self.outMatrix[ansver][self.system])
             if formats:
                 system = subprocess.Popen(
-                    "bash -c '. /ansys_inc/v"
-                    "{}/ansys/bin/anssh.ini ; echo $SYS'".format(ansver),
+                    "bash -c '. {}/ansys/bin/anssh.ini ; echo $SYS'".format(
+                        ansys_basedir(ansver)),
                     stdout=subprocess.PIPE,
                     shell=True).communicate()[0].strip()
                 for format in formats:
@@ -147,8 +159,8 @@ ANSDVER = $(ANSMAJOR).$(ANSMINOR)
             formats = self.get_formats(self.outMatrix[ansver][self.system])
             if formats:
                 system = subprocess.Popen(
-                    "bash -c '. /ansys_inc/v"
-                    "{}/ansys/bin/anssh.ini ; echo $SYS'".format(ansver),
+                    "bash -c '. {}/ansys/bin/anssh.ini ; echo $SYS'".format(
+                        ansys_basedir(ansver)),
                     stdout=subprocess.PIPE,
                     shell=True).communicate()[0].strip()
                 makefile.write(
@@ -161,9 +173,9 @@ ANSDVER = $(ANSMAJOR).$(ANSMINOR)
 
         return
 
+
 if __name__ == "__main__":
     gen_supp_inc()()
-
 
 # Local Variables:
 # mode: python

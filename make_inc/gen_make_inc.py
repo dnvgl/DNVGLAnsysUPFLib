@@ -11,7 +11,6 @@ from __future__ import (
 import os
 import re
 import sys
-import functools
 import subprocess
 
 # ID: $Id$"
@@ -19,6 +18,14 @@ __date__ = "$Date$"[6:-1]
 __version__ = "$Revision$"[10:-1]
 __author__ = "`Berthold Höllmann <berthold.hoellmann@dnvgl.com>`__"
 __copyright__ = "Copyright © 2005, 2014 by DNV GL SE"
+
+
+def ansys_basedir(ansver):
+    dirs = ("/ansys_inc", "/opt/ansys_inc")
+    for dir in dirs:
+        res = "{}/v{}".format(dir, ansver)
+        if os.path.exists(res):
+            return res
 
 
 class GenMakeInc(object):
@@ -39,6 +46,7 @@ class GenMakeInc(object):
             ('162', 'LINX64',  'ifort'): ("_ifc140_64", "-parallel"),
             ('170', 'LINX64',  'ifort'): ("_ifc150_64", "-parallel"),
             ('171', 'LINX64',  'ifort'): ("_ifc150_64", "-parallel"),
+            ('172', 'LINX64',  'ifort'): ("_ifc150_64", "-parallel"),
         }
 
         # map ANSYS version/C compiler to be used to actual compiler name
@@ -54,6 +62,7 @@ class GenMakeInc(object):
             ('161', 'LINX64',  'icc'): ("gcc", ""),
             ('170', 'LINX64',  'icc'): ("gcc", ""),
             ('171', 'LINX64',  'icc'): ("gcc", ""),
+            ('172', 'LINX64',  'icc'): ("gcc", ""),
         }
 
         # map ANSYS version/linker to be used to actual linker name
@@ -69,12 +78,13 @@ class GenMakeInc(object):
             ('162', 'LINX64',  'ld'): ("_ifc140_64", ''),
             ('170', 'LINX64',  'ld'): ("_ifc150_64", ''),
             ('171', 'LINX64',  'ld'): ("_ifc150_64", ''),
+            ('172', 'LINX64',  'ld'): ("_ifc150_64", ''),
         }
 
         self.ansys_revn = os.environ.get("ANSYS_REVN", "90")
         self.ansys_sys = subprocess.Popen(
-            ". /ansys_inc/v%s/ansys/bin/anssh.ini ; echo $SYS" %
-            (self.ansys_revn,),
+            ". {}/ansys/bin/anssh.ini ; echo $SYS".format(
+                ansys_basedir(self.ansys_revn)),
             stdout=subprocess.PIPE, shell=True).communicate()[0].strip()
 
         self.CPPFLAGS = ""
@@ -86,8 +96,8 @@ class GenMakeInc(object):
         self.clean_up()
 
     def gen_share(self):
-        os.system("/ansys_inc/v%s/ansys/customize/user/gen_share dummy"
-                  % (self.ansys_revn,))
+        os.system("{}/ansys/customize/user/gen_share dummy".format(
+            ansys_basedir(self.ansys_revn)))
 
     def parse_share(self):
         if int(self.ansys_revn) < 90:
@@ -106,32 +116,41 @@ class GenMakeInc(object):
         ld_del_re = re.compile(r"(^|\s+)-o dummy($|\s+)")
         with open('Makefile') as makefile:
 
-            for l in makefile:
-                h = l.split()
-                if h:
-                    h = h[0]
+            for line in makefile:
+                l = line.split()
+                h = None
+                if l:
+                    h = l[0]
                 if h == "PP":
-                    self.CPPFLAGS += " ".join(l.split()[2:])
+                    self.CPPFLAGS += " ".join(l[2:])
                 elif h == "FC":
-                    fcline = fcline_re.match(l)
+                    fcline = fcline_re.match(line)
                     (self.FC, self.FFLAGS) = self.fcfix(fcline.group("FC"))
                     self.FFLAGS = ' '.join((
                         self.FFLAGS, c_del_re.sub(
                             " ", fcline.group("FFLAGS")))).strip()
                 elif h == "CC":
-                    ccline = ccline_re.match(l)
+                    ccline = ccline_re.match(line)
                     (self.CC, self.CFLAGS) = self.ccfix(ccline.group("CC"))
                     self.CFLAGS += (' ' + c_del_re.sub(
                         " ", ccline.group("CFLAGS"))).strip()
                 elif h == "LN":
-                    ldline = ldline_re.match(l)
+                    ldline = ldline_re.match(line)
                     (self.LD, self.LDFLAGS) = self.ldfix(ldline.group("LD"))
                     self.LDFLAGS += ' ' + ld_del_re.sub(
                         " ", ldline.group("LDFLAGS")).strip()
                 elif h == "IN":
-                    self.CPPFLAGS += " " + " ".join(l.split()[2:])
+                    self.CPPFLAGS += " " + " ".join(l[2:])
+
+        self.CFLAGS = self.optfix(self.CFLAGS)
+        self.FFLAGS = self.optfix(self.FFLAGS)
 
         self.CPPFLAGS = self.CPPFLAGS.strip()
+
+    def optfix(self, inp):
+        if int(self.ansys_revn) == 172:
+            return inp.replace("-DLINUX_SYS -DLINUXIA64_SYS", "-DLINX64_SYS")
+        return inp
 
     def fcfix(self, fc):
         return (i.strip()
@@ -168,6 +187,7 @@ LDFLAGS  += {LDFLAGS}
 
     def clean_up(self):
         os.remove('Makefile')
+
 
 if __name__ == "__main__":
     GenMakeInc()()
