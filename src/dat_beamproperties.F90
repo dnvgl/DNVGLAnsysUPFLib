@@ -121,8 +121,6 @@ CONTAINS
 
           bp%data(bp%num)%iyz = iyz
 
-          bp%cs_info(bp%snum) = section_info
-
           err = s_get(fname, libname, __LINE__, ERH_FATAL, &
                & sec_subtype, 'SECP', n, 'SUBTYPE ')
 
@@ -159,6 +157,8 @@ CONTAINS
                   & ' Section SUBTYPE "%s" for section %d not supported.')
           END SELECT
 
+          bp%cs_info(bp%snum) = section_info
+
           IF (section_info%t_max .NE. 0d0) THEN
              bp%data(bp%num)%e(1) = tors / section_info%t_max
           END IF
@@ -173,6 +173,10 @@ CONTAINS
           bp%data(bp%num)%d(:) = (/ 0d0, cgy - offy, cgz - offz /)
 
           bp%data(bp%num)%sc(:) = (/ shcz, shcy /)
+
+          IF (ALLOCATED(section_info%data)) THEN
+             DEALLOCATE(section_info%data)
+          END IF
 
        END IF
 

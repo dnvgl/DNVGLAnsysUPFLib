@@ -105,8 +105,8 @@ MODULE ans_common
   END TYPE cs_mat_entry
 
   TYPE :: cross_section_info
-     INTEGER :: id
      ! outer dimensions for cross section
+     INTEGER :: id = 0
      REAL(KIND=8) :: t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2
      REAL(KIND=8) :: web_height = 0.
      REAL(KIND=8) :: web_thickness = 0.
@@ -238,15 +238,23 @@ CONTAINS
     IMPLICIT NONE
     TYPE(bp_type), INTENT(INOUT) :: bp
 
+    INTEGER :: i
+
     bp%num = 0
     DEALLOCATE(bp%data)
     DEALLOCATE(bp%r_bp_map)
     DEALLOCATE(bp%se_bp_map)
+    DO i = 1, SIZE(bp%cs_info)
+       IF (ALLOCATED(bp%cs_info(i)%data)) THEN
+          DEALLOCATE(bp%cs_info(i)%data)
+       END IF
+    END DO
     DEALLOCATE(bp%cs_info)
   END SUBROUTINE deallocate_bp_space
 
   FUNCTION cross_section_equal(a, b)
     USE LOCMOD, ONLY : libname
+    USE glans, ONLY : ans_error
     IMPLICIT NONE
     TYPE(cross_section_info), INTENT(IN) :: a
     TYPE(cross_section_info), INTENT(IN) :: b
@@ -257,6 +265,7 @@ CONTAINS
 
   FUNCTION cross_section_not_equal(a, b)
     USE LOCMOD, ONLY : libname
+    USE glans, ONLY : ans_error
     IMPLICIT NONE
     TYPE(cross_section_info), INTENT(IN) :: a
     TYPE(cross_section_info), INTENT(IN) :: b
@@ -270,11 +279,24 @@ CONTAINS
     IMPLICIT NONE
     TYPE(cross_section_info), INTENT(OUT) :: a
     TYPE(cross_section_info), INTENT(IN) :: b
-    CALL ans_error(fname, __LINE__, libname, "not implemented")
+    a%t_max = b%t_max
+    a%t_min = b%t_min
+    a%t_y_1 = b%t_y_1
+    a%t_y_2 = b%t_y_2
+    a%t_z_1 = b%t_z_1
+    a%t_z_2 = b%t_z_2
+    a%web_height = b%web_height
+    a%web_thickness = b%web_thickness
+    a%flange_width = b%flange_width
+    a%flange_thickness = b%flange_thickness
+    ALLOCATE(a%data(SIZE(b%data)))
+    a%data(:) = b%data(:)
+    a%type_code = b%type_code
   END SUBROUTINE cross_section_assign
 
   FUNCTION cs_mat_equal(a, b)
     USE LOCMOD, ONLY : libname
+    USE glans, ONLY : ans_error
     IMPLICIT NONE
     TYPE(cs_mat_entry), INTENT(IN) :: a
     TYPE(cs_mat_entry), INTENT(IN) :: b
@@ -285,6 +307,7 @@ CONTAINS
 
   FUNCTION cs_mat_not_equal(a, b)
     USE LOCMOD, ONLY : libname
+    USE glans, ONLY : ans_error
     IMPLICIT NONE
     TYPE(cs_mat_entry), INTENT(IN) :: a
     TYPE(cs_mat_entry), INTENT(IN) :: b
@@ -295,6 +318,7 @@ CONTAINS
 
   SUBROUTINE cs_mat_assign(a, b)
     USE LOCMOD, ONLY : libname
+    USE glans, ONLY : ans_error
     IMPLICIT NONE
     TYPE(cs_mat_entry), INTENT(OUT) :: a
     TYPE(cs_mat_entry), INTENT(IN) :: b
