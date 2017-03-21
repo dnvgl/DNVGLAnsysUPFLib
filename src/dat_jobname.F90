@@ -2,13 +2,14 @@
 
 MODULE mod_dat_jobname
 
+  USE dnvglans, ONLY : BeginTrack, EndTrack
+
 CONTAINS
 
   SUBROUTINE dat_jobname()
 
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd
     USE ansys_par, ONLY : ERH_NOTE, ERH_FNAME_LEN, PARMSIZE, STRING_MAX_LENG
-    USE glans
+    USE dnvglans
     USE ans_common, ONLY : jobname
     USE LOCMOD, ONLY : libname
 
@@ -25,7 +26,7 @@ CONTAINS
 
     CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
 
-    CALL TrackBegin('dat_jobname')
+    CALL BeginTrack('dat_jobname')
 
     ! reads jobname from database. See description of *GET
 
@@ -41,7 +42,7 @@ CONTAINS
     cerrinfo(1) = jobname
     CALL ans_note(fname, __LINE__, libname, '  jobname: %s')
 
-    CALL TrackEnd('dat_jobname')
+    CALL EndTrack()
 
   END SUBROUTINE dat_jobname
 

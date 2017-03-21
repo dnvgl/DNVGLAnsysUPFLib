@@ -8,7 +8,7 @@
 
 ! ID: $Id$
 
-MODULE gl_math
+MODULE dnvgl_math
 
   IMPLICIT NONE
 
@@ -53,10 +53,9 @@ CONTAINS
 
   END FUNCTION deg2rad
 
-END MODULE gl_math
+END MODULE dnvgl_math
 
 ! Local Variables:
-! mode: fortran
-! ispell-local-dictionary: "english"
+! mode: f90
 ! compile-command: "make"
 ! End:

@@ -14,6 +14,7 @@
 
 MODULE ansys_upf
 
+  PUBLIC
   ! **************************************************************
   ! Functions for accessing data on the command line
   ! integer function  intinfun(iField) - gets an integer from field iField
@@ -1506,6 +1507,8 @@ MODULE ansys_upf
        CHARACTER(LEN=*), intent(in) :: sub32
      END SUBROUTINE TrackEnd
   END INTERFACE
+
+  PRIVATE :: TrackBegin, TrackEnd
 
   ! 8.2.6. erhandler Subroutine (Displaying ANSYS Errors)
   ! *** primary function:    Display ANSYS error messages

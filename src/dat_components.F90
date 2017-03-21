@@ -14,11 +14,10 @@ CONTAINS
 
   SUBROUTINE dat_components(el_data)
 
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, &
-         elmiqr, erhandler
+    USE ansys_upf, ONLY : RunCommand, elmiqr, erhandler
     USE ansys_par, ONLY : CMD_MAX_LENG, ERH_FNAME_LEN, DB_NUMSELECTED, PARMSIZE
 
-    USE glans
+    USE dnvglans
     USE LOCMOD, ONLY : libname
     USE ans_common
 
@@ -46,7 +45,7 @@ CONTAINS
 
     CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
 
-    CALL TrackBegin('dat_components')
+    CALL BeginTrack('dat_components')
 
     ! find number of components: -> ansys_comp
     flag = get(ansys_comp, Entity='COMP', ENTNUM=0, Item1='NCOMP   ')
@@ -183,7 +182,7 @@ CONTAINS
     cmd = 'CMDELE,XXXCOMP'
     iErr = RunCommand(LEN_TRIM(cmd), cmd)
 
-    CALL TrackEnd('dat_components')
+    CALL EndTrack()
 
   END SUBROUTINE dat_components
 
@@ -191,11 +190,10 @@ CONTAINS
 
   SUBROUTINE ans2bmf_cstore(comp, csub, el_data)
 
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd, elmget, elmiqr, &
-         elnext, etyget
+    USE ansys_upf, ONLY : elmget, elmiqr, elnext, etyget
     USE ansys_par, ONLY : DB_NUMSELECTED, EL_DIM, EL_TYPE, ERH_FNAME_LEN, &
          & NNMAX, PARMSIZE, KYOP1
-    USE glans
+    USE dnvglans
     USE LOCMOD, ONLY : libname
     USE ans_common, ONLY : comp_num, el_count, el_offset, ielc, &
          l_comp_ansys, l_comp_csub, l_csub_ename, l_comp_len, &
@@ -225,7 +223,7 @@ CONTAINS
 
     CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
 
-    CALL TrackBegin('ans2bmf_cstore')
+    CALL BeginTrack('ans2bmf_cstore')
 
     CALL cmselect('s', 'XXXCOMP')
 
@@ -311,7 +309,7 @@ CONTAINS
        call ans_note(fname, __LINE__, libname, '       - len  %i')
     END IF
 
-    CALL TrackEnd('ans2bmf_cstore')
+    CALL EndTrack()
 
   END SUBROUTINE ans2bmf_cstore
 
@@ -319,10 +317,10 @@ CONTAINS
 
   SUBROUTINE ans2bmf_elread(el_data)
 
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd, elmiqr, elnext
+    USE ansys_upf, ONLY : elmiqr, elnext
     USE ansys_par, ONLY : DB_NUMSELECTED, ERH_FNAME_LEN, PARMSIZE
     USE ans_common, ONLY : el_offset, n_elem
-    use glans, ONLY : derrinfo, cerrinfo, ans_error
+    USE dnvglans, ONLY : BeginTrack, EndTrack, derrinfo, cerrinfo, ans_error
     USE LOCMOD, ONLY : libname
 
     ! Purpose:
@@ -340,7 +338,7 @@ CONTAINS
 
     CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
 
-    CALL TrackBegin('ans2bmf_elread')
+    CALL BeginTrack('ans2bmf_elread')
 
     nmax = elmiqr(0, DB_NUMSELECTED)
     n_elem=n_elem-nmax
@@ -360,7 +358,7 @@ CONTAINS
        el_offset=el_offset+1
     END DO
 
-    CALL TrackEnd('ans2bmf_elread')
+    CALL EndTrack()
 
   END SUBROUTINE ans2bmf_elread
 

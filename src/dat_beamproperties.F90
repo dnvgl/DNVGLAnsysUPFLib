@@ -11,12 +11,18 @@
 MODULE mod_dat_beamproperties
 
   USE ansys_par, ONLY : PARMSIZE, ERH_FNAME_LEN
+  USE dnvglans, ONLY : derrinfo, BeginTrack, EndTrack
+
+
+  USE LOCMOD, ONLY : libname
+
+  PRIVATE :: PARMSIZE, ERH_FNAME_LEN, libname, derrinfo
 
   PRIVATE
 
   CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
 
-  PUBLIC :: dat_beamproperties, ans2bmf_rlnosel, ans2bmf_rlsle
+  PUBLIC :: dat_beamproperties, ans2bmf_rlnosel, ans2bmf_rlsle, dat_cs_material
 
 CONTAINS
 
@@ -28,23 +34,20 @@ CONTAINS
 
     TYPE(bp_type) :: bp
 
-    CALL TrackBegin("dat_beamp")
+    CALL BeginTrack("dat_beamp")
 
     CALL dat_beamproperties_rc(bp)
     CALL dat_beamproperties_sec(bp)
 
-    CALL TrackEnd("dat_beamp")
+    CALL EndTrack()
 
   END SUBROUTINE dat_beamproperties
 
   SUBROUTINE dat_beamproperties_sec(bp)
 
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd
-
     USE ansys_par, ONLY : STRING_MAX_LENG, ERH_FATAL
     USE ans_common
-    USE glans
-    USE LOCMOD, ONLY : libname
+    USE dnvglans
 
     IMPLICIT NONE
 
@@ -78,7 +81,7 @@ CONTAINS
     INTEGER :: iErr
     LOGICAL :: err
 
-    CALL TrackBegin("dat_beamp_sec")
+    CALL BeginTrack("dat_beamp_sec")
 
     ! Loop over all sections
     err = s_get(fname, libname, __LINE__, ERH_FATAL, &
@@ -99,6 +102,7 @@ CONTAINS
           bp%se_bp_map(bp%snum)%i = bp%num
           bp%se_bp_map(bp%snum)%j = bp%num
 
+          bp%data(bp%num)%id = bp%num
           bp%data(bp%num)%A(:) = 0d0
           bp%data(bp%num)%I(:) = 0d0
           bp%data(bp%num)%e(:) = 0d0
@@ -154,8 +158,10 @@ CONTAINS
           CASE DEFAULT
              cerrinfo(1) = sec_subtype
              CALL ans_fatal(fname, __LINE__, libname, &
-                  & ' Section SUBTYPE "%s" for section %d not supported.')
+                  & 'Section SUBTYPE "%s" for section %d not supported.')
           END SELECT
+
+          section_info%id = bp%num
 
           bp%cs_info(bp%snum) = section_info
 
@@ -182,19 +188,18 @@ CONTAINS
 
     END DO
 
-    CALL TrackEnd("dat_beamp_sec")
+    CALL EndTrack()
 
   END SUBROUTINE dat_beamproperties_sec
 
   SUBROUTINE dat_beamproperties_rc(bp)
 
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd, rlget, &
-         rlinqr, vzero
+    USE ansys_upf, ONLY : rlget, rlinqr, vzero
     USE ansys_par, ONLY : DB_NUMSELECTED, DB_SELECTED, DB_MAXDEFINED, &
          ERH_ERROR, ERH_NOTE
-    USE glans
+    USE dnvglans
     USE ans_common
-    USE gl_math
+    USE dnvgl_math
     USE LOCMOD, ONLY : libname
 
     ! Purpose:
@@ -225,7 +230,7 @@ CONTAINS
 100 FORMAT (A, ':', I3, ':dat_beamproperties_rc')
 #endif
 
-    CALL TrackBegin('dat_beamproperties_rc')
+    CALL BeginTrack('dat_beamproperties_rc')
 
     ! select all real constants of BEAM44 elements
     CALL ans2bmf_rlnosel()
@@ -435,7 +440,7 @@ CONTAINS
 
     CALL ans2bmf_rlallsel()
 
-    CALL TrackEnd('dat_beamproperties_rc')
+    CALL EndTrack()
 
   END SUBROUTINE dat_beamproperties_rc
 
@@ -443,7 +448,7 @@ CONTAINS
 
   SUBROUTINE ans2bmf_rlallsel()
 
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd, rlinqr, rlsel
+    USE ansys_upf, ONLY : rlinqr, rlsel
     USE ansys_par, ONLY : DB_MAXDEFINED
 
     IMPLICIT NONE
@@ -456,14 +461,14 @@ CONTAINS
     ! ======================================================================
     INTEGER r, rmax
 
-    CALL TrackBegin('ans2bmf_rlallsel')
+    CALL BeginTrack('ans2bmf_rlallsel')
 
     rmax = rlinqr(0, DB_MAXDEFINED)
     DO r = 1, rmax
        CALL rlsel(r, 1)
     END DO
 
-    CALL TrackEnd('ans2bmf_rlallsel')
+    CALL EndTrack()
 
   END SUBROUTINE ans2bmf_rlallsel
 
@@ -471,7 +476,7 @@ CONTAINS
 
   SUBROUTINE ans2bmf_rlnosel()
 
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd, rlinqr, rlsel
+    USE ansys_upf, ONLY : rlinqr, rlsel
     USE ansys_par, ONLY : DB_MAXDEFINED
 
     IMPLICIT NONE
@@ -484,14 +489,14 @@ CONTAINS
     ! ======================================================================
     INTEGER r, rmax
 
-    CALL TrackBegin('ans2bmf_rlnosel')
+    CALL BeginTrack('ans2bmf_rlnosel')
 
     rmax = rlinqr(0, DB_MAXDEFINED)
     DO r = 1, rmax
        CALL rlsel(r, -1)
     END DO
 
-    CALL TrackEnd('ans2bmf_rlnosel')
+    CALL EndTrack()
 
   END SUBROUTINE ans2bmf_rlnosel
 
@@ -499,7 +504,7 @@ CONTAINS
 
   SUBROUTINE ans2bmf_rlsle()
 
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd, elmget, elnext
+    USE ansys_upf, ONLY : elmget, elnext
     USE ansys_par, ONLY : EL_DIM, EL_REAL, NNMAX
 
     IMPLICIT NONE
@@ -515,7 +520,7 @@ CONTAINS
     INTEGER, DIMENSION(EL_DIM) :: elmdat
     INTEGER, DIMENSION(NNMAX) :: nodes
 
-    CALL TrackBegin('ans2bmf_rlsle')
+    CALL BeginTrack('ans2bmf_rlsle')
 
     CALL ans2bmf_rlnosel()
 
@@ -526,17 +531,16 @@ CONTAINS
        el = elnext(el)
     END DO
 
-    CALL TrackEnd('ans2bmf_rlsle')
+    CALL EndTrack()
 
   END SUBROUTINE ans2bmf_rlsle
 
   SUBROUTINE get_t_beam_common(n, name, area, iyy, iyz, izz, warp_val, tors, cgy, cgz, &
        shcy, shcz, scyy, scyz, sczz, offset, offy, offz)
 
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd
     USE ansys_par, ONLY : ERH_FATAL
     USE ans_common
-    USE glans
+    USE dnvglans
     USE LOCMOD, ONLY : libname
 
     IMPLICIT NONE
@@ -562,7 +566,7 @@ CONTAINS
 
     LOGICAL :: err
 
-    CALL TrackBegin("get_t_beam_common")
+    CALL BeginTrack("get_t_beam_common")
 
     derrinfo(1) = n
 
@@ -584,15 +588,14 @@ CONTAINS
     err = s_get(fname, libname, __LINE__, ERH_FATAL, offy, 'SECP', n, 'PROP     ', 'OFFY    ')
     err = s_get(fname, libname, __LINE__, ERH_FATAL, offz, 'SECP', n, 'PROP     ', 'OFFZ    ')
 
-    CALL TrackEnd("get_t_beam_common")
+    CALL EndTrack()
 
   END SUBROUTINE get_t_beam_common
 
   SUBROUTINE get_t_beam_rect(section_info, cgy, cgz, n)
 
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd
     USE ansys_par, ONLY : ERH_FATAL
-    USE glans
+    USE dnvglans
     USE LOCMOD, ONLY : libname
     USE ans_common, ONLY : cross_section_info, CS_TYPE_RECT
 
@@ -606,7 +609,7 @@ CONTAINS
 
     LOGICAL :: err
 
-    CALL TrackBegin("get_t_beam_rect")
+    CALL BeginTrack("get_t_beam_rect")
 
     derrinfo(1) = n
 
@@ -626,20 +629,19 @@ CONTAINS
     section_info%t_z_2 = section_info%t_z_2 / 2d0
     section_info%t_z_1 = section_info%t_z_2
 
-    section_info%web_height = section_info%t_z_2
-    section_info%web_thickness = section_info%t_y_2
+    section_info%web_height = section_info%data(1)
+    section_info%web_thickness = section_info%data(2)
 
     section_info%type_code = CS_TYPE_RECT
 
-    CALL TrackEnd("get_t_beam_rect")
+    CALL EndTrack()
 
   END SUBROUTINE get_t_beam_rect
 
   SUBROUTINE get_t_beam_quad(section_info, cgy, cgz, n)
 
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd
     USE ansys_par, ONLY : ERH_FATAL
-    USE glans
+    USE dnvglans
     USE LOCMOD, ONLY : libname
     USE ans_common, ONLY : cross_section_info, CS_TYPE_QUAD
 
@@ -654,7 +656,7 @@ CONTAINS
     INTEGER :: i
     LOGICAL :: err
 
-    CALL TrackBegin("get_t_beam_quad")
+    CALL BeginTrack("get_t_beam_quad")
 
     derrinfo(2) = n
 
@@ -679,14 +681,13 @@ CONTAINS
 
     section_info%type_code = CS_TYPE_QUAD
 
-    CALL TrackEnd("get_t_beam_quad")
+    CALL EndTrack()
 
   END SUBROUTINE get_t_beam_quad
 
   SUBROUTINE get_t_beam_csolid(section_info, cgy, cgz, n)
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd
     USE ansys_par, ONLY : ERH_FATAL
-    USE glans
+    USE dnvglans
     USE LOCMOD, ONLY : libname
     USE ans_common, ONLY : cross_section_info, CS_TYPE_CSOLID
 
@@ -699,7 +700,7 @@ CONTAINS
     LOGICAL :: err
     INTEGER :: i
 
-    CALL TrackBegin("get_t_beam_csolid")
+    CALL BeginTrack("get_t_beam_csolid")
 
     derrinfo(1) = n
 
@@ -719,14 +720,13 @@ CONTAINS
 
     section_info%type_code = CS_TYPE_CSOLID
 
-    CALL TrackEnd("get_t_beam_csolid")
+    CALL EndTrack()
 
   END SUBROUTINE get_t_beam_csolid
 
   SUBROUTINE get_t_beam_ctube(section_info, cgy, cgz, n)
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd
     USE ansys_par, ONLY : ERH_FATAL
-    USE glans
+    USE dnvglans
     USE LOCMOD, ONLY : libname
     USE ans_common, ONLY : cross_section_info, CS_TYPE_CTUBE
 
@@ -740,7 +740,7 @@ CONTAINS
     LOGICAL :: err
     INTEGER :: i
 
-    CALL TrackBegin("get_t_beam_ctube")
+    CALL BeginTrack("get_t_beam_ctube")
 
     derrinfo(1) = n
 
@@ -761,14 +761,13 @@ CONTAINS
 
     section_info%type_code = CS_TYPE_CTUBE
 
-    CALL TrackEnd("get_t_beam_ctube")
+    CALL EndTrack()
 
   END SUBROUTINE get_t_beam_ctube
 
   SUBROUTINE get_t_beam_chan(section_info, cgy, cgz, n)
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd
     USE ansys_par, ONLY : ERH_FATAL
-    USE glans
+    USE dnvglans
     USE LOCMOD, ONLY : libname
     USE ans_common, ONLY : cross_section_info, CS_TYPE_CHAN
 
@@ -783,7 +782,7 @@ CONTAINS
     INTEGER :: i
     LOGICAL :: err
 
-    CALL TrackBegin("get_t_beam_chan")
+    CALL BeginTrack("get_t_beam_chan")
 
     derrinfo(2) = n
 
@@ -807,14 +806,13 @@ CONTAINS
 
     section_info%type_code = CS_TYPE_CHAN
 
-    CALL TrackEnd("get_t_beam_chan")
+    CALL EndTrack()
 
   END SUBROUTINE get_t_beam_chan
 
   SUBROUTINE get_t_beam_i(section_info, cgy, cgz, n)
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd
     USE ansys_par, ONLY : ERH_FATAL
-    USE glans
+    USE dnvglans
     USE LOCMOD, ONLY : libname
     USE ans_common, ONLY : cross_section_info, CS_TYPE_I
 
@@ -829,7 +827,7 @@ CONTAINS
     INTEGER :: i
     LOGICAL :: err
 
-    CALL TrackBegin("get_t_beam_i")
+    CALL BeginTrack("get_t_beam_i")
 
     derrinfo(2) = n
 
@@ -853,14 +851,13 @@ CONTAINS
 
     section_info%type_code = CS_TYPE_I
 
-    CALL TrackEnd("get_t_beam_i")
+    CALL EndTrack()
 
   END SUBROUTINE get_t_beam_i
 
   SUBROUTINE get_t_beam_z(section_info, cgy, cgz, n)
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd
     USE ansys_par, ONLY : ERH_FATAL
-    USE glans
+    USE dnvglans
     USE LOCMOD, ONLY : libname
     USE ans_common, ONLY : cross_section_info, CS_TYPE_Z
 
@@ -875,7 +872,7 @@ CONTAINS
     INTEGER :: i
     LOGICAL :: err
 
-    CALL TrackBegin("get_t_beam_z")
+    CALL BeginTrack("get_t_beam_z")
 
     derrinfo(2) = n
 
@@ -899,16 +896,15 @@ CONTAINS
 
     section_info%type_code = CS_TYPE_Z
 
-    CALL TrackEnd("get_t_beam_z")
+    CALL EndTrack()
 
   END SUBROUTINE get_t_beam_z
 
   SUBROUTINE get_t_beam_l(section_info, cgy, cgz, n)
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd
     USE ansys_par, ONLY : ERH_FATAL
-    USE glans
+    USE dnvglans
     USE LOCMOD, ONLY : libname
-    USE ans_common, ONLY : cross_section_info, CS_TYPE_RECT
+    USE ans_common, ONLY : cross_section_info, CS_TYPE_L
 
     IMPLICIT NONE
 
@@ -921,7 +917,7 @@ CONTAINS
     INTEGER :: i
     LOGICAL :: err
 
-    CALL TrackBegin("get_t_beam_l")
+    CALL BeginTrack("get_t_beam_l")
 
     derrinfo(2) = n
 
@@ -948,16 +944,15 @@ CONTAINS
     section_info%flange_width = w(1)
     section_info%flange_thickness = t(1)
 
-    section_info%type_code = CS_TYPE_RECT
+    section_info%type_code = CS_TYPE_L
 
-    CALL TrackEnd("get_t_beam_l")
+    CALL EndTrack()
 
   END SUBROUTINE get_t_beam_l
 
   SUBROUTINE get_t_beam_t(section_info, cgy, cgz, n)
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd
     USE ansys_par, ONLY : ERH_FATAL
-    USE glans
+    USE dnvglans
     USE LOCMOD, ONLY : libname
     USE ans_common, ONLY : cross_section_info, CS_TYPE_T
 
@@ -972,7 +967,7 @@ CONTAINS
     INTEGER :: i
     LOGICAL :: err
 
-    CALL TrackBegin("get_t_beam_t")
+    CALL BeginTrack("get_t_beam_t")
 
     derrinfo(2) = n
 
@@ -994,21 +989,20 @@ CONTAINS
     section_info%t_z_1 = - cgz
     section_info%t_z_2 = w(2) - cgz
 
-    section_info%web_height = w(2) - t(1)
+    section_info%web_height = SIGN(ABS(w(2)) - t(1), w(2))
     section_info%web_thickness = t(2)
     section_info%flange_width = w(1)
     section_info%flange_thickness = t(1)
 
     section_info%type_code = CS_TYPE_T
 
-    CALL TrackEnd("get_t_beam_t")
+    CALL EndTrack()
 
   END SUBROUTINE get_t_beam_t
 
   SUBROUTINE get_t_beam_hats(section_info, cgy, cgz, n)
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd
     USE ansys_par, ONLY : ERH_FATAL
-    USE glans
+    USE dnvglans
     USE LOCMOD, ONLY : libname
     USE ans_common, ONLY : cross_section_info, CS_TYPE_HATS
 
@@ -1023,7 +1017,7 @@ CONTAINS
     INTEGER :: i
     LOGICAL :: err
 
-    CALL TrackBegin("get_t_beam_hats")
+    CALL BeginTrack("get_t_beam_hats")
 
     derrinfo(2) = n
 
@@ -1049,14 +1043,13 @@ CONTAINS
 
     section_info%type_code = CS_TYPE_HATS
 
-    CALL TrackEnd("get_t_beam_hats")
+    CALL EndTrack()
 
   END SUBROUTINE get_t_beam_hats
 
   SUBROUTINE get_t_beam_hrec(section_info, cgy, cgz, n)
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd
     USE ansys_par, ONLY : ERH_FATAL
-    USE glans
+    USE dnvglans
     USE LOCMOD, ONLY : libname
     USE ans_common, ONLY : cross_section_info, CS_TYPE_HREC
 
@@ -1071,7 +1064,7 @@ CONTAINS
     INTEGER :: i
     LOGICAL :: err
 
-    CALL TrackBegin("get_t_beam_hrec")
+    CALL BeginTrack("get_t_beam_hrec")
 
     derrinfo(2) = n
 
@@ -1097,14 +1090,13 @@ CONTAINS
 
     section_info%type_code = CS_TYPE_HREC
 
-    CALL TrackEnd("get_t_beam_hrec")
+    CALL EndTrack()
 
   END SUBROUTINE get_t_beam_hrec
 
   SUBROUTINE get_t_beam_asec(section_info, cgy, cgz, n)
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd
     USE ansys_par, ONLY : ERH_FATAL
-    USE glans
+    USE dnvglans
     USE LOCMOD, ONLY : libname
     USE ans_common, ONLY : cross_section_info, CS_TYPE_ASEC
 
@@ -1117,7 +1109,7 @@ CONTAINS
     LOGICAL :: err
     INTEGER :: i
 
-    CALL TrackBegin("get_t_beam_asec")
+    CALL BeginTrack("get_t_beam_asec")
 
     ALLOCATE(section_info%data(12))
     DO i = 1, 12
@@ -1144,14 +1136,13 @@ CONTAINS
 
     section_info%type_code = CS_TYPE_ASEC
 
-    CALL TrackEnd("get_t_beam_asec")
+    CALL EndTrack()
 
   END SUBROUTINE get_t_beam_asec
 
   SUBROUTINE get_t_beam_mesh(section_info, cgy, cgz, n)
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd
     USE ansys_par, ONLY : ERH_FATAL
-    USE glans
+    USE dnvglans
     USE LOCMOD, ONLY : libname
     USE ans_common, ONLY : cross_section_info, CS_TYPE_MESH
 
@@ -1161,7 +1152,7 @@ CONTAINS
     REAL(KIND=8), INTENT(IN) :: cgy, cgz
     INTEGER, INTENT(IN) :: n
 
-    CALL TrackBegin("get_t_beam_mesh")
+    CALL BeginTrack("get_t_beam_mesh")
 
     section_info%t_max = 0d0
     section_info%t_min = 0d0
@@ -1172,9 +1163,55 @@ CONTAINS
 
     section_info%type_code = CS_TYPE_MESH
 
-    CALL TrackEnd("get_t_beam_mesh")
+    CALL EndTrack()
 
   END SUBROUTINE get_t_beam_mesh
+
+  SUBROUTINE dat_cs_material(gp, mat, bp)
+    USE ans_common
+    IMPLICIT NONE
+    INTEGER, INTENT(IN) :: gp
+    INTEGER, INTENT(IN) :: mat
+    TYPE(bp_type), INTENT(INOUT) :: bp
+
+    TYPE(cs_mat_entry), POINTER :: gp_ptr_cur => null()
+    TYPE(cs_mat_entry), POINTER :: gp_ptr_prev => null()
+
+    INTEGER :: i
+
+    CALL BeginTrack("dat_cs_material")
+
+    gp_loop: DO i = 1, size(bp%cs_info)
+       if (bp%cs_info(i)%id .NE. gp) THEN
+          derrinfo(1:2) = (/ bp%cs_info(i)%id, gp /)
+          CYCLE gp_loop
+       END if
+       IF (ASSOCIATED(bp%cs_info(i)%gp_entries)) THEN
+          gp_ptr_cur => bp%cs_info(i)%gp_entries
+          cs_loop: DO WHILE(associated(gp_ptr_cur))
+             IF (gp_ptr_cur%mat_id .EQ. mat) THEN
+                EXIT gp_loop
+             END IF
+             gp_ptr_prev => gp_ptr_cur
+             gp_ptr_cur => gp_ptr_cur%next
+          END DO cs_loop
+          ALLOCATE (gp_ptr_prev%next)
+          gp_ptr_cur = gp_ptr_prev%next
+          gp_ptr_cur%next => null()
+          gp_ptr_cur%mat_id = mat
+          bp%cs_id_max = bp%cs_id_max + 1
+          gp_ptr_cur%cs_id = bp%cs_id_max
+       ELSE
+          ALLOCATE (bp%cs_info(i)%gp_entries)
+          bp%cs_info(i)%gp_entries%next => null()
+          bp%cs_info(i)%gp_entries%mat_id = mat
+          bp%cs_id_max = bp%cs_id_max + 1
+          bp%cs_info(i)%gp_entries%cs_id = bp%cs_id_max
+       END IF
+       EXIT gp_loop
+    END DO gp_loop
+    CALL EndTrack()
+  END SUBROUTINE dat_cs_material
 
 END MODULE mod_dat_beamproperties
 

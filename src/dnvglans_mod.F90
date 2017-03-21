@@ -1,9 +1,9 @@
-! Copyright (C) 2007 by Germanischer Lloyd AG
+! Copyright (C) 2007 by DNV GL SE
 
 ! ======================================================================
 ! Task      Helper routines for ansys converters
 ! ----------------------------------------------------------------------
-! Author    Berthold Höllmann <hoel@GL-Group.com>
+! Author    Berthold Höllmann <berthold.hoellmann@dnvgl.com>
 ! Project   ans2bmf
 ! ======================================================================
 
@@ -17,14 +17,31 @@
 #endif !DEBUG_LOC
 #endif
 
-MODULE glans
+MODULE dnvglans
 
   USE ansys_par, ONLY : PARMSIZE, ERH_FNAME_LEN, STRING_MAX_LENG, &
        & ERH_NOTE, ERH_WARNING, ERH_ERROR, ERH_FATAL, ERH_CAUTION
 
-  PUBLIC :: ERH_FNAME_LEN
+  PRIVATE :: PARMSIZE, ERH_FNAME_LEN, STRING_MAX_LENG, &
+       & ERH_NOTE, ERH_WARNING, ERH_ERROR, ERH_FATAL, ERH_CAUTION
 
   PRIVATE
+
+  TYPE :: TrackStackType
+     CHARACTER(LEN = 32) :: position
+     TYPE(TrackStackType), POINTER :: prev => null()
+     TYPE(TrackStackType), POINTER :: next => null()
+  END TYPE TrackStackType
+
+  TYPE(TrackStackType), POINTER :: TrackStack => null()
+  TYPE(TrackStackType), POINTER :: TrackStackPos => null()
+  PRIVATE :: TrackStack, TrackStackPos
+
+  INTERFACE BeginTrack
+     MODULE PROCEDURE BeginTrack_p, BeginTrack_fl
+  END INTERFACE BeginTrack
+
+  PUBLIC :: BeginTrack, EndTrack
 
   INTERFACE get
      MODULE PROCEDURE getf, getfs, getfi, geti, getis, getii, gets, getsi
@@ -64,6 +81,65 @@ MODULE glans
   PUBLIC :: ans_note, ans_warn, ans_error, ans_fatal, ans_caution
 
 CONTAINS
+
+  SUBROUTINE BeginTrack_p(pos)
+    IMPLICIT NONE
+    CHARACTER(LEN=*), INTENT(IN) :: pos
+    TYPE(TrackStackType), POINTER :: new
+    IF (ASSOCIATED(TrackStack)) THEN
+       ALLOCATE(new)
+       new%prev => TrackStackPos
+       new%position = pos
+       TrackStackPos => new
+    ELSE
+       ALLOCATE(new)
+       new%position = pos
+       TrackStackPos => new
+       TrackStack => new
+    END IF
+    CALL TrackBegin(pos(1:MIN(32, LEN_TRIM(pos))))
+  END SUBROUTINE BeginTrack_p
+
+  SUBROUTINE BeginTrack_fl(file, line)
+    IMPLICIT NONE
+    CHARACTER(LEN=*), INTENT(IN) :: file
+    INTEGER, INTENT(IN) :: line
+
+    CHARACTER(LEN=32) :: pos
+    CHARACTER(LEN=16) :: form
+
+    INTEGER :: tmp
+
+    tmp = MAX(1, INDEX(file, '/', .TRUE.), INDEX(file, '\\', .TRUE.))
+    pos = file(tmp:MIN(LEN_TRIM(file) - tmp, tmp+31))
+    tmp = MIN(LEN_TRIM(pos), INDEX(file, '.', .TRUE.))
+    IF (tmp .NE. 0) THEN
+       pos = pos(1:MIN(tmp, 32))
+    ELSE
+       pos = pos(1:32)
+    END IF
+    tmp = FLOOR(LOG10(DBLE(line)))
+    WRITE(form, fmt="('(I',I0,','':'',A',I0,')')") tmp + 1, 30 - tmp
+    WRITE(pos, form) line, pos
+    CALL BeginTrack_p(pos)
+  END SUBROUTINE BeginTrack_fl
+
+  SUBROUTINE EndTrack()
+    IF (ASSOCIATED(TrackStackPos)) THEN
+       CALL TrackEnd(TrackStackPos%position)
+       IF (ASSOCIATED(TrackStackPos%prev)) THEN
+          DEALLOCATE(TrackStackPos%next)
+          TrackStackPos%next => null()
+          TrackStackPos = TrackStackPos%prev
+       ELSE
+          DEALLOCATE(TrackStackPos)
+          TrackStackPos => null()
+       END IF
+    ELSE
+       CALL ans_fatal(fname, __LINE__, 'ansys_upf', &
+            & 'Track stack is empty')
+    END IF
+  END SUBROUTINE EndTrack
 
   SUBROUTINE ans_note(fname, line, libname, msg)
     IMPLICIT NONE
@@ -120,7 +196,7 @@ CONTAINS
     ! reads ANSYS command string 'cmd_str'
     ! puts out REAL(KIND=8) parameter 'dout'
 
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, parevl
+    USE ansys_upf, ONLY : RunCommand, parevl
     USE ansys_par, ONLY : CMD_MAX_LENG, STRING_MAX_LENG, PARMSIZE
     IMPLICIT NONE
     ! Purpose:
@@ -140,20 +216,20 @@ CONTAINS
 
     INTEGER :: iErr
 
-    CALL TrackBegin("glans:ans2bmf_get_d")
+    CALL BeginTrack("ans2bmf_get_d")
     cmd = '*GET,PAR_,'//cmd_str
     iErr = RunCommand(LEN_TRIM(cmd), cmd)
     para ='PAR_'
 
     CALL parevl(para, 0, subc, 2, dout, dummy, iErr)
 
-    CALL TrackEnd("glans:ans2bmf_get_d")
+    CALL EndTrack()
   END SUBROUTINE ans2bmf_get_d
 
   SUBROUTINE ans2bmf_get_s(cmd_str, sout)
     ! reads ANSYS command string 'cmd_str'
     ! writes a string of length 8 into 'sout'
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, parevl
+    USE ansys_upf, ONLY : RunCommand, parevl
     USE ansys_par, ONLY : CMD_MAX_LENG, STRING_MAX_LENG, PARMSIZE
     IMPLICIT NONE
     ! Purpose:
@@ -173,7 +249,7 @@ CONTAINS
 
     INTEGER :: iErr
 
-    CALL TrackBegin("glans:ans2bmf_get_s")
+    CALL BeginTrack("ans2bmf_get_s")
 
     cmd = '*GET,PAR_,'//cmd_str
     iErr = RunCommand(LEN_TRIM(cmd), cmd)
@@ -181,18 +257,17 @@ CONTAINS
     CALL parevl(para, 0, subc, 2, res_double, dummy, iErr)
     sout = TRIM(dummy)
 
-    CALL TrackEnd("glans:ans2bmf_get_s")
+    CALL EndTrack()
   END SUBROUTINE ans2bmf_get_s
 
   FUNCTION upcase(string) RESULT(upper)
     ! Convert input string to uppercase
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd
     IMPLICIT NONE
     CHARACTER(LEN=*), INTENT(IN) :: string
     CHARACTER(LEN=LEN(string)) :: upper
     INTEGER :: j
 
-    CALL TrackBegin('glans:upcase')
+    CALL BeginTrack('upcase')
 
     DO j = 1, LEN(string)
        IF(string(j:j) >= "a" .AND. string(j:j) <= "z") THEN
@@ -202,13 +277,13 @@ CONTAINS
        END IF
     END DO
 
-    CALL TrackEnd('glans:upcase')
+    CALL EndTrack()
 
   END FUNCTION upcase
 
   SUBROUTINE cmselect(mode, name)
     ! select component
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand
+    USE ansys_upf, ONLY : RunCommand
     USE ansys_par, ONLY : CMD_MAX_LENG, ERH_FATAL, ERH_FNAME_LEN, PARMSIZE
     IMPLICIT NONE
     ! Purpose:
@@ -238,9 +313,7 @@ CONTAINS
 
     CHARACTER(LEN=CMD_MAX_LENG) :: cmd
 
-!    CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
-
-    CALL TrackBegin('glans:cmselect')
+    CALL BeginTrack('cmselect')
 
     umode = upcase(mode)
 
@@ -250,7 +323,7 @@ CONTAINS
          & (umode.NE.'U') .AND. &
          & (umode.NE.'ALL') .AND. &
          & (umode.NE.'NONE')) THEN
-       CALL ans_fatal(fname, __LINE__, 'glansys', &
+       CALL ans_fatal(fname, __LINE__, 'dnvglansys', &
             & 'invalid mode: '//TRIM(umode)//'.')
     END IF
 
@@ -263,13 +336,13 @@ CONTAINS
 
     iErr = RunCommand(LEN_TRIM(cmd), cmd)
 
-    CALL TrackEnd('glans:cmselect')
+    CALL EndTrack()
 
     RETURN
   END SUBROUTINE cmselect
 
   SUBROUTINE eseli(Type, Item, Comp, VMIN, VMAX, VINC, KABS)
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand
+    USE ansys_upf, ONLY : RunCommand
     USE ansys_par, ONLY : CMD_MAX_LENG, ERH_FATAL, ERH_FNAME_LEN, PARMSIZE
 
     IMPLICIT NONE
@@ -337,9 +410,7 @@ CONTAINS
 
     CHARACTER(LEN=CMD_MAX_LENG) :: cmd
 
-    CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
-
-    CALL TrackBegin('glans:eseli')
+    CALL BeginTrack('eseli')
 
     utype = upcase(type)
 
@@ -350,13 +421,13 @@ CONTAINS
          & (utype.NE.'ALL').AND. &
          & (utype.NE.'NONE').AND. &
          & (utype.NE.'INVE')) THEN
-       CALL ans_fatal(fname, __LINE__, 'glansys', &
+       CALL ans_fatal(fname, __LINE__, 'dnvglansys', &
             & 'invalid type: '//TRIM(utype)//'.')
     END IF
 
     IF (PRESENT(Item)) THEN
        IF (LEN(item).GT.128) THEN
-          CALL ans_fatal(fname, __LINE__, 'glansys', &
+          CALL ans_fatal(fname, __LINE__, 'dnvglansys', &
                & 'length of value item greater then 129.')
        END IF
        uitem = upcase(item)
@@ -377,7 +448,7 @@ CONTAINS
             & (uitem.NE.'SFE').AND. &
             & (uitem.NE.'BFE').AND. &
             & (uitem.NE.'PATH')) THEN
-          CALL ans_fatal(fname, __LINE__, 'glansys', &
+          CALL ans_fatal(fname, __LINE__, 'dnvglansys', &
                & 'invalid item: '//TRIM(uitem)//'.')
        END IF
        IF (PRESENT(comp)) THEN
@@ -395,23 +466,23 @@ CONTAINS
                & (uitem.EQ.'PINC').AND. &
                & (uitem.EQ.'PEXC').AND. &
                & (uitem.EQ.'STRA')) THEN
-             CALL ans_fatal(fname, __LINE__, 'glansys', &
+             CALL ans_fatal(fname, __LINE__, 'dnvglansys', &
                   & 'invalid input: component not allowed '// &
                   & 'with item '//uitem//'.')
           ELSE IF (uitem.EQ.'SFE') THEN
-             CALL ans_fatal(fname, __LINE__, 'glansys', &
+             CALL ans_fatal(fname, __LINE__, 'dnvglansys', &
                   & 'item '//uitem//' not yet supported.')
           ELSE IF (uitem.EQ.'BFE') THEN
-             CALL ans_fatal(fname, __LINE__, 'glansys', &
+             CALL ans_fatal(fname, __LINE__, 'dnvglansys', &
                   & 'item '//uitem//' not yet supported.')
           ELSE IF (uitem.EQ.'PATH') THEN
-             CALL ans_fatal(fname, __LINE__, 'glansys', &
+             CALL ans_fatal(fname, __LINE__, 'dnvglansys', &
                   & 'item '//uitem//' not yet supported.')
           END IF
        END IF
     ELSE
        IF (PRESENT(comp)) THEN
-          CALL ans_fatal(fname, __LINE__, 'glansys', &
+          CALL ans_fatal(fname, __LINE__, 'dnvglansys', &
                & 'invaid call: comp given, but no item.')
        END IF
     END IF
@@ -454,14 +525,14 @@ CONTAINS
 
     iErr = RunCommand(LEN_TRIM(cmd), cmd)
 
-    CALL TrackEnd('glans:eseli')
+    CALL EndTrack()
 
     RETURN
   END SUBROUTINE eseli
 
   SUBROUTINE esels(Type, Item, Comp, VMIN)
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand
-    USE ansys_par, ONLY : CMD_MAX_LENG, ERH_FNAME_LEN, PARMSIZE, STRING_MAX_LENG
+    USE ansys_upf, ONLY : RunCommand
+    USE ansys_par, ONLY : CMD_MAX_LENG, PARMSIZE, STRING_MAX_LENG
 
     IMPLICIT NONE
     ! Purpose: select elements
@@ -512,7 +583,7 @@ CONTAINS
 
     CHARACTER(LEN=CMD_MAX_LENG) :: cmd
 
-    CALL TrackBegin('glans:esels')
+    CALL BeginTrack('esels')
 
     utype = upcase(type)
 
@@ -523,12 +594,12 @@ CONTAINS
          & (utype.NE.'ALL').AND. &
          & (utype.NE.'NONE').AND. &
          & (utype.NE.'INVE')) THEN
-       CALL ans_fatal(fname, __LINE__, 'glansys', &
+       CALL ans_fatal(fname, __LINE__, 'dnvglansys', &
             & 'invalid type: '//TRIM(utype)//'.')
     END IF
 
     IF (LEN(item).GT.STRING_MAX_LENG) THEN
-       CALL ans_fatal(fname, __LINE__, 'glansys', &
+       CALL ans_fatal(fname, __LINE__, 'dnvglansys', &
             & 'length of value item greater then STRING_MAX_LENG.')
     END IF
     uitem = upcase(item)
@@ -549,7 +620,7 @@ CONTAINS
          & (uitem.NE.'SFE').AND. &
          & (uitem.NE.'BFE').AND. &
          & (uitem.NE.'PATH')) THEN
-       CALL ans_fatal(fname, __LINE__, 'glansys', &
+       CALL ans_fatal(fname, __LINE__, 'dnvglansys', &
             & 'invalid item: '//TRIM(uitem)//'.')
     END IF
     IF (PRESENT(comp)) THEN
@@ -567,17 +638,17 @@ CONTAINS
             & (uitem.EQ.'PINC').AND. &
             & (uitem.EQ.'PEXC').AND. &
             & (uitem.EQ.'STRA')) THEN
-          CALL ans_fatal(fname, __LINE__, 'glansys', &
+          CALL ans_fatal(fname, __LINE__, 'dnvglansys', &
                & 'invalid input: component not allowed '// &
                & 'with item '//uitem//'.')
        ELSE IF (uitem.EQ.'SFE') THEN
-          CALL ans_fatal(fname, __LINE__, 'glansys', &
+          CALL ans_fatal(fname, __LINE__, 'dnvglansys', &
                & 'item '//uitem//' not yet supported.')
        ELSE IF (uitem.EQ.'BFE') THEN
-          CALL ans_fatal(fname, __LINE__, 'glansys', &
+          CALL ans_fatal(fname, __LINE__, 'dnvglansys', &
                & 'item '//uitem//' not yet supported.')
        ELSE IF (uitem.EQ.'PATH') THEN
-          CALL ans_fatal(fname, __LINE__, 'glansys', &
+          CALL ans_fatal(fname, __LINE__, 'dnvglansys', &
                & 'item '//uitem//' not yet supported.')
        END IF
     END IF
@@ -596,14 +667,14 @@ CONTAINS
 
     iErr = RunCommand(LEN_TRIM(cmd), cmd)
 
-    CALL TrackEnd('glans:esels')
+    CALL EndTrack()
 
     RETURN
   END SUBROUTINE esels
 
   SUBROUTINE nsel(Type, Item, Comp, VMIN, VMAX, VINC, KABS)
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand
-    USE ansys_par, ONLY : CMD_MAX_LENG, ERH_FATAL, ERH_FNAME_LEN, PARMSIZE
+    USE ansys_upf, ONLY : RunCommand
+    USE ansys_par, ONLY : CMD_MAX_LENG, ERH_FATAL, PARMSIZE
 
     IMPLICIT NONE
     ! Purpose: select nodes
@@ -662,9 +733,7 @@ CONTAINS
 
     CHARACTER(LEN=CMD_MAX_LENG) :: cmd
 
-    CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
-
-    CALL TrackBegin('glans:nsel')
+    CALL BeginTrack('nsel')
 
     utype = upcase(type)
 
@@ -675,13 +744,13 @@ CONTAINS
          & (utype.NE.'ALL').AND. &
          & (utype.NE.'NONE').AND. &
          & (utype.NE.'INVE')) THEN
-       CALL ans_fatal(fname, __LINE__, 'glansys', &
+       CALL ans_fatal(fname, __LINE__, 'dnvglansys', &
             & 'invalid type: '//TRIM(utype)//'.')
     END IF
 
     IF (PRESENT(Item)) THEN
        IF (LEN(item).GT.128) THEN
-          CALL ans_fatal(fname, __LINE__, 'glansys', &
+          CALL ans_fatal(fname, __LINE__, 'dnvglansys', &
                & 'length of value item greater then 129.')
        END IF
        uitem = upcase(item)
@@ -695,11 +764,11 @@ CONTAINS
             & (uitem.NE.'D').AND. &
             & (uitem.NE.'F').AND. &
             & (uitem.NE.'BF')) THEN
-          CALL ans_fatal(fname, __LINE__, 'glansys', &
+          CALL ans_fatal(fname, __LINE__, 'dnvglansys', &
                & 'invalid item: '//TRIM(uitem)//'.')
        END IF
        IF (PRESENT(comp)) THEN
-          CALL ans_fatal(fname, __LINE__, 'glansys', &
+          CALL ans_fatal(fname, __LINE__, 'dnvglansys', &
                & 'component not yet allowed.')
        END IF
     END IF
@@ -742,7 +811,7 @@ CONTAINS
 
     iErr = RunCommand(LEN_TRIM(cmd), cmd)
 
-    CALL TrackEnd('glans:nsel')
+    CALL EndTrack()
 
     RETURN
   END SUBROUTINE nsel
@@ -820,7 +889,7 @@ CONTAINS
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: IT2NUM
 
-    CALL TrackBegin('glans:s_gets')
+    CALL BeginTrack('s_gets')
 
     derrinfo(1) = ENTNUM
 
@@ -839,12 +908,12 @@ CONTAINS
                & ', ' // Item1 // ' for ENTNUM=%d failed.', derrinfo, cerrinfo)
     END IF
 
-    CALL TrackEnd('glans:s_gets')
+    CALL EndTrack()
   END FUNCTION s_gets
 
   FUNCTION gets(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
+    USE ansys_upf, ONLY : RunCommand, erinqr
     USE ansys_par, ONLY : CMD_MAX_LENG, ER_NUMWARNING, ER_NUMERROR, PARMSIZE, &
          & STRING_MAX_LENG
     IMPLICIT NONE
@@ -880,7 +949,7 @@ CONTAINS
     INTEGER :: numwrn
     INTEGER :: numerr
 
-    CALL TrackBegin('glans:gets')
+    CALL BeginTrack('gets')
 
     numwrn = erinqr(ER_NUMWARNING)
     numerr = erinqr(ER_NUMERROR)
@@ -911,7 +980,7 @@ CONTAINS
     flag = ((erinqr(ER_NUMWARNING) - numwrn) + (erinqr(ER_NUMERROR) - numerr)).NE.0
 
     IF (flag) THEN
-       CALL TrackEnd('glans:gets')
+       CALL EndTrack()
        RETURN
     END IF
 
@@ -926,7 +995,7 @@ CONTAINS
 101 FORMAT(A,',',I)
 102 FORMAT(A,',')
 
-    CALL TrackEnd('glans:gets')
+    CALL EndTrack()
 
   END FUNCTION gets
 
@@ -964,7 +1033,7 @@ CONTAINS
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
     INTEGER, INTENT(IN), OPTIONAL :: IT2NUM
 
-    CALL TrackBegin('glans:s_getsi')
+    CALL BeginTrack('s_getsi')
 
     derrinfo(1) = ENTNUM
 
@@ -981,12 +1050,12 @@ CONTAINS
                & ', ' // Item1 // ' for ENTNUM=%d failed.', derrinfo, cerrinfo)
     END IF
 
-    CALL TrackEnd('glans:s_getsi')
+    CALL EndTrack()
   END FUNCTION s_getsi
 
   FUNCTION getsi(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
+    USE ansys_upf, ONLY : RunCommand, erinqr
     USE ansys_par, ONLY : CMD_MAX_LENG, ER_NUMWARNING, ER_NUMERROR, &
          & ERH_FATAL, ERH_FNAME_LEN, PARMSIZE, STRING_MAX_LENG
     IMPLICIT NONE
@@ -1015,15 +1084,13 @@ CONTAINS
     INTEGER :: numwrn
     INTEGER :: numerr
 
-    CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
-
-    CALL TrackBegin('glans:getsi')
+    CALL BeginTrack('getsi')
 
     numwrn = erinqr(ER_NUMWARNING)
     numerr = erinqr(ER_NUMERROR)
 
-    CALL ans_fatal(fname, __LINE__, 'glansys', &
-         & 'glans:getsi not implemented')
+    CALL ans_fatal(fname, __LINE__, 'dnvglansys', &
+         & 'getsi not implemented')
 
     value = 'empty'
 
@@ -1033,7 +1100,7 @@ CONTAINS
 
     flag = .TRUE.
 
-    CALL TrackEnd('glans:getsi')
+    CALL EndTrack()
 
   END FUNCTION getsi
 
@@ -1071,7 +1138,7 @@ CONTAINS
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: IT2NUM
 
-    CALL TrackBegin('glans:s_getf')
+    CALL BeginTrack('s_getf')
 
     derrinfo(1) = ENTNUM
 
@@ -1090,12 +1157,12 @@ CONTAINS
                & ', ' // Item1 // ' for ENTNUM=%d failed.', derrinfo, cerrinfo)
     END IF
 
-    CALL TrackEnd('glans:s_getf')
+    CALL EndTrack()
   END FUNCTION s_getf
 
   FUNCTION getf(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
+    USE ansys_upf, ONLY : RunCommand, erinqr
     USE ansys_par, ONLY : CMD_MAX_LENG, ER_NUMWARNING, ER_NUMERROR, PARMSIZE, &
          & STRING_MAX_LENG
     IMPLICIT NONE
@@ -1131,7 +1198,7 @@ CONTAINS
     INTEGER :: numwrn
     INTEGER :: numerr
 
-    CALL TrackBegin('glans:getf')
+    CALL BeginTrack('getf')
 
     value = 0d0
 
@@ -1162,7 +1229,7 @@ CONTAINS
     flag = ((erinqr(ER_NUMWARNING) - numwrn) + (erinqr(ER_NUMERROR) - numerr)).NE.0
 
     IF (flag) THEN
-       CALL TrackEnd('glans:getf')
+       CALL EndTrack()
        RETURN
     END IF
 
@@ -1176,7 +1243,7 @@ CONTAINS
 100 FORMAT(A,',',A)
 101 FORMAT(A,',',I)
 
-    CALL TrackEnd('glans:getf')
+    CALL EndTrack()
 
   END FUNCTION getf
 
@@ -1214,7 +1281,7 @@ CONTAINS
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: IT2NUM
 
-    CALL TrackBegin('glans:s_getfs')
+    CALL BeginTrack('s_getfs')
 
     cerrinfo(1) = ENTNUM
 
@@ -1233,12 +1300,12 @@ CONTAINS
                & ', ' // Item1 // ' for ENTNUM=%s failed.', derrinfo, cerrinfo)
     END IF
 
-    CALL TrackEnd('glans:s_getfs')
+    CALL EndTrack()
   END FUNCTION s_getfs
 
   FUNCTION getfs(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
+    USE ansys_upf, ONLY : RunCommand, erinqr
     USE ansys_par, ONLY : CMD_MAX_LENG, ER_NUMWARNING, ER_NUMERROR, &
          & PARMSIZE, STRING_MAX_LENG
     IMPLICIT NONE
@@ -1274,7 +1341,7 @@ CONTAINS
 
     INTEGER :: iErr
 
-    CALL TrackBegin('glans:getfs')
+    CALL BeginTrack('getfs')
 
     value = 0d0
 
@@ -1305,7 +1372,7 @@ CONTAINS
     flag = ((erinqr(ER_NUMWARNING) - numwrn) + (erinqr(ER_NUMERROR) - numerr)).NE.0
 
     IF (flag) THEN
-       CALL TrackEnd('glans:getfs')
+       CALL EndTrack()
        RETURN
     END IF
 
@@ -1319,7 +1386,7 @@ CONTAINS
 100 FORMAT(A,',',A)
 102 FORMAT(A,',')
 
-    CALL TrackEnd('glans:getfs')
+    CALL EndTrack()
 
   END FUNCTION getfs
 
@@ -1357,7 +1424,7 @@ CONTAINS
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
     INTEGER, INTENT(IN), OPTIONAL :: IT2NUM
 
-    CALL TrackBegin('glans:s_getfi')
+    CALL BeginTrack('s_getfi')
 
     derrinfo(1) = ENTNUM
 
@@ -1374,12 +1441,12 @@ CONTAINS
                & ', ' // Item1 // ' for ENTNUM=%d failed.', derrinfo, cerrinfo)
     END IF
 
-    CALL TrackEnd('glans:s_getfi')
+    CALL EndTrack()
   END FUNCTION s_getfi
 
   FUNCTION getfi(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr, wrinqr
+    USE ansys_upf, ONLY : RunCommand, erinqr, wrinqr
     USE ansys_par, ONLY : CMD_MAX_LENG, ER_NUMWARNING, ER_NUMERROR, ERH_FATAL, &
          & ERH_FNAME_LEN, PARMSIZE, STRING_MAX_LENG, WR_OUTPUT
     IMPLICIT NONE
@@ -1410,14 +1477,12 @@ CONTAINS
     CHARACTER(LEN=PARMSIZE) :: para
     REAL(KIND=8), DIMENSION(3) :: subc
 
-    CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
-
     INTEGER :: numwrn
     INTEGER :: numerr
 
     INTEGER :: iErr
 
-    CALL TrackBegin('glans:getfi')
+    CALL BeginTrack('getfi')
 
     value = 0d0
 
@@ -1444,7 +1509,7 @@ CONTAINS
     flag = ((erinqr(ER_NUMWARNING) - numwrn) + (erinqr(ER_NUMERROR) - numerr)).NE.0
 
     IF (flag) THEN
-       CALL TrackEnd('glans:getfi')
+       CALL EndTrack()
        RETURN
     END IF
 
@@ -1459,7 +1524,7 @@ CONTAINS
 101 FORMAT(A,',',I)
 102 FORMAT(A,',')
 
-    CALL TrackEnd('glans:getfi')
+    CALL EndTrack()
 
   END FUNCTION getfi
 
@@ -1497,7 +1562,7 @@ CONTAINS
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: IT2NUM
 
-    CALL TrackBegin('glans:s_geti')
+    CALL BeginTrack('s_geti')
 
     derrinfo(1) = ENTNUM
 
@@ -1516,12 +1581,12 @@ CONTAINS
                & ', ' // Item1 // ' for ENTNUM=%d failed.', derrinfo, cerrinfo)
     END IF
 
-    CALL TrackEnd('glans:s_geti')
+    CALL EndTrack()
   END FUNCTION s_geti
 
   FUNCTION geti(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
+    USE ansys_upf, ONLY : RunCommand, erinqr
     USE ansys_par, ONLY : CMD_MAX_LENG, ER_NUMWARNING, ER_NUMERROR, &
          & PARMSIZE, STRING_MAX_LENG
     IMPLICIT NONE
@@ -1549,12 +1614,12 @@ CONTAINS
 
     REAL(KIND=8) :: fvalue
 
-    CALL TrackBegin('glans:geti')
+    CALL BeginTrack('geti')
 
     flag = getf(fvalue, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM)
     value = INT(fvalue)
 
-    CALL TrackEnd('glans:geti')
+    CALL EndTrack()
 
   END FUNCTION geti
 
@@ -1592,7 +1657,7 @@ CONTAINS
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: IT2NUM
 
-    CALL TrackBegin('glans:s_getis')
+    CALL BeginTrack('s_getis')
 
     cerrinfo(1) = ENTNUM
 
@@ -1611,12 +1676,12 @@ CONTAINS
                & ', ' // Item1 // ' for ENTNUM=%s failed.', derrinfo, cerrinfo)
     END IF
 
-    CALL TrackEnd('glans:s_getis')
+    CALL EndTrack()
   END FUNCTION s_getis
 
   FUNCTION getis(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
+    USE ansys_upf, ONLY : RunCommand, erinqr
     USE ansys_par, ONLY : CMD_MAX_LENG, ER_NUMWARNING, ER_NUMERROR, &
          & PARMSIZE, STRING_MAX_LENG
     IMPLICIT NONE
@@ -1644,12 +1709,12 @@ CONTAINS
 
     REAL(KIND=8) :: fvalue
 
-    CALL TrackBegin('glans:getis')
+    CALL BeginTrack('getis')
 
     flag = getfs(fvalue, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM)
     value = INT(fvalue)
 
-    CALL TrackEnd('glans:getis')
+    CALL EndTrack()
 
   END FUNCTION getis
 
@@ -1687,7 +1752,7 @@ CONTAINS
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
     INTEGER, INTENT(IN), OPTIONAL :: IT2NUM
 
-    CALL TrackBegin('glans:s_getii')
+    CALL BeginTrack('s_getii')
 
     derrinfo(1) = ENTNUM
 
@@ -1704,12 +1769,12 @@ CONTAINS
                & ', ' // Item1 // ' for ENTNUM=%d failed.', derrinfo, cerrinfo)
     END IF
 
-    CALL TrackEnd('glans:s_getii')
+    CALL EndTrack()
   END FUNCTION s_getii
 
   FUNCTION getii(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, erinqr
+    USE ansys_upf, ONLY : RunCommand, erinqr
     USE ansys_par, ONLY : CMD_MAX_LENG, ER_NUMWARNING, ER_NUMERROR, &
          & PARMSIZE, STRING_MAX_LENG
     IMPLICIT NONE
@@ -1737,19 +1802,19 @@ CONTAINS
 
     REAL(KIND=8) :: fvalue
 
-    CALL TrackBegin('glans:getii')
+    CALL BeginTrack('getii')
 
     flag = getfi(fvalue, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM)
     value = INT(fvalue)
 
-    CALL TrackEnd('glans:getii')
+    CALL EndTrack()
 
   END FUNCTION getii
 
   ! issue warnings and update message count
   SUBROUTINE message(wcode,n1,n2)
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd, erhandler
-    USE ansys_par, ONLY : ERH_WARNING, ERH_FNAME_LEN, PARMSIZE, MP_EX, MP_NUXY, MP_DENS
+    USE ansys_upf, ONLY : erhandler
+    USE ansys_par, ONLY : ERH_WARNING, PARMSIZE, MP_EX, MP_NUXY, MP_DENS
     USE LOCMOD, ONLY : libname
     IMPLICIT NONE
     ! Purpose:
@@ -1762,10 +1827,9 @@ CONTAINS
     CHARACTER(LEN=4) :: wcode
     INTEGER n1,n2
 
-    CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
     CHARACTER(LEN=1024) :: msg
 
-    CALL TrackBegin('glans:message')
+    CALL BeginTrack('message')
     wcount=wcount+1
     derrinfo(1) = n1
     derrinfo(2) = n2
@@ -1806,11 +1870,11 @@ CONTAINS
             & 'not supported (el. %i). Average value taken.')
     END IF
 
-    CALL TrackEnd('glans:message')
+    CALL EndTrack()
 
   END SUBROUTINE message
 
-END MODULE glans
+END MODULE dnvglans
 
 ! Local Variables:
 ! compile-command:"make -C .. test"

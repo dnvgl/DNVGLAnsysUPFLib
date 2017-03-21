@@ -1,9 +1,9 @@
-!     Copyright (C) 2005 by Germanischer Lloyd AG
+!     Copyright (C) 2005 by DNV GL SE
 
 !     ======================================================================
 !     Task      collect mass information from ANSYS model
 !     ----------------------------------------------------------------------
-!     Author    Berthold Höllmann <hoel@GL-Group.com>
+!     Author    Berthold Höllmann <berthold.hoellmann@dnvgl.com>
 !     Project   ans2bmf
 !     ======================================================================
 
@@ -12,10 +12,12 @@
 
 MODULE mod_dat_masses
 
+  USE dnvglans, ONLY : BeginTrack, EndTrack
+
 CONTAINS
 
   SUBROUTINE dat_masses()
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd, RunCommand, elmiqr
+    USE ansys_upf, ONLY : RunCommand, elmiqr
     USE ansys_par, ONLY : CMD_MAX_LENG, DB_NUMSELECTED
     USE ans_common, ONLY : n_masses
 
@@ -33,7 +35,7 @@ CONTAINS
 
     CHARACTER(LEN=CMD_MAX_LENG) :: cmd
 
-    CALL TrackBegin('dat_masses')
+    CALL BeginTrack('dat_masses')
 
     ! select all nodal mass elements
     cmd = 'ESEL,S,ENAME,,MASS21'
@@ -41,7 +43,7 @@ CONTAINS
 
     n_masses = elmiqr(0, DB_NUMSELECTED)
 
-    CALL TrackEnd('dat_masses')
+    CALL EndTrack()
 
   END SUBROUTINE dat_masses
 

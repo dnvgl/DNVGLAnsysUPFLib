@@ -8,14 +8,16 @@
 
 MODULE mod_dat_loadcases
 
+  USE dnvglans, ONLY : BeginTrack, EndTrack
+
 CONTAINS
 
   SUBROUTINE dat_loadcases()
 
-    USE ansys_upf, ONLY : TrackBegin, TrackEnd, foriqr
+    USE ansys_upf, ONLY : foriqr
     USE ansys_par, ONLY : DB_NUMDEFINED, ERH_FNAME_LEN, ERH_NOTE, PARMSIZE
     USE ans_common
-    USE glans
+    USE dnvglans
     USE LOCMOD, ONLY : libname
 
     ! Purpose:
@@ -36,7 +38,7 @@ CONTAINS
 
     CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
 
-    CALL TrackBegin('dat_loadcases')
+    CALL BeginTrack('dat_loadcases')
 
     max_loadcases = 0
 
@@ -93,7 +95,7 @@ CONTAINS
     derrinfo(1) = max_loadcases
     CALL ans_note(fname, __LINE__, 'ans2bmf', '  loadcases defined:  %i')
 
-    CALL TrackEnd('dat_loadcases')
+    CALL EndTrack()
 
   END SUBROUTINE dat_loadcases
 

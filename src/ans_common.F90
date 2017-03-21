@@ -2,7 +2,7 @@ MODULE ans_common
 
   USE csubdata
   USE ansys_par
-  USE glans, ONLY : ans_error
+  USE dnvglans, ONLY : ans_error
 
   ! variables to interface with ANSYS
   INTEGER :: ityp
@@ -52,6 +52,7 @@ MODULE ans_common
 
   TYPE :: bp_values
 
+     INTEGER :: id
      CHARACTER(LEN=16) :: name = ""
      REAL(KIND=8), DIMENSION(3) :: A = 0d0
      REAL(KIND=8), DIMENSION(3) :: I = 0d0
@@ -105,8 +106,8 @@ MODULE ans_common
   END TYPE cs_mat_entry
 
   TYPE :: cross_section_info
-     ! outer dimensions for cross section
      INTEGER :: id = 0
+     ! outer dimensions for cross section
      REAL(KIND=8) :: t_max, t_min, t_y_1, t_y_2, t_z_1, t_z_2
      REAL(KIND=8) :: web_height = 0.
      REAL(KIND=8) :: web_thickness = 0.
@@ -154,7 +155,10 @@ MODULE ans_common
   END INTERFACE
 
   TYPE :: bp_type
-     INTEGER :: num = 0, rnum = 0, snum = 0
+     INTEGER :: num = 0 ! Total number of ANSYS CS geometry entries
+     INTEGER :: rnum = 0 ! Number of Real CS entries
+     INTEGER :: snum = 0 ! Number of Section CS entries
+     INTEGER :: cs_id_max = 0 ! CS ids for BMF export
      ! beam property entries
      TYPE(bp_values), DIMENSION(:), ALLOCATABLE :: data
      ! Mapping real const. number to beam property entry
@@ -177,7 +181,7 @@ CONTAINS
     TYPE(bp_values), INTENT(IN) :: a, b
     LOGICAL :: bp_values_equal
 
-    bp_values_equal = ( &
+    bp_values_equal = ( (a%id == b%id) .AND. &
          (a%name == b%name) .AND. ALL(a%A == b%A) .AND. &
          ALL(a%I == b%I) .AND. ALL(a%e == b%e) .AND. &
          ALL(a%sc == b%sc) .AND. ALL(a%d == b%d) .AND. &
@@ -199,6 +203,7 @@ CONTAINS
     TYPE(bp_values), INTENT(OUT) :: a
     TYPE(bp_values), INTENT(IN) :: b
 
+    a%id = b%id
     a%name(:) = b%name(:)
     a%A(:) = b%A(:)
     a%I(:) = b%I(:)
@@ -254,7 +259,7 @@ CONTAINS
 
   FUNCTION cross_section_equal(a, b)
     USE LOCMOD, ONLY : libname
-    USE glans, ONLY : ans_error
+    USE dnvglans, ONLY : ans_error
     IMPLICIT NONE
     TYPE(cross_section_info), INTENT(IN) :: a
     TYPE(cross_section_info), INTENT(IN) :: b
@@ -265,7 +270,7 @@ CONTAINS
 
   FUNCTION cross_section_not_equal(a, b)
     USE LOCMOD, ONLY : libname
-    USE glans, ONLY : ans_error
+    USE dnvglans, ONLY : ans_error
     IMPLICIT NONE
     TYPE(cross_section_info), INTENT(IN) :: a
     TYPE(cross_section_info), INTENT(IN) :: b
@@ -279,6 +284,7 @@ CONTAINS
     IMPLICIT NONE
     TYPE(cross_section_info), INTENT(OUT) :: a
     TYPE(cross_section_info), INTENT(IN) :: b
+    a%id = b%id
     a%t_max = b%t_max
     a%t_min = b%t_min
     a%t_y_1 = b%t_y_1
@@ -289,14 +295,16 @@ CONTAINS
     a%web_thickness = b%web_thickness
     a%flange_width = b%flange_width
     a%flange_thickness = b%flange_thickness
-    ALLOCATE(a%data(SIZE(b%data)))
-    a%data(:) = b%data(:)
+    IF (ALLOCATED(a%data)) THEN
+       ALLOCATE(a%data(SIZE(b%data)))
+       a%data(:) = b%data(:)
+    END IF
     a%type_code = b%type_code
   END SUBROUTINE cross_section_assign
 
   FUNCTION cs_mat_equal(a, b)
     USE LOCMOD, ONLY : libname
-    USE glans, ONLY : ans_error
+    USE dnvglans, ONLY : ans_error
     IMPLICIT NONE
     TYPE(cs_mat_entry), INTENT(IN) :: a
     TYPE(cs_mat_entry), INTENT(IN) :: b
@@ -307,7 +315,7 @@ CONTAINS
 
   FUNCTION cs_mat_not_equal(a, b)
     USE LOCMOD, ONLY : libname
-    USE glans, ONLY : ans_error
+    USE dnvglans, ONLY : ans_error
     IMPLICIT NONE
     TYPE(cs_mat_entry), INTENT(IN) :: a
     TYPE(cs_mat_entry), INTENT(IN) :: b
@@ -318,7 +326,7 @@ CONTAINS
 
   SUBROUTINE cs_mat_assign(a, b)
     USE LOCMOD, ONLY : libname
-    USE glans, ONLY : ans_error
+    USE dnvglans, ONLY : ans_error
     IMPLICIT NONE
     TYPE(cs_mat_entry), INTENT(OUT) :: a
     TYPE(cs_mat_entry), INTENT(IN) :: b
