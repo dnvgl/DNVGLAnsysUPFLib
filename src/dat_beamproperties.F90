@@ -1174,12 +1174,16 @@ CONTAINS
     INTEGER, INTENT(IN) :: mat
     TYPE(bp_type), INTENT(INOUT) :: bp
 
-    TYPE(cs_mat_entry), POINTER :: gp_ptr_cur => null()
-    TYPE(cs_mat_entry), POINTER :: gp_ptr_prev => null()
+    TYPE(cs_mat_entry), POINTER :: gp_ptr_cur
+    TYPE(cs_mat_entry), POINTER :: gp_ptr_prev
+    TYPE(cs_mat_entry), POINTER :: gp_ptr
 
     INTEGER :: i
 
     CALL BeginTrack("dat_cs_material")
+
+    gp_ptr_cur => null()
+    gp_ptr_prev => null()
 
     gp_loop: DO i = 1, size(bp%cs_info)
        if (bp%cs_info(i)%id .NE. gp) THEN
@@ -1195,18 +1199,19 @@ CONTAINS
              gp_ptr_prev => gp_ptr_cur
              gp_ptr_cur => gp_ptr_cur%next
           END DO cs_loop
-          ALLOCATE (gp_ptr_prev%next)
-          gp_ptr_cur = gp_ptr_prev%next
-          gp_ptr_cur%next => null()
-          gp_ptr_cur%mat_id = mat
+          ALLOCATE (gp_ptr)
           bp%cs_id_max = bp%cs_id_max + 1
-          gp_ptr_cur%cs_id = bp%cs_id_max
+          gp_ptr%cs_id = bp%cs_id_max
+          gp_ptr%mat_id = mat
+          gp_ptr_cur => gp_ptr
+          gp_ptr_prev%next => gp_ptr
        ELSE
-          ALLOCATE (bp%cs_info(i)%gp_entries)
-          bp%cs_info(i)%gp_entries%next => null()
-          bp%cs_info(i)%gp_entries%mat_id = mat
+          ALLOCATE (gp_ptr)
+          bp%cs_info(i)%gp_entries => gp_ptr
           bp%cs_id_max = bp%cs_id_max + 1
-          bp%cs_info(i)%gp_entries%cs_id = bp%cs_id_max
+          gp_ptr%cs_id = bp%cs_id_max
+          gp_ptr%mat_id = mat
+          bp%cs_info(i)%gp_entries => gp_ptr
        END IF
        EXIT gp_loop
     END DO gp_loop
