@@ -8,7 +8,7 @@
 
 MODULE mod_dat_loadcases
 
-  USE dnvglans, ONLY : BeginTrack, EndTrack
+  USE dnvglans, ONLY : ezTrackBegin, ezTrackEnd
 
 CONTAINS
 
@@ -38,7 +38,7 @@ CONTAINS
 
     CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
 
-    CALL BeginTrack('dat_loadcases')
+    CALL ezTrackBegin('dat_loadcases')
 
     max_loadcases = 0
 
@@ -95,7 +95,7 @@ CONTAINS
     derrinfo(1) = max_loadcases
     CALL ans_note(fname, __LINE__, 'ans2bmf', '  loadcases defined:  %i')
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
   END SUBROUTINE dat_loadcases
 

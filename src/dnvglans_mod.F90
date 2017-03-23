@@ -37,11 +37,11 @@ MODULE dnvglans
   TYPE(TrackStackType), POINTER :: TrackStackPos => null()
   PRIVATE :: TrackStack, TrackStackPos
 
-  INTERFACE BeginTrack
-     MODULE PROCEDURE BeginTrack_p, BeginTrack_fl
-  END INTERFACE BeginTrack
+  INTERFACE ezTrackBegin
+     MODULE PROCEDURE TrackBegin_p, TrackBegin_fl
+  END INTERFACE EzTrackBegin
 
-  PUBLIC :: BeginTrack, EndTrack
+  PUBLIC :: ezTrackBegin, ezTrackEnd, ezRunCommand
 
   INTERFACE get
      MODULE PROCEDURE getf, getfs, getfi, geti, getis, getii, gets, getsi
@@ -82,7 +82,17 @@ MODULE dnvglans
 
 CONTAINS
 
-  SUBROUTINE BeginTrack_p(pos)
+  FUNCTION ezRunCommand(cmd) RESULT(res)
+    USE ansys_upf, ONLY : RunCommand
+    IMPLICIT NONE
+    INTEGER :: res
+    CHARACTER(LEN=*) :: cmd
+    CALL ezTrackBegin("ezRunCommand")
+    res = RunCommand(LEN_TRIM(cmd), TRIM(cmd))
+    CALL ezTrackEnd()
+  END FUNCTION ezRunCommand
+
+  SUBROUTINE TrackBegin_p(pos)
     IMPLICIT NONE
     CHARACTER(LEN=*), INTENT(IN) :: pos
     TYPE(TrackStackType), POINTER :: new
@@ -98,9 +108,9 @@ CONTAINS
        TrackStack => new
     END IF
     CALL TrackBegin(pos(1:MIN(32, LEN_TRIM(pos))))
-  END SUBROUTINE BeginTrack_p
+  END SUBROUTINE TrackBegin_p
 
-  SUBROUTINE BeginTrack_fl(file, line)
+  SUBROUTINE TrackBegin_fl(file, line)
     IMPLICIT NONE
     CHARACTER(LEN=*), INTENT(IN) :: file
     INTEGER, INTENT(IN) :: line
@@ -121,10 +131,10 @@ CONTAINS
     tmp = FLOOR(LOG10(DBLE(line)))
     WRITE(form, fmt="('(I',I0,','':'',A',I0,')')") tmp + 1, 30 - tmp
     WRITE(pos, form) line, pos
-    CALL BeginTrack_p(pos)
-  END SUBROUTINE BeginTrack_fl
+    CALL TrackBegin_p(pos)
+  END SUBROUTINE TrackBegin_fl
 
-  SUBROUTINE EndTrack()
+  SUBROUTINE ezTrackEnd()
     IF (ASSOCIATED(TrackStackPos)) THEN
        CALL TrackEnd(TrackStackPos%position)
        IF (ASSOCIATED(TrackStackPos%prev)) THEN
@@ -139,7 +149,7 @@ CONTAINS
        CALL ans_fatal(fname, __LINE__, 'ansys_upf', &
             & 'Track stack is empty')
     END IF
-  END SUBROUTINE EndTrack
+  END SUBROUTINE EzTrackEnd
 
   SUBROUTINE ans_note(fname, line, libname, msg)
     IMPLICIT NONE
@@ -196,7 +206,7 @@ CONTAINS
     ! reads ANSYS command string 'cmd_str'
     ! puts out REAL(KIND=8) parameter 'dout'
 
-    USE ansys_upf, ONLY : RunCommand, parevl
+    USE ansys_upf, ONLY : parevl
     USE ansys_par, ONLY : CMD_MAX_LENG, STRING_MAX_LENG, PARMSIZE
     IMPLICIT NONE
     ! Purpose:
@@ -216,20 +226,20 @@ CONTAINS
 
     INTEGER :: iErr
 
-    CALL BeginTrack("ans2bmf_get_d")
+    CALL ezTrackBegin("ans2bmf_get_d")
     cmd = '*GET,PAR_,'//cmd_str
-    iErr = RunCommand(LEN_TRIM(cmd), cmd)
+    iErr = ezRunCommand(cmd)
     para ='PAR_'
 
     CALL parevl(para, 0, subc, 2, dout, dummy, iErr)
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
   END SUBROUTINE ans2bmf_get_d
 
   SUBROUTINE ans2bmf_get_s(cmd_str, sout)
     ! reads ANSYS command string 'cmd_str'
     ! writes a string of length 8 into 'sout'
-    USE ansys_upf, ONLY : RunCommand, parevl
+    USE ansys_upf, ONLY : parevl
     USE ansys_par, ONLY : CMD_MAX_LENG, STRING_MAX_LENG, PARMSIZE
     IMPLICIT NONE
     ! Purpose:
@@ -249,15 +259,15 @@ CONTAINS
 
     INTEGER :: iErr
 
-    CALL BeginTrack("ans2bmf_get_s")
+    CALL ezTrackBegin("ans2bmf_get_s")
 
     cmd = '*GET,PAR_,'//cmd_str
-    iErr = RunCommand(LEN_TRIM(cmd), cmd)
+    iErr = ezRunCommand(cmd)
     para ='PAR_'
     CALL parevl(para, 0, subc, 2, res_double, dummy, iErr)
     sout = TRIM(dummy)
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
   END SUBROUTINE ans2bmf_get_s
 
   FUNCTION upcase(string) RESULT(upper)
@@ -267,7 +277,7 @@ CONTAINS
     CHARACTER(LEN=LEN(string)) :: upper
     INTEGER :: j
 
-    CALL BeginTrack('upcase')
+    CALL ezTrackBegin('upcase')
 
     DO j = 1, LEN(string)
        IF(string(j:j) >= "a" .AND. string(j:j) <= "z") THEN
@@ -277,13 +287,12 @@ CONTAINS
        END IF
     END DO
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
   END FUNCTION upcase
 
   SUBROUTINE cmselect(mode, name)
     ! select component
-    USE ansys_upf, ONLY : RunCommand
     USE ansys_par, ONLY : CMD_MAX_LENG, ERH_FATAL, ERH_FNAME_LEN, PARMSIZE
     IMPLICIT NONE
     ! Purpose:
@@ -313,7 +322,7 @@ CONTAINS
 
     CHARACTER(LEN=CMD_MAX_LENG) :: cmd
 
-    CALL BeginTrack('cmselect')
+    CALL ezTrackBegin('cmselect')
 
     umode = upcase(mode)
 
@@ -334,15 +343,14 @@ CONTAINS
     END IF
 200 FORMAT('CMSEL,'A,','A)
 
-    iErr = RunCommand(LEN_TRIM(cmd), cmd)
+    iErr = ezRunCommand(cmd)
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
     RETURN
   END SUBROUTINE cmselect
 
   SUBROUTINE eseli(Type, Item, Comp, VMIN, VMAX, VINC, KABS)
-    USE ansys_upf, ONLY : RunCommand
     USE ansys_par, ONLY : CMD_MAX_LENG, ERH_FATAL, ERH_FNAME_LEN, PARMSIZE
 
     IMPLICIT NONE
@@ -410,7 +418,7 @@ CONTAINS
 
     CHARACTER(LEN=CMD_MAX_LENG) :: cmd
 
-    CALL BeginTrack('eseli')
+    CALL ezTrackBegin('eseli')
 
     utype = upcase(type)
 
@@ -523,15 +531,14 @@ CONTAINS
 200 FORMAT(A,','A)
 201 FORMAT(A,','I)
 
-    iErr = RunCommand(LEN_TRIM(cmd), cmd)
+    iErr = ezRunCommand(cmd)
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
     RETURN
   END SUBROUTINE eseli
 
   SUBROUTINE esels(Type, Item, Comp, VMIN)
-    USE ansys_upf, ONLY : RunCommand
     USE ansys_par, ONLY : CMD_MAX_LENG, PARMSIZE, STRING_MAX_LENG
 
     IMPLICIT NONE
@@ -583,7 +590,7 @@ CONTAINS
 
     CHARACTER(LEN=CMD_MAX_LENG) :: cmd
 
-    CALL BeginTrack('esels')
+    CALL ezTrackBegin('esels')
 
     utype = upcase(type)
 
@@ -665,15 +672,14 @@ CONTAINS
 
 200 FORMAT(A,','A)
 
-    iErr = RunCommand(LEN_TRIM(cmd), cmd)
+    iErr = ezRunCommand(cmd)
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
     RETURN
   END SUBROUTINE esels
 
   SUBROUTINE nsel(Type, Item, Comp, VMIN, VMAX, VINC, KABS)
-    USE ansys_upf, ONLY : RunCommand
     USE ansys_par, ONLY : CMD_MAX_LENG, ERH_FATAL, PARMSIZE
 
     IMPLICIT NONE
@@ -733,7 +739,7 @@ CONTAINS
 
     CHARACTER(LEN=CMD_MAX_LENG) :: cmd
 
-    CALL BeginTrack('nsel')
+    CALL ezTrackBegin('nsel')
 
     utype = upcase(type)
 
@@ -809,9 +815,9 @@ CONTAINS
 200 FORMAT(A,','A)
 201 FORMAT(A,','I)
 
-    iErr = RunCommand(LEN_TRIM(cmd), cmd)
+    iErr = ezRunCommand(cmd)
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
     RETURN
   END SUBROUTINE nsel
@@ -889,7 +895,7 @@ CONTAINS
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: IT2NUM
 
-    CALL BeginTrack('s_gets')
+    CALL ezTrackBegin('s_gets')
 
     derrinfo(1) = ENTNUM
 
@@ -908,12 +914,12 @@ CONTAINS
                & ', ' // Item1 // ' for ENTNUM=%d failed.', derrinfo, cerrinfo)
     END IF
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
   END FUNCTION s_gets
 
   FUNCTION gets(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
-    USE ansys_upf, ONLY : RunCommand, erinqr
+    USE ansys_upf, ONLY : erinqr
     USE ansys_par, ONLY : CMD_MAX_LENG, ER_NUMWARNING, ER_NUMERROR, PARMSIZE, &
          & STRING_MAX_LENG
     IMPLICIT NONE
@@ -949,7 +955,7 @@ CONTAINS
     INTEGER :: numwrn
     INTEGER :: numerr
 
-    CALL BeginTrack('gets')
+    CALL ezTrackBegin('gets')
 
     numwrn = erinqr(ER_NUMWARNING)
     numerr = erinqr(ER_NUMERROR)
@@ -975,12 +981,12 @@ CONTAINS
        WRITE(cmd,102) TRIM(cmd)
     END IF
     ! WRITE(wrinqr(WR_OUTPUT),*) 'cmd: ', TRIM(cmd)
-    iErr = RunCommand(LEN_TRIM(cmd), TRIM(cmd))
+    iErr = ezRunCommand(cmd)
 
     flag = ((erinqr(ER_NUMWARNING) - numwrn) + (erinqr(ER_NUMERROR) - numerr)).NE.0
 
     IF (flag) THEN
-       CALL EndTrack()
+       CALL ezTrackEnd()
        RETURN
     END IF
 
@@ -995,7 +1001,7 @@ CONTAINS
 101 FORMAT(A,',',I)
 102 FORMAT(A,',')
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
   END FUNCTION gets
 
@@ -1033,7 +1039,7 @@ CONTAINS
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
     INTEGER, INTENT(IN), OPTIONAL :: IT2NUM
 
-    CALL BeginTrack('s_getsi')
+    CALL ezTrackBegin('s_getsi')
 
     derrinfo(1) = ENTNUM
 
@@ -1050,12 +1056,12 @@ CONTAINS
                & ', ' // Item1 // ' for ENTNUM=%d failed.', derrinfo, cerrinfo)
     END IF
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
   END FUNCTION s_getsi
 
   FUNCTION getsi(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
-    USE ansys_upf, ONLY : RunCommand, erinqr
+    USE ansys_upf, ONLY : erinqr
     USE ansys_par, ONLY : CMD_MAX_LENG, ER_NUMWARNING, ER_NUMERROR, &
          & ERH_FATAL, ERH_FNAME_LEN, PARMSIZE, STRING_MAX_LENG
     IMPLICIT NONE
@@ -1084,7 +1090,7 @@ CONTAINS
     INTEGER :: numwrn
     INTEGER :: numerr
 
-    CALL BeginTrack('getsi')
+    CALL ezTrackBegin('getsi')
 
     numwrn = erinqr(ER_NUMWARNING)
     numerr = erinqr(ER_NUMERROR)
@@ -1100,7 +1106,7 @@ CONTAINS
 
     flag = .TRUE.
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
   END FUNCTION getsi
 
@@ -1138,7 +1144,7 @@ CONTAINS
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: IT2NUM
 
-    CALL BeginTrack('s_getf')
+    CALL ezTrackBegin('s_getf')
 
     derrinfo(1) = ENTNUM
 
@@ -1157,12 +1163,12 @@ CONTAINS
                & ', ' // Item1 // ' for ENTNUM=%d failed.', derrinfo, cerrinfo)
     END IF
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
   END FUNCTION s_getf
 
   FUNCTION getf(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
-    USE ansys_upf, ONLY : RunCommand, erinqr
+    USE ansys_upf, ONLY : erinqr
     USE ansys_par, ONLY : CMD_MAX_LENG, ER_NUMWARNING, ER_NUMERROR, PARMSIZE, &
          & STRING_MAX_LENG
     IMPLICIT NONE
@@ -1198,7 +1204,7 @@ CONTAINS
     INTEGER :: numwrn
     INTEGER :: numerr
 
-    CALL BeginTrack('getf')
+    CALL ezTrackBegin('getf')
 
     value = 0d0
 
@@ -1224,12 +1230,12 @@ CONTAINS
        WRITE(cmd,100) TRIM(cmd), ''
     END IF
     ! WRITE(wrinqr(WR_OUTPUT),*) 'cmd: ', TRIM(cmd)
-    iErr = RunCommand(LEN_TRIM(cmd), TRIM(cmd))
+    iErr = ezRunCommand(cmd)
 
     flag = ((erinqr(ER_NUMWARNING) - numwrn) + (erinqr(ER_NUMERROR) - numerr)).NE.0
 
     IF (flag) THEN
-       CALL EndTrack()
+       CALL ezTrackEnd()
        RETURN
     END IF
 
@@ -1243,7 +1249,7 @@ CONTAINS
 100 FORMAT(A,',',A)
 101 FORMAT(A,',',I)
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
   END FUNCTION getf
 
@@ -1281,7 +1287,7 @@ CONTAINS
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: IT2NUM
 
-    CALL BeginTrack('s_getfs')
+    CALL ezTrackBegin('s_getfs')
 
     cerrinfo(1) = ENTNUM
 
@@ -1300,12 +1306,12 @@ CONTAINS
                & ', ' // Item1 // ' for ENTNUM=%s failed.', derrinfo, cerrinfo)
     END IF
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
   END FUNCTION s_getfs
 
   FUNCTION getfs(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
-    USE ansys_upf, ONLY : RunCommand, erinqr
+    USE ansys_upf, ONLY : erinqr
     USE ansys_par, ONLY : CMD_MAX_LENG, ER_NUMWARNING, ER_NUMERROR, &
          & PARMSIZE, STRING_MAX_LENG
     IMPLICIT NONE
@@ -1341,7 +1347,7 @@ CONTAINS
 
     INTEGER :: iErr
 
-    CALL BeginTrack('getfs')
+    CALL ezTrackBegin('getfs')
 
     value = 0d0
 
@@ -1367,12 +1373,12 @@ CONTAINS
        WRITE(cmd,102) TRIM(cmd)
     END IF
     ! WRITE(wrinqr(WR_OUTPUT),*) 'cmd: ', TRIM(cmd)
-    iErr = RunCommand(LEN_TRIM(cmd), TRIM(cmd))
+    iErr = ezRunCommand(cmd)
 
     flag = ((erinqr(ER_NUMWARNING) - numwrn) + (erinqr(ER_NUMERROR) - numerr)).NE.0
 
     IF (flag) THEN
-       CALL EndTrack()
+       CALL ezTrackEnd()
        RETURN
     END IF
 
@@ -1386,7 +1392,7 @@ CONTAINS
 100 FORMAT(A,',',A)
 102 FORMAT(A,',')
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
   END FUNCTION getfs
 
@@ -1424,7 +1430,7 @@ CONTAINS
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
     INTEGER, INTENT(IN), OPTIONAL :: IT2NUM
 
-    CALL BeginTrack('s_getfi')
+    CALL ezTrackBegin('s_getfi')
 
     derrinfo(1) = ENTNUM
 
@@ -1441,12 +1447,12 @@ CONTAINS
                & ', ' // Item1 // ' for ENTNUM=%d failed.', derrinfo, cerrinfo)
     END IF
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
   END FUNCTION s_getfi
 
   FUNCTION getfi(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
-    USE ansys_upf, ONLY : RunCommand, erinqr, wrinqr
+    USE ansys_upf, ONLY : erinqr, wrinqr
     USE ansys_par, ONLY : CMD_MAX_LENG, ER_NUMWARNING, ER_NUMERROR, ERH_FATAL, &
          & ERH_FNAME_LEN, PARMSIZE, STRING_MAX_LENG, WR_OUTPUT
     IMPLICIT NONE
@@ -1482,7 +1488,7 @@ CONTAINS
 
     INTEGER :: iErr
 
-    CALL BeginTrack('getfi')
+    CALL ezTrackBegin('getfi')
 
     value = 0d0
 
@@ -1504,12 +1510,12 @@ CONTAINS
        WRITE(cmd,102) TRIM(cmd)
     END IF
     ! WRITE(wrinqr(WR_OUTPUT),*) 'cmd: ', TRIM(cmd)
-    iErr = RunCommand(LEN_TRIM(cmd), TRIM(cmd))
+    iErr = ezRunCommand(cmd)
 
     flag = ((erinqr(ER_NUMWARNING) - numwrn) + (erinqr(ER_NUMERROR) - numerr)).NE.0
 
     IF (flag) THEN
-       CALL EndTrack()
+       CALL ezTrackEnd()
        RETURN
     END IF
 
@@ -1524,7 +1530,7 @@ CONTAINS
 101 FORMAT(A,',',I)
 102 FORMAT(A,',')
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
   END FUNCTION getfi
 
@@ -1562,7 +1568,7 @@ CONTAINS
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: IT2NUM
 
-    CALL BeginTrack('s_geti')
+    CALL ezTrackBegin('s_geti')
 
     derrinfo(1) = ENTNUM
 
@@ -1581,12 +1587,12 @@ CONTAINS
                & ', ' // Item1 // ' for ENTNUM=%d failed.', derrinfo, cerrinfo)
     END IF
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
   END FUNCTION s_geti
 
   FUNCTION geti(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
-    USE ansys_upf, ONLY : RunCommand, erinqr
+    USE ansys_upf, ONLY : erinqr
     USE ansys_par, ONLY : CMD_MAX_LENG, ER_NUMWARNING, ER_NUMERROR, &
          & PARMSIZE, STRING_MAX_LENG
     IMPLICIT NONE
@@ -1614,12 +1620,12 @@ CONTAINS
 
     REAL(KIND=8) :: fvalue
 
-    CALL BeginTrack('geti')
+    CALL ezTrackBegin('geti')
 
     flag = getf(fvalue, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM)
     value = INT(fvalue)
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
   END FUNCTION geti
 
@@ -1657,7 +1663,7 @@ CONTAINS
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: IT2NUM
 
-    CALL BeginTrack('s_getis')
+    CALL ezTrackBegin('s_getis')
 
     cerrinfo(1) = ENTNUM
 
@@ -1676,12 +1682,12 @@ CONTAINS
                & ', ' // Item1 // ' for ENTNUM=%s failed.', derrinfo, cerrinfo)
     END IF
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
   END FUNCTION s_getis
 
   FUNCTION getis(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
-    USE ansys_upf, ONLY : RunCommand, erinqr
+    USE ansys_upf, ONLY : erinqr
     USE ansys_par, ONLY : CMD_MAX_LENG, ER_NUMWARNING, ER_NUMERROR, &
          & PARMSIZE, STRING_MAX_LENG
     IMPLICIT NONE
@@ -1709,12 +1715,12 @@ CONTAINS
 
     REAL(KIND=8) :: fvalue
 
-    CALL BeginTrack('getis')
+    CALL ezTrackBegin('getis')
 
     flag = getfs(fvalue, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM)
     value = INT(fvalue)
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
   END FUNCTION getis
 
@@ -1752,7 +1758,7 @@ CONTAINS
     CHARACTER(LEN=8), INTENT(IN), OPTIONAL :: Item2
     INTEGER, INTENT(IN), OPTIONAL :: IT2NUM
 
-    CALL BeginTrack('s_getii')
+    CALL ezTrackBegin('s_getii')
 
     derrinfo(1) = ENTNUM
 
@@ -1769,12 +1775,12 @@ CONTAINS
                & ', ' // Item1 // ' for ENTNUM=%d failed.', derrinfo, cerrinfo)
     END IF
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
   END FUNCTION s_getii
 
   FUNCTION getii(value, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM) &
        & RESULT(flag)
-    USE ansys_upf, ONLY : RunCommand, erinqr
+    USE ansys_upf, ONLY : erinqr
     USE ansys_par, ONLY : CMD_MAX_LENG, ER_NUMWARNING, ER_NUMERROR, &
          & PARMSIZE, STRING_MAX_LENG
     IMPLICIT NONE
@@ -1802,12 +1808,12 @@ CONTAINS
 
     REAL(KIND=8) :: fvalue
 
-    CALL BeginTrack('getii')
+    CALL ezTrackBegin('getii')
 
     flag = getfi(fvalue, Entity, ENTNUM, Item1, IT1NUM, Item2, IT2NUM)
     value = INT(fvalue)
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
   END FUNCTION getii
 
@@ -1829,7 +1835,7 @@ CONTAINS
 
     CHARACTER(LEN=1024) :: msg
 
-    CALL BeginTrack('message')
+    CALL ezTrackBegin('message')
     wcount=wcount+1
     derrinfo(1) = n1
     derrinfo(2) = n2
@@ -1870,7 +1876,7 @@ CONTAINS
             & 'not supported (el. %i). Average value taken.')
     END IF
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
   END SUBROUTINE message
 

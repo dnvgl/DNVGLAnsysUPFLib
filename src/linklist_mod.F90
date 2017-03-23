@@ -52,7 +52,7 @@ CONTAINS
     TYPE(i_list), POINTER :: next
     TYPE(i_list), POINTER :: cur
 
-    CALL BeginTrack('linklist:append_i_list')
+    CALL ezTrackBegin('linklist:append_i_list')
     cur => NULL()
     next => base
     DO WHILE (ASSOCIATED(next))
@@ -64,7 +64,7 @@ CONTAINS
     ELSE
        base => item
     END IF
-    CALL EndTrack()
+    CALL ezTrackEnd()
   END SUBROUTINE append_i_list
 
   SUBROUTINE clear_i_list(base)
@@ -80,7 +80,7 @@ CONTAINS
 
     TYPE(i_list), POINTER :: next
     TYPE(i_list), POINTER :: cur
-    CALL BeginTrack('linklist:clear_ii_list')
+    CALL ezTrackBegin('linklist:clear_ii_list')
     cur => base
     DO WHILE (ASSOCIATED(cur))
        next => cur % next
@@ -88,7 +88,7 @@ CONTAINS
        cur => next
     END DO
     base => NULL()
-    CALL EndTrack()
+    CALL ezTrackEnd()
   END SUBROUTINE clear_i_list
 
   SUBROUTINE append_ii_list(base, item)
@@ -106,7 +106,7 @@ CONTAINS
     TYPE(ii_list), POINTER :: next
     TYPE(ii_list), POINTER :: cur
 
-    CALL BeginTrack('linklist:append_ii_list')
+    CALL ezTrackBegin('linklist:append_ii_list')
     cur => NULL()
     next => base
     DO WHILE (ASSOCIATED(next))
@@ -118,11 +118,11 @@ CONTAINS
     ELSE
        base => item
     END IF
-    CALL EndTrack()
+    CALL ezTrackEnd()
   END SUBROUTINE append_ii_list
 
   FUNCTION insert_ii_list(base, item, id) RESULT(inserted)
-    USE dnvglans, ONLY : BeginTrack, EndTrack
+    USE dnvglans, ONLY : ezTrackBegin, ezTrackEnd
     IMPLICIT NONE
     ! Purpose:
     !
@@ -139,7 +139,7 @@ CONTAINS
     TYPE(ii_list), POINTER :: prev
     TYPE(ii_list), POINTER :: cur
 
-    CALL BeginTrack('linklist:insert_ii_list')
+    CALL ezTrackBegin('linklist:insert_ii_list')
     inserted = .TRUE.
     prev => NULL()
     cur => base
@@ -155,7 +155,7 @@ CONTAINS
           ! Alread found section, return ID
           id = cur % value2
           inserted = .FALSE.
-          CALL EndTrack()
+          CALL ezTrackEnd()
           RETURN
        END IF
     END IF
@@ -168,7 +168,7 @@ CONTAINS
        item % next => cur
     END IF
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
   END FUNCTION insert_ii_list
 
   SUBROUTINE clear_ii_list(base)
@@ -184,7 +184,7 @@ CONTAINS
 
     TYPE(ii_list), POINTER :: next
     TYPE(ii_list), POINTER :: cur
-    CALL BeginTrack('linklist:clear_iii_list')
+    CALL ezTrackBegin('linklist:clear_iii_list')
     cur => base
     DO WHILE (ASSOCIATED(cur))
        next => cur % next
@@ -192,7 +192,7 @@ CONTAINS
        cur => next
     END DO
     base => NULL()
-    CALL EndTrack()
+    CALL ezTrackEnd()
   END SUBROUTINE clear_ii_list
 
   SUBROUTINE append_il_list(base, item)
@@ -210,7 +210,7 @@ CONTAINS
     TYPE(il_list), POINTER :: next
     TYPE(il_list), POINTER :: cur
 
-    CALL BeginTrack('linklist:append_il_list')
+    CALL ezTrackBegin('linklist:append_il_list')
     cur => NULL()
     next => base
     DO WHILE (ASSOCIATED(next))
@@ -222,11 +222,11 @@ CONTAINS
     ELSE
        base => item
     END IF
-    CALL EndTrack()
+    CALL ezTrackEnd()
   END SUBROUTINE append_il_list
 
   FUNCTION insert_il_list(base, item, val) RESULT(inserted)
-    USE dnvglans, ONLY : BeginTrack, EndTrack
+    USE dnvglans, ONLY : ezTrackBegin, ezTrackEnd
     IMPLICIT NONE
     ! Purpose:
     !
@@ -243,7 +243,7 @@ CONTAINS
     TYPE(il_list), POINTER :: prev
     TYPE(il_list), POINTER :: cur
 
-    CALL BeginTrack('linklist:insert_il_list')
+    CALL ezTrackBegin('linklist:insert_il_list')
     inserted = .TRUE.
     prev => NULL()
     cur => base
@@ -258,7 +258,7 @@ CONTAINS
           ! Alread found section, return ID
           val = cur % value2
           inserted = .FALSE.
-          CALL EndTrack()
+          CALL ezTrackEnd()
           RETURN
        END IF
     END IF
@@ -272,7 +272,7 @@ CONTAINS
        item % next => cur
     END IF
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
   END FUNCTION insert_il_list
 
   SUBROUTINE clear_il_list(base)
@@ -288,7 +288,7 @@ CONTAINS
 
     TYPE(il_list), POINTER :: next
     TYPE(il_list), POINTER :: cur
-    CALL BeginTrack('linklist:clear_iil_list')
+    CALL ezTrackBegin('linklist:clear_iil_list')
     cur => base
     DO WHILE (ASSOCIATED(cur))
        next => cur % next
@@ -296,7 +296,7 @@ CONTAINS
        cur => next
     END DO
     base => NULL()
-    CALL EndTrack()
+    CALL ezTrackEnd()
   END SUBROUTINE clear_il_list
 
   SUBROUTINE append_dd_list(base, item)
@@ -314,7 +314,7 @@ CONTAINS
     TYPE(dd_list), POINTER :: next
     TYPE(dd_list), POINTER :: cur
 
-    CALL BeginTrack('linklist:append_dd_list')
+    CALL ezTrackBegin('linklist:append_dd_list')
     cur => NULL()
     next => base
     DO WHILE (ASSOCIATED(next))
@@ -326,7 +326,7 @@ CONTAINS
     ELSE
        base => item
     END IF
-    CALL EndTrack()
+    CALL ezTrackEnd()
   END SUBROUTINE append_dd_list
 
   SUBROUTINE clear_dd_list(base)
@@ -342,7 +342,7 @@ CONTAINS
 
     TYPE(dd_list), POINTER :: next
     TYPE(dd_list), POINTER :: cur
-    CALL BeginTrack('linklist:clear_idd_list')
+    CALL ezTrackBegin('linklist:clear_idd_list')
     cur => base
     DO WHILE (ASSOCIATED(cur))
        next => cur % next
@@ -350,7 +350,7 @@ CONTAINS
        cur => next
     END DO
     base => NULL()
-    CALL EndTrack()
+    CALL ezTrackEnd()
   END SUBROUTINE clear_dd_list
 
 END MODULE linklist_mod

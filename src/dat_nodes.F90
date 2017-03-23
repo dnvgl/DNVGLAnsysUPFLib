@@ -1,7 +1,7 @@
 !     find out and store # of nodes
 MODULE mod_dat_nodes
 
-  USE dnvglans, ONLY : BeginTrack, EndTrack
+  USE dnvglans, ONLY : ezTrackBegin, ezTrackEnd
 
 CONTAINS
 
@@ -25,13 +25,13 @@ CONTAINS
 
     CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
 
-    CALL BeginTrack('dat_nodes')
+    CALL ezTrackBegin('dat_nodes')
 
     n_nodes = ndinqr(0, DB_NUMDEFINED)
     derrinfo(1) = n_nodes
     CALL ans_note(fname, __LINE__, libname, '  nodes defined: %i')
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
   END SUBROUTINE dat_nodes
 

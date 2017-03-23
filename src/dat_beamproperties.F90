@@ -11,7 +11,7 @@
 MODULE mod_dat_beamproperties
 
   USE ansys_par, ONLY : PARMSIZE, ERH_FNAME_LEN
-  USE dnvglans, ONLY : derrinfo, BeginTrack, EndTrack
+  USE dnvglans, ONLY : derrinfo, ezTrackBegin, ezTrackEnd
 
 
   USE LOCMOD, ONLY : libname
@@ -34,12 +34,12 @@ CONTAINS
 
     TYPE(bp_type) :: bp
 
-    CALL BeginTrack("dat_beamp")
+    CALL ezTrackBegin("dat_beamp")
 
     CALL dat_beamproperties_rc(bp)
     CALL dat_beamproperties_sec(bp)
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
   END SUBROUTINE dat_beamproperties
 
@@ -81,7 +81,7 @@ CONTAINS
     INTEGER :: iErr
     LOGICAL :: err
 
-    CALL BeginTrack("dat_beamp_sec")
+    CALL ezTrackBegin("dat_beamp_sec")
 
     ! Loop over all sections
     err = s_get(fname, libname, __LINE__, ERH_FATAL, &
@@ -188,7 +188,7 @@ CONTAINS
 
     END DO
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
   END SUBROUTINE dat_beamproperties_sec
 
@@ -230,7 +230,7 @@ CONTAINS
 100 FORMAT (A, ':', I3, ':dat_beamproperties_rc')
 #endif
 
-    CALL BeginTrack('dat_beamproperties_rc')
+    CALL ezTrackBegin('dat_beamproperties_rc')
 
     ! select all real constants of BEAM44 elements
     CALL ans2bmf_rlnosel()
@@ -440,7 +440,7 @@ CONTAINS
 
     CALL ans2bmf_rlallsel()
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
   END SUBROUTINE dat_beamproperties_rc
 
@@ -461,14 +461,14 @@ CONTAINS
     ! ======================================================================
     INTEGER r, rmax
 
-    CALL BeginTrack('ans2bmf_rlallsel')
+    CALL ezTrackBegin('ans2bmf_rlallsel')
 
     rmax = rlinqr(0, DB_MAXDEFINED)
     DO r = 1, rmax
        CALL rlsel(r, 1)
     END DO
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
   END SUBROUTINE ans2bmf_rlallsel
 
@@ -489,14 +489,14 @@ CONTAINS
     ! ======================================================================
     INTEGER r, rmax
 
-    CALL BeginTrack('ans2bmf_rlnosel')
+    CALL ezTrackBegin('ans2bmf_rlnosel')
 
     rmax = rlinqr(0, DB_MAXDEFINED)
     DO r = 1, rmax
        CALL rlsel(r, -1)
     END DO
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
   END SUBROUTINE ans2bmf_rlnosel
 
@@ -520,7 +520,7 @@ CONTAINS
     INTEGER, DIMENSION(EL_DIM) :: elmdat
     INTEGER, DIMENSION(NNMAX) :: nodes
 
-    CALL BeginTrack('ans2bmf_rlsle')
+    CALL ezTrackBegin('ans2bmf_rlsle')
 
     CALL ans2bmf_rlnosel()
 
@@ -531,7 +531,7 @@ CONTAINS
        el = elnext(el)
     END DO
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
   END SUBROUTINE ans2bmf_rlsle
 
@@ -566,7 +566,7 @@ CONTAINS
 
     LOGICAL :: err
 
-    CALL BeginTrack("get_t_beam_common")
+    CALL ezTrackBegin("get_t_beam_common")
 
     derrinfo(1) = n
 
@@ -588,7 +588,7 @@ CONTAINS
     err = s_get(fname, libname, __LINE__, ERH_FATAL, offy, 'SECP', n, 'PROP     ', 'OFFY    ')
     err = s_get(fname, libname, __LINE__, ERH_FATAL, offz, 'SECP', n, 'PROP     ', 'OFFZ    ')
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
   END SUBROUTINE get_t_beam_common
 
@@ -609,7 +609,7 @@ CONTAINS
 
     LOGICAL :: err
 
-    CALL BeginTrack("get_t_beam_rect")
+    CALL ezTrackBegin("get_t_beam_rect")
 
     derrinfo(1) = n
 
@@ -629,12 +629,12 @@ CONTAINS
     section_info%t_z_2 = section_info%t_z_2 / 2d0
     section_info%t_z_1 = section_info%t_z_2
 
-    section_info%web_height = section_info%data(1)
-    section_info%web_thickness = section_info%data(2)
+    section_info%web_height = section_info%data(2)
+    section_info%web_thickness = section_info%data(1)
 
     section_info%type_code = CS_TYPE_RECT
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
   END SUBROUTINE get_t_beam_rect
 
@@ -656,7 +656,7 @@ CONTAINS
     INTEGER :: i
     LOGICAL :: err
 
-    CALL BeginTrack("get_t_beam_quad")
+    CALL ezTrackBegin("get_t_beam_quad")
 
     derrinfo(2) = n
 
@@ -681,7 +681,7 @@ CONTAINS
 
     section_info%type_code = CS_TYPE_QUAD
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
   END SUBROUTINE get_t_beam_quad
 
@@ -700,7 +700,7 @@ CONTAINS
     LOGICAL :: err
     INTEGER :: i
 
-    CALL BeginTrack("get_t_beam_csolid")
+    CALL ezTrackBegin("get_t_beam_csolid")
 
     derrinfo(1) = n
 
@@ -720,7 +720,7 @@ CONTAINS
 
     section_info%type_code = CS_TYPE_CSOLID
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
   END SUBROUTINE get_t_beam_csolid
 
@@ -740,7 +740,7 @@ CONTAINS
     LOGICAL :: err
     INTEGER :: i
 
-    CALL BeginTrack("get_t_beam_ctube")
+    CALL ezTrackBegin("get_t_beam_ctube")
 
     derrinfo(1) = n
 
@@ -761,7 +761,7 @@ CONTAINS
 
     section_info%type_code = CS_TYPE_CTUBE
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
   END SUBROUTINE get_t_beam_ctube
 
@@ -782,7 +782,7 @@ CONTAINS
     INTEGER :: i
     LOGICAL :: err
 
-    CALL BeginTrack("get_t_beam_chan")
+    CALL ezTrackBegin("get_t_beam_chan")
 
     derrinfo(2) = n
 
@@ -806,7 +806,7 @@ CONTAINS
 
     section_info%type_code = CS_TYPE_CHAN
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
   END SUBROUTINE get_t_beam_chan
 
@@ -827,7 +827,7 @@ CONTAINS
     INTEGER :: i
     LOGICAL :: err
 
-    CALL BeginTrack("get_t_beam_i")
+    CALL ezTrackBegin("get_t_beam_i")
 
     derrinfo(2) = n
 
@@ -851,7 +851,7 @@ CONTAINS
 
     section_info%type_code = CS_TYPE_I
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
   END SUBROUTINE get_t_beam_i
 
@@ -872,7 +872,7 @@ CONTAINS
     INTEGER :: i
     LOGICAL :: err
 
-    CALL BeginTrack("get_t_beam_z")
+    CALL ezTrackBegin("get_t_beam_z")
 
     derrinfo(2) = n
 
@@ -896,7 +896,7 @@ CONTAINS
 
     section_info%type_code = CS_TYPE_Z
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
   END SUBROUTINE get_t_beam_z
 
@@ -917,7 +917,7 @@ CONTAINS
     INTEGER :: i
     LOGICAL :: err
 
-    CALL BeginTrack("get_t_beam_l")
+    CALL ezTrackBegin("get_t_beam_l")
 
     derrinfo(2) = n
 
@@ -946,7 +946,7 @@ CONTAINS
 
     section_info%type_code = CS_TYPE_L
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
   END SUBROUTINE get_t_beam_l
 
@@ -967,7 +967,7 @@ CONTAINS
     INTEGER :: i
     LOGICAL :: err
 
-    CALL BeginTrack("get_t_beam_t")
+    CALL ezTrackBegin("get_t_beam_t")
 
     derrinfo(2) = n
 
@@ -996,7 +996,7 @@ CONTAINS
 
     section_info%type_code = CS_TYPE_T
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
   END SUBROUTINE get_t_beam_t
 
@@ -1017,7 +1017,7 @@ CONTAINS
     INTEGER :: i
     LOGICAL :: err
 
-    CALL BeginTrack("get_t_beam_hats")
+    CALL ezTrackBegin("get_t_beam_hats")
 
     derrinfo(2) = n
 
@@ -1043,7 +1043,7 @@ CONTAINS
 
     section_info%type_code = CS_TYPE_HATS
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
   END SUBROUTINE get_t_beam_hats
 
@@ -1064,7 +1064,7 @@ CONTAINS
     INTEGER :: i
     LOGICAL :: err
 
-    CALL BeginTrack("get_t_beam_hrec")
+    CALL ezTrackBegin("get_t_beam_hrec")
 
     derrinfo(2) = n
 
@@ -1090,7 +1090,7 @@ CONTAINS
 
     section_info%type_code = CS_TYPE_HREC
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
   END SUBROUTINE get_t_beam_hrec
 
@@ -1109,7 +1109,7 @@ CONTAINS
     LOGICAL :: err
     INTEGER :: i
 
-    CALL BeginTrack("get_t_beam_asec")
+    CALL ezTrackBegin("get_t_beam_asec")
 
     ALLOCATE(section_info%data(12))
     DO i = 1, 12
@@ -1136,7 +1136,7 @@ CONTAINS
 
     section_info%type_code = CS_TYPE_ASEC
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
   END SUBROUTINE get_t_beam_asec
 
@@ -1152,7 +1152,7 @@ CONTAINS
     REAL(KIND=8), INTENT(IN) :: cgy, cgz
     INTEGER, INTENT(IN) :: n
 
-    CALL BeginTrack("get_t_beam_mesh")
+    CALL ezTrackBegin("get_t_beam_mesh")
 
     section_info%t_max = 0d0
     section_info%t_min = 0d0
@@ -1163,7 +1163,7 @@ CONTAINS
 
     section_info%type_code = CS_TYPE_MESH
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
   END SUBROUTINE get_t_beam_mesh
 
@@ -1180,7 +1180,7 @@ CONTAINS
 
     INTEGER :: i
 
-    CALL BeginTrack("dat_cs_material")
+    CALL ezTrackBegin("dat_cs_material")
 
     gp_ptr_cur => null()
     gp_ptr_prev => null()
@@ -1215,7 +1215,7 @@ CONTAINS
        END IF
        EXIT gp_loop
     END DO gp_loop
-    CALL EndTrack()
+    CALL ezTrackEnd()
   END SUBROUTINE dat_cs_material
 
 END MODULE mod_dat_beamproperties

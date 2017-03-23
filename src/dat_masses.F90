@@ -12,15 +12,14 @@
 
 MODULE mod_dat_masses
 
-  USE dnvglans, ONLY : BeginTrack, EndTrack
+  USE dnvglans, ONLY : ezTrackBegin, ezTrackEnd, ezRunCommand
 
 CONTAINS
 
   SUBROUTINE dat_masses()
-    USE ansys_upf, ONLY : RunCommand, elmiqr
+    USE ansys_upf, ONLY : elmiqr
     USE ansys_par, ONLY : CMD_MAX_LENG, DB_NUMSELECTED
     USE ans_common, ONLY : n_masses
-
     ! Purpose:
     !
     ! Parameter:
@@ -35,15 +34,15 @@ CONTAINS
 
     CHARACTER(LEN=CMD_MAX_LENG) :: cmd
 
-    CALL BeginTrack('dat_masses')
+    CALL ezTrackBegin('dat_masses')
 
     ! select all nodal mass elements
     cmd = 'ESEL,S,ENAME,,MASS21'
-    iErr = RunCommand(LEN_TRIM(cmd), cmd)
+    iErr = ezRunCommand(cmd)
 
     n_masses = elmiqr(0, DB_NUMSELECTED)
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
   END SUBROUTINE dat_masses
 

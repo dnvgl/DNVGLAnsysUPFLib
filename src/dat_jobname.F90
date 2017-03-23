@@ -2,7 +2,7 @@
 
 MODULE mod_dat_jobname
 
-  USE dnvglans, ONLY : BeginTrack, EndTrack
+  USE dnvglans, ONLY : ezTrackBegin, ezTrackEnd
 
 CONTAINS
 
@@ -26,7 +26,7 @@ CONTAINS
 
     CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
 
-    CALL BeginTrack('dat_jobname')
+    CALL ezTrackBegin('dat_jobname')
 
     ! reads jobname from database. See description of *GET
 
@@ -42,7 +42,7 @@ CONTAINS
     cerrinfo(1) = jobname
     CALL ans_note(fname, __LINE__, libname, '  jobname: %s')
 
-    CALL EndTrack()
+    CALL ezTrackEnd()
 
   END SUBROUTINE dat_jobname
 
