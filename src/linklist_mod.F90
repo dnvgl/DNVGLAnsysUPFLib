@@ -38,6 +38,7 @@ MODULE linklist_mod
 CONTAINS
 
   SUBROUTINE append_i_list(base, item)
+    USE dnvglans, ONLY : ezTrackBegin, ezTrackEnd
     IMPLICIT NONE
     ! Purpose:
     !
@@ -68,6 +69,7 @@ CONTAINS
   END SUBROUTINE append_i_list
 
   SUBROUTINE clear_i_list(base)
+    USE dnvglans, ONLY : ezTrackBegin, ezTrackEnd
     IMPLICIT NONE
     ! Purpose:
     !
@@ -92,6 +94,7 @@ CONTAINS
   END SUBROUTINE clear_i_list
 
   SUBROUTINE append_ii_list(base, item)
+    USE dnvglans, ONLY : ezTrackBegin, ezTrackEnd
     IMPLICIT NONE
     ! Purpose:
     !
@@ -172,6 +175,7 @@ CONTAINS
   END FUNCTION insert_ii_list
 
   SUBROUTINE clear_ii_list(base)
+    USE dnvglans, ONLY : ezTrackBegin, ezTrackEnd
     IMPLICIT NONE
     ! Purpose:
     !
@@ -196,6 +200,7 @@ CONTAINS
   END SUBROUTINE clear_ii_list
 
   SUBROUTINE append_il_list(base, item)
+    USE dnvglans, ONLY : ezTrackBegin, ezTrackEnd
     IMPLICIT NONE
     ! Purpose:
     !
@@ -276,6 +281,7 @@ CONTAINS
   END FUNCTION insert_il_list
 
   SUBROUTINE clear_il_list(base)
+    USE dnvglans, ONLY : ezTrackBegin, ezTrackEnd
     IMPLICIT NONE
     ! Purpose:
     !
@@ -300,6 +306,7 @@ CONTAINS
   END SUBROUTINE clear_il_list
 
   SUBROUTINE append_dd_list(base, item)
+    USE dnvglans, ONLY : ezTrackBegin, ezTrackEnd
     IMPLICIT NONE
     ! Purpose:
     !
@@ -330,6 +337,7 @@ CONTAINS
   END SUBROUTINE append_dd_list
 
   SUBROUTINE clear_dd_list(base)
+    USE dnvglans, ONLY : ezTrackBegin, ezTrackEnd
     IMPLICIT NONE
     ! Purpose:
     !
