@@ -48,14 +48,38 @@ CONTAINS
     CALL ezTrackBegin('dat_components')
 
     ! find number of components: -> ansys_comp
+    CALL ezTrackMark(__FILE__, __LINE__)
     flag = get(ansys_comp, Entity='COMP', ENTNUM=0, Item1='NCOMP   ')
     if (flag) THEN
        CALL ans_fatal(fname, __LINE__, libname, &
             'Could not determine number of components.')
     END IF
 
+    CALL ezTrackMark(__FILE__, __LINE__)
     derrinfo(1) = ansys_comp
     CALL ans_note(fname, __LINE__, libname, ' # of ANSYS components: %i')
+
+    IF (ALLOCATED(l_comp_name)) THEN
+       DEALLOCATE( &
+            l_comp_name, &
+            comp_name, &
+            l_comp_pos, &
+            l_comp_len, &
+            l_comp_ansys, &
+            l_comp_csub, &
+            l_csub_gid)
+    END IF
+
+    CALL ezTrackMark(__FILE__, __LINE__)
+    ALLOCATE( &
+         l_comp_name(ansys_comp + 1 + csub_num), &
+         comp_name(ansys_comp + 1 + csub_num), &
+         l_comp_pos(ansys_comp + 1 + csub_num), &
+         l_comp_len(ansys_comp + 1 + csub_num), &
+         l_comp_ansys(ansys_comp + 1 + csub_num), &
+         l_comp_csub(ansys_comp + 1 + csub_num), &
+         l_csub_gid(ansys_comp + 1 + csub_num))
+    comp_name(:) = " "
 
     ! loop over all components
     !  running # for sxf components created
@@ -64,9 +88,9 @@ CONTAINS
     an_cnum = 0
     DO n = 1, ansys_comp+1
 
-       IF (comp_num.GE.max_components-csub_num) THEN
+       IF (comp_num.GT.ansys_comp + 1) THEN
           derrinfo(1) = comp_num
-          derrinfo(2) = max_components
+          derrinfo(2) = ansys_comp + 1 - csub_num
           CALL ans_error(fname, __LINE__, libname, &
                & 'ERROR: %i components defined. Greater or '// &
                & 'too close to maximal number %i')
@@ -84,6 +108,7 @@ CONTAINS
              CALL cmselect('U', trim(comp_name(m)))
           END DO
           cmd = 'CM,NOTNAMED,ELEM'
+          CALL ezTrackMark(__FILE__, __LINE__)
           iErr = ezRunCommand(cmd)
           an_cnum = an_cnum+1
 
@@ -152,6 +177,7 @@ CONTAINS
 
           ! define temporary component
           cmd = 'CM,XXXCOMP,ELEM'
+          CALL ezTrackMark(__FILE__, __LINE__)
           iErr = ezRunCommand(cmd)
 
           ! subselect all different types in the component an_cnum and

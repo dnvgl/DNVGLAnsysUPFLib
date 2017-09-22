@@ -41,7 +41,19 @@ MODULE dnvglans
      MODULE PROCEDURE TrackBegin_p, TrackBegin_fl
   END INTERFACE EzTrackBegin
 
-  PUBLIC :: ezTrackBegin, ezTrackEnd, ezRunCommand
+  INTERFACE ezTrackMark
+     MODULE PROCEDURE TrackMark_p, TrackMark_fl
+  END INTERFACE ezTrackMark
+
+  PUBLIC :: ezTrackBegin, ezTrackEnd, ezTrackMark, ezRunCommand
+
+  INTERFACE ezBanner
+     MODULE PROCEDURE ezBanner_s, ezBanner_a
+  END INTERFACE ezBanner
+
+  PUBLIC :: ezBanner
+
+  CHARACTER(LEN=*), PARAMETER :: banner_fmt = "(x,'*',x,A64,x,'*')"
 
   INTERFACE get
      MODULE PROCEDURE getf, getfs, getfi, geti, getis, getii, gets, getsi
@@ -61,7 +73,6 @@ MODULE dnvglans
   PUBLIC :: esel
   PUBLIC :: nsel
   PUBLIC :: cmselect
-  PUBLIC :: message
   PUBLIC :: doDebugLoc
   PUBLIC :: ans2bmf_get_s
   PUBLIC :: ans2bmf_get_d
@@ -134,6 +145,21 @@ CONTAINS
     CALL TrackBegin_p(pos)
   END SUBROUTINE TrackBegin_fl
 
+  SUBROUTINE TrackMark_p(pos)
+    IMPLICIT NONE
+    CHARACTER(LEN=*), INTENT(IN) :: pos
+    CALL TrackBegin_p(pos)
+    CALL ezTrackEnd()
+  END SUBROUTINE TrackMark_p
+
+  SUBROUTINE TrackMark_fl(file, line)
+    IMPLICIT NONE
+    CHARACTER(LEN=*), INTENT(IN) :: file
+    INTEGER, INTENT(IN) :: line
+    CALL TrackBegin_fl(file, line)
+    CALL ezTrackEnd()
+  END SUBROUTINE TrackMark_fl
+
   SUBROUTINE ezTrackEnd()
     IF (ASSOCIATED(TrackStackPos)) THEN
        CALL TrackEnd(TrackStackPos%position)
@@ -150,6 +176,74 @@ CONTAINS
             & 'Track stack is empty')
     END IF
   END SUBROUTINE EzTrackEnd
+
+  SUBROUTINE init_banner(unit)
+    IMPLICIT NONE
+    INTEGER :: unit
+
+    WRITE(unit, "(/,x,'*',66('-'),'*')")
+  END SUBROUTINE init_banner
+
+  SUBROUTINE finish_banner(unit)
+    IMPLICIT NONE
+    INTEGER :: unit
+
+    WRITE(unit, "(x,'*',66('-'),'*',/)")
+  END SUBROUTINE finish_banner
+
+  SUBROUTINE ezBanner_s(inp)
+    USE ansys_upf, ONLY : wrinqr
+    USE ansys_par, ONLY : WR_OUTPUT
+    IMPLICIT NONE
+    CHARACTER(LEN=*) :: inp
+
+    INTEGER :: o_unit
+
+    CHARACTER(LEN=64) :: line
+
+    CALL ezTrackBegin(__FILE__, __LINE__)
+
+    o_unit = wrinqr(WR_OUTPUT)
+
+    CALL init_banner(o_unit)
+
+    line(:) = ' '
+    line = inp
+    WRITE(o_unit, banner_fmt) line
+
+    CALL finish_banner(o_unit)
+
+    CALL ezTrackEnd()
+
+  END SUBROUTINE ezBanner_s
+
+  SUBROUTINE ezBanner_a(inp)
+    USE ansys_upf, ONLY : wrinqr
+    USE ansys_par, ONLY : WR_OUTPUT
+    IMPLICIT NONE
+    CHARACTER(LEN=*), DIMENSION(:) :: inp
+
+    INTEGER :: o_unit
+
+    CHARACTER(LEN=64) :: line
+    INTEGER :: line_no
+
+    CALL ezTrackBegin(__FILE__, __LINE__)
+
+    o_unit = wrinqr(WR_OUTPUT)
+
+    CALL init_banner(o_unit)
+
+    DO line_no = 1, size(inp)
+       line(:) = ' '
+       line = inp(line_no)
+       WRITE(o_unit, banner_fmt) line
+    END DO
+
+    CALL finish_banner(o_unit)
+
+    CALL ezTrackEnd()
+  END SUBROUTINE ezBanner_a
 
   SUBROUTINE ans_note(fname, line, libname, msg)
     IMPLICIT NONE

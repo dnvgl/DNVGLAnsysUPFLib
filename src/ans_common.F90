@@ -35,14 +35,13 @@ MODULE ans_common
   INTEGER :: el_length
   INTEGER :: el_count
 
-  INTEGER, PARAMETER :: max_components=1024
-  CHARACTER(LEN=16), DIMENSION(max_components) :: l_comp_name
-  CHARACTER(LEN=STRING_MAX_LENG), DIMENSION(max_components) :: comp_name = " "
-  INTEGER, DIMENSION(max_components) :: l_comp_pos
-  INTEGER, DIMENSION(max_components) :: l_comp_len
-  CHARACTER(LEN=STRING_MAX_LENG), DIMENSION(max_components) :: l_comp_ansys
-  INTEGER, DIMENSION(max_components) :: l_comp_csub
-  INTEGER, DIMENSION(max_components) :: l_csub_gid
+  CHARACTER(LEN=16), DIMENSION(:), ALLOCATABLE :: l_comp_name
+  CHARACTER(LEN=STRING_MAX_LENG), DIMENSION(:), ALLOCATABLE :: comp_name ! = " "
+  INTEGER, DIMENSION(:), ALLOCATABLE :: l_comp_pos
+  INTEGER, DIMENSION(:), ALLOCATABLE :: l_comp_len
+  CHARACTER(LEN=STRING_MAX_LENG), DIMENSION(:), ALLOCATABLE :: l_comp_ansys
+  INTEGER, DIMENSION(:), ALLOCATABLE :: l_comp_csub
+  INTEGER, DIMENSION(:), ALLOCATABLE :: l_csub_gid
   INTEGER :: comp_num
 
   INTEGER :: n_sfiles
