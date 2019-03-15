@@ -94,7 +94,7 @@ CONTAINS
        err = s_get(fname, libname, __LINE__, ERH_NOTE, &
             & sec_type, 'SECP', n, 'TYPE    ')
 
-       IF (.NOT. err .AND. sec_type.eq.'BEAM') THEN
+       IF (.NOT. err .AND. sec_type.EQ.'BEAM') THEN
 
           bp%num = bp%num + 1
           bp%snum = bp%snum + 1
@@ -102,13 +102,13 @@ CONTAINS
           bp%se_bp_map(bp%snum)%i = bp%num
           bp%se_bp_map(bp%snum)%j = bp%num
 
-          bp%data(bp%num)%id = bp%num
-          bp%data(bp%num)%A(:) = 0d0
-          bp%data(bp%num)%I(:) = 0d0
-          bp%data(bp%num)%e(:) = 0d0
-          bp%data(bp%num)%sc(:) = 0d0
-          bp%data(bp%num)%d(:) = 0d0
-          bp%data(bp%num)%Iyz = 0d0
+          bp%DATA(bp%num)%id = bp%num
+          bp%DATA(bp%num)%A(:) = 0d0
+          bp%DATA(bp%num)%I(:) = 0d0
+          bp%DATA(bp%num)%e(:) = 0d0
+          bp%DATA(bp%num)%sc(:) = 0d0
+          bp%DATA(bp%num)%d(:) = 0d0
+          bp%DATA(bp%num)%Iyz = 0d0
 
           section_info%t_y_1 = 0d0
           section_info%t_y_2 = 0d0
@@ -118,12 +118,12 @@ CONTAINS
           CALL get_t_beam_common(n, name, area, iyy, iyz, izz, warp_val, tors, &
                cgy, cgz, shcy, shcz, scyy, scyz, sczz, offset, offy, offz)
 
-          bp%data(bp%num)%name(:) = name(1:16)
-          bp%data(bp%num)%A(:) = (/ area, area * scyy, area * sczz /)
+          bp%DATA(bp%num)%name(:) = name(1:16)
+          bp%DATA(bp%num)%A(:) = (/ area, area * scyy, area * sczz /)
 
-          bp%data(bp%num)%i(:) = (/ tors, izz, iyy /)
+          bp%DATA(bp%num)%i(:) = (/ tors, izz, iyy /)
 
-          bp%data(bp%num)%iyz = iyz
+          bp%DATA(bp%num)%iyz = iyz
 
           err = s_get(fname, libname, __LINE__, ERH_FATAL, &
                & sec_subtype, 'SECP', n, 'SUBTYPE ')
@@ -166,22 +166,22 @@ CONTAINS
           bp%cs_info(bp%snum) = section_info
 
           IF (section_info%t_max .NE. 0d0) THEN
-             bp%data(bp%num)%e(1) = tors / section_info%t_max
+             bp%DATA(bp%num)%e(1) = tors / section_info%t_max
           END IF
           IF (section_info%t_min .NE. 0d0) THEN
-             bp%data(bp%num)%e(2) = tors / section_info%t_min
+             bp%DATA(bp%num)%e(2) = tors / section_info%t_min
           END IF
 
-          bp%data(bp%num)%e(3:6) = (/ &
+          bp%DATA(bp%num)%e(3:6) = (/ &
              section_info%t_y_1, section_info%t_y_2, &
              section_info%t_z_1, section_info%t_z_2 /)
 
-          bp%data(bp%num)%d(:) = (/ 0d0, cgy - offy, cgz - offz /)
+          bp%DATA(bp%num)%d(:) = (/ 0d0, cgy - offy, cgz - offz /)
 
-          bp%data(bp%num)%sc(:) = (/ shcz, shcy /)
+          bp%DATA(bp%num)%sc(:) = (/ shcz, shcy /)
 
-          IF (ALLOCATED(section_info%data)) THEN
-             DEALLOCATE(section_info%data)
+          IF (ALLOCATED(section_info%DATA)) THEN
+             DEALLOCATE(section_info%DATA)
           END IF
 
        END IF
@@ -386,7 +386,7 @@ CONTAINS
           i_vals%sc(:) = (/ rtable(31), rtable(32) /)
           IF (rtable(34) .NE. 0d0) THEN
              j_vals%sc(1) = rtable(33)
-          else
+          ELSE
              j_vals%sc(1) = rtable(31)
           END IF
           IF (rtable(33) .NE. 0d0) THEN
@@ -423,12 +423,12 @@ CONTAINS
 
           bp%num = bp%num + 1
           bp%rnum = bp%rnum + 1
-          bp%data(bp%num) = i_vals
+          bp%DATA(bp%num) = i_vals
           bp%r_bp_map(bp%rnum)%r = n
           bp%r_bp_map(bp%rnum)%i = bp%num
           IF (i_vals .NE. j_vals) THEN
              bp%num = bp%num + 1
-             bp%data(bp%num) = j_vals
+             bp%DATA(bp%num) = j_vals
           END IF
           bp%r_bp_map(bp%rnum)%j = bp%num
 
@@ -613,24 +613,24 @@ CONTAINS
 
     derrinfo(1) = n
 
-    ALLOCATE(section_info%data(4))
+    ALLOCATE(section_info%DATA(4))
     DO i = 1, 4
        err = s_get(fname, libname, __LINE__, ERH_FATAL, &
-              & section_info%data(i), 'SECP', n, 'DATA    ', i)
+              & section_info%DATA(i), 'SECP', n, 'DATA    ', i)
     END DO
 
-    section_info%t_y_2 = section_info%data(1)
-    section_info%t_z_2 = section_info%data(2)
+    section_info%t_y_2 = section_info%DATA(1)
+    section_info%t_z_2 = section_info%DATA(2)
 
-    section_info%t_max = max(section_info%t_y_1, section_info%t_z_1)
-    section_info%t_min = min(section_info%t_y_1, section_info%t_z_1)
+    section_info%t_max = MAX(section_info%t_y_1, section_info%t_z_1)
+    section_info%t_min = MIN(section_info%t_y_1, section_info%t_z_1)
     section_info%t_y_2 = section_info%t_y_2 / 2d0
     section_info%t_y_1 = section_info%t_y_2
     section_info%t_z_2 = section_info%t_z_2 / 2d0
     section_info%t_z_1 = section_info%t_z_2
 
-    section_info%web_height = section_info%data(2)
-    section_info%web_thickness = section_info%data(1)
+    section_info%web_height = section_info%DATA(2)
+    section_info%web_thickness = section_info%DATA(1)
 
     section_info%type_code = CS_TYPE_RECT
 
@@ -660,15 +660,15 @@ CONTAINS
 
     derrinfo(2) = n
 
-    ALLOCATE(section_info%data(10))
+    ALLOCATE(section_info%DATA(10))
     DO i = 1, 10
        err = s_get(fname, libname, __LINE__, ERH_FATAL, &
-            & section_info%data(i), 'SECP', n, 'DATA    ', i)
+            & section_info%DATA(i), 'SECP', n, 'DATA    ', i)
     END DO
 
     DO i = 1, 4
-       y(i) = section_info%data(2*i-1)
-       z(i) = section_info%data(2*i)
+       y(i) = section_info%DATA(2*i-1)
+       z(i) = section_info%DATA(2*i)
     END DO
 
     section_info%t_min = MIN(-y(1) + y(2), -y(4) + y(3), -z(1) + z(4), -z(2) + z(3))
@@ -704,13 +704,13 @@ CONTAINS
 
     derrinfo(1) = n
 
-    ALLOCATE(section_info%data(3))
+    ALLOCATE(section_info%DATA(3))
     DO i = 1, 3
        err = s_get(fname, libname, __LINE__, ERH_FATAL, &
-              & section_info%data(i), 'SECP', n, 'DATA    ', i)
+              & section_info%DATA(i), 'SECP', n, 'DATA    ', i)
     END DO
 
-    section_info%t_y_2 = section_info%data(1)
+    section_info%t_y_2 = section_info%DATA(1)
 
     section_info%t_max = section_info%t_y_2 * 2.
     section_info%t_min = section_info%t_max
@@ -744,14 +744,14 @@ CONTAINS
 
     derrinfo(1) = n
 
-    ALLOCATE(section_info%data(3))
+    ALLOCATE(section_info%DATA(3))
     DO i = 1, 3
        err = s_get(fname, libname, __LINE__, ERH_FATAL, &
-              & section_info%data(i), 'SECP', n, 'DATA    ', i)
+              & section_info%DATA(i), 'SECP', n, 'DATA    ', i)
     END DO
 
-    r_i = section_info%data(1)
-    section_info%t_y_2 = section_info%data(2)
+    r_i = section_info%DATA(1)
+    section_info%t_y_2 = section_info%DATA(2)
 
     section_info%t_max = section_info%t_y_2 - r_i
     section_info%t_min = section_info%t_max
@@ -777,8 +777,8 @@ CONTAINS
     REAL(KIND=8), INTENT(IN) :: cgy, cgz
     INTEGER, INTENT(IN) :: n
 
-    REAL(KIND=8), dimension(3) :: w
-    REAL(KIND=8), dimension(3) :: t
+    REAL(KIND=8), DIMENSION(3) :: w
+    REAL(KIND=8), DIMENSION(3) :: t
     INTEGER :: i
     LOGICAL :: err
 
@@ -786,15 +786,15 @@ CONTAINS
 
     derrinfo(2) = n
 
-    ALLOCATE(section_info%data(6))
+    ALLOCATE(section_info%DATA(6))
     DO i = 1, 6
        err = s_get(fname, libname, __LINE__, ERH_FATAL, &
-              & section_info%data(i), 'SECP', n, 'DATA    ', i)
+              & section_info%DATA(i), 'SECP', n, 'DATA    ', i)
     END DO
 
     DO i = 1, 3
-       w(i) = section_info%data(i)
-       t(i) = section_info%data(i+3)
+       w(i) = section_info%DATA(i)
+       t(i) = section_info%DATA(i+3)
     END DO
 
     section_info%t_min = MIN(t(1), t(2), t(3))
@@ -831,15 +831,15 @@ CONTAINS
 
     derrinfo(2) = n
 
-    ALLOCATE(section_info%data(6))
+    ALLOCATE(section_info%DATA(6))
     DO i = 1, 6
        err = s_get(fname, libname, __LINE__, ERH_FATAL, &
-              & section_info%data(i), 'SECP', n, 'DATA    ', i)
+              & section_info%DATA(i), 'SECP', n, 'DATA    ', i)
     END DO
 
     DO i = 1, 3
-       w(i) = section_info%data(i)
-       t(i) = section_info%data(i+3)
+       w(i) = section_info%DATA(i)
+       t(i) = section_info%DATA(i+3)
     END DO
 
     section_info%t_min = MIN(t(1), t(2), t(3))
@@ -876,15 +876,15 @@ CONTAINS
 
     derrinfo(2) = n
 
-    ALLOCATE(section_info%data(6))
+    ALLOCATE(section_info%DATA(6))
     DO i = 1, 6
        err = s_get(fname, libname, __LINE__, ERH_FATAL, &
-              & section_info%data(i), 'SECP', n, 'DATA    ', i)
+              & section_info%DATA(i), 'SECP', n, 'DATA    ', i)
     END DO
 
     DO i = 1, 3
-       w(i) = section_info%data(i)
-       t(i) = section_info%data(i+3)
+       w(i) = section_info%DATA(i)
+       t(i) = section_info%DATA(i+3)
     END DO
 
     section_info%t_min = MIN(t(1), t(2), t(3))
@@ -921,15 +921,15 @@ CONTAINS
 
     derrinfo(2) = n
 
-    ALLOCATE(section_info%data(4))
+    ALLOCATE(section_info%DATA(4))
     DO i = 1, 4
        err = s_get(fname, libname, __LINE__, ERH_FATAL, &
-              & section_info%data(i), 'SECP', n, 'DATA    ', i)
+              & section_info%DATA(i), 'SECP', n, 'DATA    ', i)
     END DO
 
     DO i = 1, 2
-       w(i) = section_info%data(i)
-       t(i) = section_info%data(i+2)
+       w(i) = section_info%DATA(i)
+       t(i) = section_info%DATA(i+2)
     END DO
 
     section_info%t_min = MIN(t(1), t(2))
@@ -971,15 +971,15 @@ CONTAINS
 
     derrinfo(2) = n
 
-    ALLOCATE(section_info%data(4))
+    ALLOCATE(section_info%DATA(4))
     DO i = 1, 4
        err = s_get(fname, libname, __LINE__, ERH_FATAL, &
-              & section_info%data(i), 'SECP', n, 'DATA    ', i)
+              & section_info%DATA(i), 'SECP', n, 'DATA    ', i)
     END DO
 
     DO i = 1, 2
-       w(i) = section_info%data(i)
-       t(i) = section_info%data(i+2)
+       w(i) = section_info%DATA(i)
+       t(i) = section_info%DATA(i+2)
     END DO
 
     section_info%t_min = MIN(t(1), t(2))
@@ -1021,17 +1021,17 @@ CONTAINS
 
     derrinfo(2) = n
 
-    ALLOCATE(section_info%data(9))
+    ALLOCATE(section_info%DATA(9))
     DO i = 1, 9
        err = s_get(fname, libname, __LINE__, ERH_FATAL, &
-              & section_info%data(i), 'SECP', n, 'DATA    ', i)
+              & section_info%DATA(i), 'SECP', n, 'DATA    ', i)
     END DO
 
     DO i = 1, 4
-       w(i) = section_info%data(i)
+       w(i) = section_info%DATA(i)
     END DO
     DO i = 1, 5
-       t(i) = section_info%data(i+2)
+       t(i) = section_info%DATA(i+2)
     END DO
 
     section_info%t_min = MIN(t(1), t(2), t(3), t(4), t(5))
@@ -1068,17 +1068,17 @@ CONTAINS
 
     derrinfo(2) = n
 
-    ALLOCATE(section_info%data(6))
+    ALLOCATE(section_info%DATA(6))
     DO i = 1, 6
        err = s_get(fname, libname, __LINE__, ERH_FATAL, &
-              & section_info%data(i), 'SECP', n, 'DATA    ', i)
+              & section_info%DATA(i), 'SECP', n, 'DATA    ', i)
     END DO
 
     DO i = 1, 2
-       w(i) = section_info%data(i)
+       w(i) = section_info%DATA(i)
     END DO
     DO i = 1, 4
-       t(i) = section_info%data(i+2)
+       t(i) = section_info%DATA(i+2)
     END DO
 
     section_info%t_min = MIN(t(1), t(2), t(3), t(4))
@@ -1111,18 +1111,18 @@ CONTAINS
 
     CALL ezTrackBegin("get_t_beam_asec")
 
-    ALLOCATE(section_info%data(12))
+    ALLOCATE(section_info%DATA(12))
     DO i = 1, 12
        err = s_get(fname, libname, __LINE__, ERH_FATAL, &
-              & section_info%data(i), 'SECP', n, 'DATA    ', i)
+              & section_info%DATA(i), 'SECP', n, 'DATA    ', i)
     END DO
 
     section_info%t_min = 0d0
     section_info%t_max = 0d0
 
 #if ANSVER >= 150
-    section_info%t_y_1 = section_info%data(12)
-    section_info%t_z_1 = section_info%data(11)
+    section_info%t_y_1 = section_info%DATA(12)
+    section_info%t_z_1 = section_info%DATA(11)
     section_info%t_y_2 = section_info%t_y_1 / 2d0
     section_info%t_z_2 = section_info%t_z_1 / 2d0
     section_info%t_y_1 = - section_info%t_y_2
@@ -1182,17 +1182,17 @@ CONTAINS
 
     CALL ezTrackBegin("dat_cs_material")
 
-    gp_ptr_cur => null()
-    gp_ptr_prev => null()
+    gp_ptr_cur => NULL()
+    gp_ptr_prev => NULL()
 
-    gp_loop: DO i = 1, size(bp%cs_info)
-       if (bp%cs_info(i)%id .NE. gp) THEN
+    gp_loop: DO i = 1, SIZE(bp%cs_info)
+       IF (bp%cs_info(i)%id .NE. gp) THEN
           derrinfo(1:2) = (/ bp%cs_info(i)%id, gp /)
           CYCLE gp_loop
-       END if
+       END IF
        IF (ASSOCIATED(bp%cs_info(i)%gp_entries)) THEN
           gp_ptr_cur => bp%cs_info(i)%gp_entries
-          cs_loop: DO WHILE(associated(gp_ptr_cur))
+          cs_loop: DO WHILE(ASSOCIATED(gp_ptr_cur))
              IF (gp_ptr_cur%mat_id .EQ. mat) THEN
                 EXIT gp_loop
              END IF

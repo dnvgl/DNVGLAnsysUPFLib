@@ -101,7 +101,7 @@ MODULE ans_common
   TYPE :: cs_mat_entry
      INTEGER :: mat_id = 0
      INTEGER :: cs_id = 0
-     TYPE(cs_mat_entry), POINTER :: next => null()
+     TYPE(cs_mat_entry), POINTER :: next => NULL()
   END TYPE cs_mat_entry
 
   TYPE :: cross_section_info
@@ -113,11 +113,11 @@ MODULE ans_common
      REAL(KIND=8) :: flange_width = 0.
      REAL(KIND=8) :: flange_thickness = 0.
      ! raw cross section data acc. to ANSYS
-     REAL(KIND=8), DIMENSION(:), ALLOCATABLE :: data
+     REAL(KIND=8), DIMENSION(:), ALLOCATABLE :: DATA
      ! cross section type
      INTEGER :: type_code = CS_TYPE_NOT_VALID
 
-     TYPE(cs_mat_entry), POINTER :: gp_entries => null()
+     TYPE(cs_mat_entry), POINTER :: gp_entries => NULL()
   END TYPE cross_section_info
 
   INTERFACE OPERATOR(.EQ.)
@@ -159,7 +159,7 @@ MODULE ans_common
      INTEGER :: snum = 0 ! Number of Section CS entries
      INTEGER :: cs_id_max = 0 ! CS ids for BMF export
      ! beam property entries
-     TYPE(bp_values), DIMENSION(:), ALLOCATABLE :: data
+     TYPE(bp_values), DIMENSION(:), ALLOCATABLE :: DATA
      ! Mapping real const. number to beam property entry
      TYPE(bp_loc), DIMENSION(:), ALLOCATABLE :: r_bp_map
      ! Mapping section number to beam property entry
@@ -229,12 +229,12 @@ CONTAINS
     TYPE(bp_type), INTENT(INOUT) :: bp
     INTEGER, INTENT(IN) :: rnum, snum
 
-    allocate_bp_space = .True.
-    ALLOCATE(bp%data((2*rnum) + snum + 2))
+    allocate_bp_space = .TRUE.
+    ALLOCATE(bp%DATA((2*rnum) + snum + 2))
     ALLOCATE(bp%r_bp_map(rnum))
     ALLOCATE(bp%se_bp_map(snum))
     ALLOCATE(bp%cs_info(snum))
-    allocate_bp_space = .False.
+    allocate_bp_space = .FALSE.
     RETURN
   END FUNCTION allocate_bp_space
 
@@ -245,12 +245,12 @@ CONTAINS
     INTEGER :: i
 
     bp%num = 0
-    DEALLOCATE(bp%data)
+    DEALLOCATE(bp%DATA)
     DEALLOCATE(bp%r_bp_map)
     DEALLOCATE(bp%se_bp_map)
     DO i = 1, SIZE(bp%cs_info)
-       IF (ALLOCATED(bp%cs_info(i)%data)) THEN
-          DEALLOCATE(bp%cs_info(i)%data)
+       IF (ALLOCATED(bp%cs_info(i)%DATA)) THEN
+          DEALLOCATE(bp%cs_info(i)%DATA)
        END IF
     END DO
     DEALLOCATE(bp%cs_info)
@@ -294,9 +294,9 @@ CONTAINS
     a%web_thickness = b%web_thickness
     a%flange_width = b%flange_width
     a%flange_thickness = b%flange_thickness
-    IF (ALLOCATED(a%data)) THEN
-       ALLOCATE(a%data(SIZE(b%data)))
-       a%data(:) = b%data(:)
+    IF (ALLOCATED(a%DATA)) THEN
+       ALLOCATE(a%DATA(SIZE(b%DATA)))
+       a%DATA(:) = b%DATA(:)
     END IF
     a%type_code = b%type_code
   END SUBROUTINE cross_section_assign
