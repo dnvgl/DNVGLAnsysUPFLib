@@ -11,7 +11,7 @@ constants. Also provides convenient wrappers for some ANSYS features:
       number. `ezTrackEnd` takes no argument and ends the track started
       with the last `ezTrackBegin` call.
 
-    ```fortran
+      ```fortran
         CALL ezTrackBegin(__FILE__, __LINE__)
         CALL ezTrackEnd()
 
@@ -19,8 +19,7 @@ constants. Also provides convenient wrappers for some ANSYS features:
         CALL ezTrackBegin("Point of interest")
         CALL ezTrackEnd()
         CALL ezTrackEnd()
-
-    ```
+      ```
 
     - `ezTrackMark`: Just `TrackBegin` directly fllowed by `TrackEnd`.
 
