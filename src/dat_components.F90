@@ -45,7 +45,15 @@ CONTAINS
 
     CHARACTER(LEN=ERH_FNAME_LEN), PARAMETER :: fname=__FILE__
 
-    CALL ezTrackBegin('dat_components')
+    CHARACTER(LEN=16), DIMENSION(:), ALLOCATABLE :: tmp_l_comp_name
+    CHARACTER(LEN=STRING_MAX_LENG), DIMENSION(:), ALLOCATABLE :: tmp_comp_name
+    INTEGER, DIMENSION(:), ALLOCATABLE :: tmp_l_comp_pos
+    INTEGER, DIMENSION(:), ALLOCATABLE :: tmp_l_comp_len
+    CHARACTER(LEN=STRING_MAX_LENG), DIMENSION(:), ALLOCATABLE :: tmp_l_comp_ansys
+    INTEGER, DIMENSION(:), ALLOCATABLE :: tmp_l_comp_csub
+    INTEGER, DIMENSION(:), ALLOCATABLE :: tmp_l_csub_gid
+
+  CALL ezTrackBegin('dat_components')
 
     ! find number of components: -> ansys_comp
     CALL ezTrackMark(__FILE__, __LINE__)
@@ -86,15 +94,44 @@ CONTAINS
     comp_num = 0
     !  running # of ANSYS components treated
     an_cnum = 0
-    DO n = 1, ansys_comp+1
+    n = 1
+    DO WHILE(n.LE.ansys_comp+1)
 
        IF (comp_num.GT.ansys_comp + 1) THEN
-          derrinfo(1) = comp_num
-          derrinfo(2) = ansys_comp + 1 - csub_num
-          CALL ans_error(fname, __LINE__, libname, &
-               & 'ERROR: %i components defined. Greater or '// &
-               & 'too close to maximal number %i')
-          CALL anserr(4,'Too many components',0.0,' ')
+
+          ALLOCATE( &
+               tmp_l_comp_name(ansys_comp + 2 + csub_num), &
+               tmp_comp_name(ansys_comp + 2 + csub_num), &
+               tmp_l_comp_pos(ansys_comp + 2 + csub_num), &
+               tmp_l_comp_len(ansys_comp + 2 + csub_num), &
+               tmp_l_comp_ansys(ansys_comp + 2 + csub_num), &
+               tmp_l_comp_csub(ansys_comp + 2 + csub_num), &
+               tmp_l_csub_gid(ansys_comp + 2 + csub_num))
+
+          tmp_l_comp_name(1:ansys_comp + 1) = l_comp_name
+          tmp_comp_name(1:ansys_comp + 1) = comp_name
+          tmp_l_comp_pos(1:ansys_comp + 1) = l_comp_pos
+          tmp_l_comp_len(1:ansys_comp + 1) = l_comp_len
+          tmp_l_comp_ansys(1:ansys_comp + 1) = l_comp_ansys
+          tmp_l_comp_csub(1:ansys_comp + 1) = l_comp_csub
+          tmp_l_csub_gid(1:ansys_comp + 1) = l_csub_gid
+
+          CALL MOVE_ALLOC(l_comp_name, tmp_l_comp_name)
+          CALL MOVE_ALLOC(comp_name, tmp_comp_name)
+          CALL MOVE_ALLOC(l_comp_pos, tmp_l_comp_pos)
+          CALL MOVE_ALLOC(l_comp_len, tmp_l_comp_len)
+          CALL MOVE_ALLOC(l_comp_ansys, tmp_l_comp_ansys)
+          CALL MOVE_ALLOC(l_comp_csub, tmp_l_comp_csub)
+          CALL MOVE_ALLOC(l_csub_gid, tmp_l_csub_gid)
+
+          ansys_comp = ansys_comp + 1
+
+          ! derrinfo(1) = comp_num
+          ! derrinfo(2) = ansys_comp + 1
+          ! CALL ans_error(fname, __LINE__, libname, &
+          !      & 'ERROR: %i components defined. Greater or '// &
+          !      & 'too close to maximal number %i')
+          ! CALL anserr(4,'Too many components',0.0,' ')
        END IF
 
        IF (n.GT.ansys_comp) THEN
@@ -202,6 +239,7 @@ CONTAINS
        END IF
 
 1000   CONTINUE
+       n = n + 1
     END DO
 
     ! delete temporary component
@@ -329,9 +367,9 @@ CONTAINS
 
        derrinfo(1) = comp_num
        call ans_note(fname, __LINE__, libname, '  comp - num  %i')
-       derrinfo(1) = l_comp_len(comp_num)
-       call ans_note(fname, __LINE__, libname, '       - name %s')
        cerrinfo(1) = l_comp_name(comp_num)
+       call ans_note(fname, __LINE__, libname, '       - name %s')
+       derrinfo(1) = l_comp_len(comp_num)
        call ans_note(fname, __LINE__, libname, '       - len  %i')
     END IF
 
